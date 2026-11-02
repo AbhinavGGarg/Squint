@@ -9,8 +9,19 @@
  * Plain fetch, no SDK.
  */
 
-const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+// Vercel's Upstash integration names the variables <PREFIX>_REST_API_URL / <PREFIX>_REST_API_TOKEN
+// (prefix chosen when connecting); Upstash's own console uses UPSTASH_REDIS_REST_URL / _TOKEN.
+// Accept any of them so the prefix doesn't matter.
+function findPair(): { url: string; token: string } {
+  const env = process.env;
+  if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) return { url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN };
+  for (const k of Object.keys(env)) {
+    const m = k.match(/^(.+)_REST_API_URL$/);
+    if (m && env[k] && env[`${m[1]}_REST_API_TOKEN`]) return { url: env[k]!, token: env[`${m[1]}_REST_API_TOKEN`]! };
+  }
+  return { url: "", token: "" };
+}
+const { url: URL_, token: TOKEN } = findPair();
 
 export const kvBackend = URL_ && TOKEN ? "upstash" : "memory";
 
