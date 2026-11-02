@@ -41,7 +41,7 @@ export async function runJudge(input: {
 }): Promise<{ result?: JudgeResult; findings: Finding[]; skipped?: string }> {
   const provider = resolveProvider();
   if (!provider) {
-    return { findings: [], skipped: "No LLM key configured. Set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env.local to enable the 10-second test, generic-copy review and tailored advice." };
+    return { findings: [], skipped: "Pro tier not enabled on this deployment." };
   }
 
   const facts = input.measured

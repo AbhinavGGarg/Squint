@@ -60,7 +60,7 @@ export async function runImpeccable(opts: { url?: string; html: string }): Promi
     raw = parse(r.stdout);
     if (!raw || (raw.length === 0 && /Error:/.test(r.stdout + r.stderr))) {
       raw = null;
-      note = "URL scan unavailable (no local Chrome or no network for it); ";
+      note = "no local Chrome; ";
     } else note = "rendered-page rules via URL";
   }
   if (!raw) {
@@ -75,6 +75,11 @@ export async function runImpeccable(opts: { url?: string; html: string }): Promi
     }
   }
   if (!raw) return { findings: [], note, ok: false };
+  // In HTML-only mode Impeccable has no computed styles, so rules that need rendered sizes/colours
+  // guess (e.g. every heading "16px"). Keep only its pattern rules there; our own DOM rules cover the rest.
+  const htmlOnly = /captured HTML/.test(note);
+  const NEEDS_RENDER = /flat-type-hierarchy|low-contrast|gray-on-color|tiny-text|undersized-ui-text|line-length|cramped-padding|tight-leading|heading-rhythm|text-overflow|clipped-overflow|edge-flush|text-occlusion|viewport|oversized-h1|skipped-heading|straggler|unbalanced-heading/;
+  if (htmlOnly) raw = raw.filter((f) => !NEEDS_RENDER.test(f.antipattern));
 
   // Collapse duplicates of the same rule; keep count and first snippet.
   const byRule = new Map<string, { f: ImpFinding; count: number; snippets: string[] }>();

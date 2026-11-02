@@ -16,6 +16,9 @@ interface Store {
   save(report: Report, pngs: { viewport: Buffer; full: Buffer }): Promise<void>;
   load(id: string): Promise<Report | null>;
   screenshot(id: string, which: "viewport" | "full"): Promise<Buffer | null>;
+  /** A directly fetchable URL for the screenshot, when the store has one (Blob). Lets us skip
+   *  proxying multi-MB PNGs through a serverless function (Vercel caps responses at 4.5 MB). */
+  screenshotUrl(id: string, which: "viewport" | "full"): Promise<string | null>;
   list(limit: number): Promise<Summary[]>;
 }
 
@@ -45,6 +48,7 @@ function fileStore(): Store {
     async screenshot(id, which) {
       try { return await readFile(path.join(dir(id), `${which}.png`)); } catch { return null; }
     },
+    async screenshotUrl() { return null; },
     async list(limit) {
       try {
         const ids = await readdir(path.join(ROOT, "reports"));
@@ -103,6 +107,9 @@ function blobStore(): Store {
     async screenshot(id, which) {
       try { return await fetchBuf(await urlFor(id, `${which}.png`)); } catch { return null; }
     },
+    async screenshotUrl(id, which) {
+      try { return await urlFor(id, `${which}.png`); } catch { return null; }
+    },
     async list(limit) {
       try {
         const { list } = await import("@vercel/blob");
@@ -127,4 +134,5 @@ export const storeName = store.name;
 export const saveReport = (report: Report, pngs: { viewport: Buffer; full: Buffer }) => store.save(report, pngs);
 export const loadReport = (id: string) => store.load(id);
 export const loadScreenshot = (id: string, which: "viewport" | "full") => store.screenshot(id, which);
+export const screenshotUrl = (id: string, which: "viewport" | "full") => store.screenshotUrl(id, which);
 export const listReports = (limit = 20) => store.list(limit);
