@@ -27,7 +27,10 @@ const CLI = path.join(process.cwd(), "node_modules", "impeccable", "cli", "bin",
 
 function run(args: string[], timeoutMs: number): Promise<{ stdout: string; stderr: string; code: number | null }> {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [CLI, ...args], { stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NO_COLOR: "1" } });
+    const serverless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    // On serverless the only writable place is /tmp; Impeccable downloads its engine into $HOME/.impeccable.
+    const env = { ...process.env, NO_COLOR: "1", ...(serverless ? { HOME: "/tmp", XDG_CACHE_HOME: "/tmp" } : {}) };
+    const child = spawn(process.execPath, [CLI, ...args], { stdio: ["ignore", "pipe", "pipe"], env });
     let stdout = "", stderr = "";
     child.stdout.on("data", (d) => (stdout += d));
     child.stderr.on("data", (d) => (stderr += d));
@@ -49,10 +52,11 @@ function parse(stdout: string): ImpFinding[] | null {
 }
 
 export async function runImpeccable(opts: { url?: string; html: string }): Promise<{ findings: Finding[]; note: string; ok: boolean }> {
+  if (process.env.SQUINT_SKIP_IMPECCABLE) return { findings: [], note: "disabled by SQUINT_SKIP_IMPECCABLE", ok: false };
   let raw: ImpFinding[] | null = null;
   let note = "";
   if (opts.url && /^https?:/.test(opts.url) && !process.env.SQUINT_IMPECCABLE_HTML_ONLY) {
-    const r = await run(["detect", "--json", opts.url], 90_000);
+    const r = await run(["detect", "--json", opts.url], 60_000);
     raw = parse(r.stdout);
     if (!raw || (raw.length === 0 && /Error:/.test(r.stdout + r.stderr))) {
       raw = null;
@@ -63,7 +67,7 @@ export async function runImpeccable(opts: { url?: string; html: string }): Promi
     const dir = await mkdtemp(path.join(tmpdir(), "squint-imp-"));
     try {
       await writeFile(path.join(dir, "index.html"), opts.html, "utf8");
-      const r = await run(["detect", "--json", dir], 90_000);
+      const r = await run(["detect", "--json", dir], 60_000);
       raw = parse(r.stdout);
       note += raw ? "pattern rules on captured HTML" : `failed: ${(r.stderr || r.stdout).slice(0, 200)}`;
     } finally {

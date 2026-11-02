@@ -47,6 +47,25 @@ npm run verify
 
 Every finding carries a **confidence**: `measured` (a fact), `heuristic` (a rule that can misfire), `judgment` (a reviewer's opinion). The score weights them accordingly.
 
+## Deploy to Vercel
+
+The repo is Vercel-ready. Three things differ from localhost, and all three are automatic:
+
+1. **Renderer.** On Vercel, `SQUINT_RENDERER` defaults to `serverless`: `playwright-core` drives [@sparticuz/chromium](https://github.com/Sparticuz/chromium), a Chromium build that fits inside a serverless function. Locally the full `playwright` package is used.
+2. **Storage.** Serverless functions have no durable disk, so reports and screenshots go to **Vercel Blob**. In the Vercel dashboard: your project → *Storage* → *Create database* → *Blob* → connect it to the project. That sets `BLOB_READ_WRITE_TOKEN` and the app switches stores on its own. Without it, report links will 404 on Vercel.
+3. **Impeccable** is best-effort on Vercel (it needs to download its engine into `/tmp` on cold start, and it has no Chrome, so only its pattern rules run). Set `SQUINT_SKIP_IMPECCABLE=1` in the project's environment variables if it slows scans down or misbehaves.
+
+Steps:
+
+```bash
+npm i -g vercel
+vercel            # link the repo, accept defaults (Next.js is auto-detected)
+```
+
+Then in the dashboard: attach a Blob store (above), add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` under *Settings → Environment Variables* if you want the judge, and make sure **Fluid Compute** is on (*Settings → Functions*) so the analyze route can use its 300-second `maxDuration`; without it the Hobby plan caps functions at 60s, which a slow site can exceed. Redeploy with `vercel --prod`.
+
+A scan on Vercel takes 10–40s plus a few seconds of cold start while Chromium unpacks.
+
 ## Configuration
 
 `.env.local`:

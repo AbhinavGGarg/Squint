@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { render } from "./render";
+import { render, rendererName } from "./render";
 import { consistencyRules } from "./rules/consistency";
 import { containerRules } from "./rules/container";
 import { fingerprintRules } from "./rules/fingerprints";
@@ -9,7 +9,7 @@ import { appealMetrics } from "./metrics/appeal";
 import { runImpeccable } from "./impeccable";
 import { runJudge } from "./judge/judge";
 import { computeScores } from "./score";
-import { saveReport } from "./store";
+import { saveReport, storeName } from "./store";
 import sharp from "sharp";
 import type { Finding, PageType, Report } from "./types";
 
@@ -32,7 +32,7 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
   const t0 = Date.now();
 
   const r = await render({ url: input.url, html: input.html });
-  engines.push({ name: "render", ok: true, durationMs: Date.now() - t0, note: `${r.snapshot.els.length} elements, ${r.snapshot.fullHeight}px tall` });
+  engines.push({ name: "render", ok: true, durationMs: Date.now() - t0, note: `${rendererName()} · ${r.snapshot.els.length} elements, ${r.snapshot.fullHeight}px tall · store: ${storeName}` });
 
   resetIds();
   let findings: Finding[] = [];

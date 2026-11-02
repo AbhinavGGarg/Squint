@@ -1,4 +1,4 @@
-import { chromium, type Browser } from "playwright";
+import type { Browser } from "playwright-core";
 import { SNAPSHOT_SCRIPT } from "./snapshot.generated";
 import type { Snapshot } from "./types";
 
@@ -18,21 +18,40 @@ export interface RenderResult {
 }
 
 const PROXY = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || "";
+/**
+ * Renderer selection:
+ *  - "playwright" (default on a laptop/server): the full `playwright` package with its own Chromium.
+ *  - "serverless" (default on Vercel/Lambda): `playwright-core` driving @sparticuz/chromium, a
+ *    Chromium build that fits in a serverless function. Override with SQUINT_RENDERER.
+ */
+const RENDERER = (process.env.SQUINT_RENDERER || (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME ? "serverless" : "playwright")) as "playwright" | "serverless";
+
 // Two lazily-launched browsers: one through the environment's proxy (if any) for
 // the public web, one direct for localhost dev servers. Chromium's bypass list
 // is unreliable for loopback, so we keep them separate.
 const browsers: Record<"proxied" | "direct", Promise<Browser> | null> = { proxied: null, direct: null };
 
+async function launch(kind: "proxied" | "direct"): Promise<Browser> {
+  const proxy = kind === "proxied" && PROXY ? { server: PROXY } : undefined;
+  if (RENDERER === "serverless") {
+    const [{ chromium: pw }, sparticuz] = await Promise.all([import("playwright-core"), import("@sparticuz/chromium")]);
+    const executablePath = await sparticuz.default.executablePath();
+    return pw.launch({ headless: true, executablePath, args: sparticuz.default.args, proxy });
+  }
+  const { chromium } = await import("playwright");
+  return chromium.launch({ headless: true, proxy, args: ["--disable-dev-shm-usage"] }) as unknown as Promise<Browser>;
+}
+
 async function getBrowser(kind: "proxied" | "direct") {
   if (!browsers[kind]) {
-    browsers[kind] = chromium.launch({
-      headless: true,
-      proxy: kind === "proxied" && PROXY ? { server: PROXY } : undefined,
-      args: ["--disable-dev-shm-usage"],
-    });
-    browsers[kind]!.then((b) => b.on("disconnected", () => (browsers[kind] = null)));
+    browsers[kind] = launch(kind);
+    browsers[kind]!.then((b) => b.on("disconnected", () => (browsers[kind] = null))).catch(() => (browsers[kind] = null));
   }
   return browsers[kind]!;
+}
+
+export function rendererName() {
+  return RENDERER === "serverless" ? "playwright-core + @sparticuz/chromium" : "playwright";
 }
 
 function isLocal(url?: string) {
