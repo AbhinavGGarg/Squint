@@ -1,0 +1,36 @@
+{
+  "name": "squint",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "build:snapshot": "node scripts/build-snapshot.mjs",
+    "predev": "node scripts/build-snapshot.mjs",
+    "prebuild": "node scripts/build-snapshot.mjs",
+    "verify": "node scripts/build-snapshot.mjs && npx tsx scripts/verify.ts",
+    "postinstall": "node scripts/build-snapshot.mjs",
+    "squint": "npx tsx scripts/cli.ts"
+  },
+  "dependencies": {
+    "impeccable": "^4.8.0",
+    "next": "16.4.3",
+    "playwright": "^1.63.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "typescript": "^5",
+    "esbuild": "^0.28.2"
+  }
+}
