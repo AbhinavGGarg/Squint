@@ -4,13 +4,16 @@
  * 32px. Runs on a second render; findings are "quality".
  */
 import type { El, Finding, Snapshot } from "../types";
-import { label, mk, round } from "./util";
+import { ancestors, byIndex, label, mk, round } from "./util";
 
 export function mobileRules(m: Snapshot): Finding[] {
   const out: Finding[] = [];
   const vw = m.viewport.width;
-  // Overflow: page wider than the viewport, or elements poking out.
-  const wide = m.els.filter((e) => e.r.x + e.r.w > vw + 4 && e.r.w > 40 && e.s.position !== "fixed" && e.tag !== "html" && e.tag !== "body");
+  const idx = byIndex(m);
+  // An element inside an overflow:hidden/auto/scroll container (a marquee, a carousel, a code block) is clipped by design.
+  const clipped = (e: El) => ancestors(e, idx, 12).some((a) => /hidden|auto|scroll|clip/.test(a.s.overflow));
+  // Overflow: page wider than the viewport, or elements poking out of it.
+  const wide = m.els.filter((e) => e.r.x + e.r.w > vw + 4 && e.r.w > 40 && e.s.position !== "fixed" && e.tag !== "html" && e.tag !== "body" && !clipped(e));
   if (m.scrollWidth > vw + 4 || wide.length >= 1) {
     out.push(mk({
       rule: "mobile-overflow", source: "squint", category: "quality", severity: m.scrollWidth > vw + 4 ? "error" : "warn", confidence: "measured",
@@ -32,7 +35,8 @@ export function mobileRules(m: Snapshot): Finding[] {
     }));
   }
   // Tap targets
-  const small = m.els.filter((e: El) => e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text && (e.r.h < 32 || e.r.w < 32) && e.r.y < m.fullHeight);
+  // Visually-hidden (sr-only) links are 1×1 by design; skip anything that small or named as such.
+  const small = m.els.filter((e: El) => e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text && (e.r.h < 32 || e.r.w < 32) && e.r.w > 2 && e.r.h > 2 && !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight);
   if (small.length >= 3) {
     out.push(mk({
       rule: "mobile-tap-targets", source: "squint", category: "quality", severity: small.length >= 8 ? "warn" : "info", confidence: "measured",
