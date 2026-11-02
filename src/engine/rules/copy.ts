@@ -8,8 +8,12 @@ import type { Finding, Snapshot } from "../types";
 import { byIndex, mk, round } from "./util";
 
 const BUZZWORDS = ["streamline your", "empower your", "supercharge your", "unleash your", "unleash the power", "leverage the power", "built for the modern", "trusted by leading", "trusted by the world", "best-in-class", "industry-leading", "world-class", "enterprise-grade", "next-generation", "cutting-edge", "transform your business", "revolutionize", "game-changer", "game changing", "mission-critical", "best of breed", "future-proof", "future proof", "seamless experience", "seamlessly integrate", "drive engagement", "drive growth", "drive results", "harness the power", "unlock the power", "unlock your", "take it to the next level", "to the next level", "effortlessly", "all-in-one", "reimagined", "in today's digital age", "in today's fast-paced world", "the future of", "elevate your", "built with love", "made with ❤"];
-const PLACEHOLDERS = [/lorem ipsum/i, /\bjohn doe\b/i, /\bjane doe\b/i, /\[(topic|name|company|product|your [a-z ]+)\]/i, /\byour name\b/i, /\bcompany name\b/i, /\bexample\.com\b/i, /\bsarah j(ohnson)?\.?,? (product manager|ceo)/i, /\bacme (corp|inc)/i, /\b(coming soon|placeholder text)\b/i];
+const PLACEHOLDERS = [/lorem ipsum/i, /\bjohn doe\b/i, /\bjane doe\b/i, /\[(topic|name|company|product|your [a-z ]+)\]/i, /\byour name\b/i, /\bcompany name\b/i, /\bexample\.com\b/i, /\bsarah j(ohnson)?\.?,? (product manager|ceo)/i, /\bacme (corp|inc)/i, /\bplaceholder text\b/i];
 const CONTRASTIVE = /\b(?:it['’]s|this is|we['’]re|that['’]s)\s+not\s+(?:just|only|merely|simply)\s+(?:a |an |about )?[^.,;:—–]{2,60}[,;:—–.]\s*(?:it['’]s|this is|we['’]re|that['’]s|but)\s+/giu;
+const FILLER_OPENERS = /\b(in today'?s (fast-paced|digital|modern|ever-changing|rapidly evolving) \w+|welcome to (the future|a new era|the next generation)|imagine a world|are you tired of|say goodbye to|say hello to|meet your new|the (ultimate|all-in-one|smarter) way to)\b/gi;
+const WHETHER_YOURE = /\bwhether you'?re (a |an )?[^.,;]{3,40},? or (a |an )?[^.,;]{3,40}/gi;
+const FORMULAIC_CLOSERS = /\b(ready to (get started|transform|take the leap|level up)|what are you waiting for|join (thousands|hundreds|millions) of|start your (free )?(trial|journey) today|the future is (here|now))\b/gi;
+const FAKE_PROOF = /\b(trusted by|loved by|join|used by)\s+(over\s+)?\d[\d,.]*\s?[kKmM+]*\+?\s+(users|teams|companies|developers|customers|businesses|founders|students)\b|\b4\.[5-9]\s?\/\s?5\b|\b(99\.9+%)\s+uptime\b/gi;
 const GENERIC_H1 = /\b(unlock|transform|supercharge|elevate|empower|reimagine|revolutioni[sz]e|seamless|effortless|next level|all-in-one|the future of|smarter|faster|better|your (?:ultimate|all-in-one|complete))\b/i;
 
 export function copyRules(snap: Snapshot): Finding[] {
@@ -61,6 +65,37 @@ export function copyRules(snap: Snapshot): Finding[] {
       evidence: reframes.slice(0, 3).map((r) => `“${r}…”`).join(" · "),
       fix: "Say the Y directly. The negation adds drama and removes information.",
       citation: "halans/ai-pattern-detection contrastive-reframe (MIT), HIGH tier",
+    }));
+  }
+
+  // Filler openers, "whether you're", formulaic closers, fake social proof
+  const pat = (re: RegExp) => [...text.matchAll(re)].map((m) => m[0]).slice(0, 4);
+  const openers = pat(FILLER_OPENERS), whether = pat(WHETHER_YOURE), closers = pat(FORMULAIC_CLOSERS), proof = pat(FAKE_PROOF);
+  if (openers.length + closers.length) {
+    out.push(mk({
+      rule: "formulaic-copy", source: "squint", category: "copy", severity: openers.length + closers.length >= 2 ? "warn" : "info", confidence: "measured",
+      title: `Formulaic ${openers.length ? "opener" : ""}${openers.length && closers.length ? " and " : ""}${closers.length ? "closer" : ""}`,
+      evidence: [...openers, ...closers].map((x) => `“${x}”`).join(" · "),
+      fix: "Open with the specific thing the product does; close with the specific next step. Both are places where a template sentence is doing the job of a real one.",
+      citation: "slop-detect filler_openers / formulaic_closers",
+    }));
+  }
+  if (whether.length) {
+    out.push(mk({
+      rule: "whether-youre", source: "squint", category: "copy", severity: "info", confidence: "measured",
+      title: `“Whether you're X or Y” (${whether.length})`,
+      evidence: whether.map((x) => `“${x}”`).join(" · "),
+      fix: "Pick the one audience you actually built this for and address them.",
+      citation: "slop-detect whether_youre",
+    }));
+  }
+  if (proof.length) {
+    out.push(mk({
+      rule: "unsourced-social-proof", source: "squint", category: "copy", severity: "warn", confidence: "heuristic",
+      title: `Social proof with no source (${proof.length})`,
+      evidence: proof.map((x) => `“${x}”`).join(" · ") + ". Round numbers of users, 4.9/5 ratings and 99.9% uptime on a new product are the template's defaults.",
+      fix: "Use a number you can link to, or none. One true sentence beats three impressive ones.",
+      citation: "slop-detect structural_fake_social_proof; 21st.dev tell #4",
     }));
   }
 

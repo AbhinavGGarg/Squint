@@ -35,9 +35,9 @@ npm run verify
 `heading-size-drift` (same heading level, different sizes), `container-vs-content` (a card whose content fills <40% of it), `stretched-row-cards` (a row of equal-height tiles where one wrapped line dictates everyone's height), `misaligned-siblings` (2–3px offsets), `uneven-gaps`, `flat-type-hierarchy`, `radius-sprawl`, `cramped-padding`.
 
 **Generic — the fingerprints of unedited generated UI, ranked by how often real people call them out.**
-`ai-purple`, `gradient-text`, `neon-glow`, `emoji-as-icons`, `icon-tile-stack`, `three-equal-cards`, `hero-eyebrow-chip`, `cards-in-cards`, `decorative-badge` (a lone pill that does nothing), `inert-tags`, `pulsing-dot`, `status-dots`, `tasteful-default` (cream + serif + sage, the 2026 tell), `shadcn-untouched`, `overused-font`, `animation-overload`.
+`ai-purple`, `gradient-text`, `neon-glow`, `emoji-as-icons`, `icon-tile-stack`, `three-equal-cards`, `hero-eyebrow-chip`, `cards-in-cards`, `decorative-badge` (a lone pill that does nothing), `inert-tags`, `pulsing-dot`, `status-dots`, `tasteful-default` (cream + serif + sage, the 2026 tell), `shadcn-untouched`, `overused-font`, `animation-overload`, `accent-stripe`, `glassmorphism`, `perma-dark`, `numbered-steps`, `stat-banner`, `sparkle-badge`, `logo-bar`, `fake-window-chrome`, `gradient-avatars`, `centered-hero`, `caps-labels`, `aurora-blob` (the last twelve ported from Krebs's 500-site Show HN study and slop-detect's MIT catalogue).
 
-**Copy.** `marketing-buzzwords`, `contrastive-reframe` ("it's not just X, it's Y"), `em-dash-density`, `placeholder-content` (lorem ipsum, "Sarah J., Product Manager"), `generic-headline`.
+**Copy.** `marketing-buzzwords`, `contrastive-reframe` ("it's not just X, it's Y"), `em-dash-density`, `placeholder-content` (lorem ipsum, "Sarah J., Product Manager"), `generic-headline`, `formulaic-copy` (filler openers and closers), `whether-youre`, `unsourced-social-proof`.
 
 **First impression — from the viewport screenshot, after Reinecke et al. 2013.** Colorfulness (Hasler & Süsstrunk), quadtree visual complexity with text masked, whitespace share, text density. Reinecke found complexity + colorfulness explain ~48% of the variance in 500 ms appeal ratings, with high complexity the strongest negative.
 
@@ -65,6 +65,24 @@ vercel            # link the repo, accept defaults (Next.js is auto-detected)
 Then in the dashboard: attach a Blob store (above), add `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` under *Settings → Environment Variables* if you want the judge, and make sure **Fluid Compute** is on (*Settings → Functions*) so the analyze route can use its 300-second `maxDuration`; without it the Hobby plan caps functions at 60s, which a slow site can exceed. Redeploy with `vercel --prod`.
 
 A scan on Vercel takes 10–40s plus a few seconds of cold start while Chromium unpacks.
+
+## CLI, CI and presets
+
+**`npx squint-test <url>`** — zero-dependency CLI that talks to the hosted Squint (`packages/cli`). `--type`, `--goal`, `--fresh`, `--json`, `--all`, `--fail-under N` (exit 2 below it), `--host` for a self-hosted instance. The full local engine is still `npm run squint -- <url|file>`.
+
+**GitHub Action** — `action.yml` at the repo root:
+
+```yaml
+- uses: AbhinavGGarg/Squint@main
+  with:
+    url: ${{ steps.deploy.outputs.url }}   # a preview deployment URL
+    type: landing
+    fail-under: 70
+```
+
+**Presets by page type** (`src/engine/presets.ts`) downgrade or drop rules that don't apply to the page's job: product grids on e-commerce aren't "three equal cards", docs aren't penalised for density or a missing hero, hackathon pages are forgiven template structure but not placeholders. Presets never add findings.
+
+**Mobile pass** renders the page again at 390px and reports horizontal overflow, text under 12px and tap targets under 32px. **Technical checks** read the HTML for title, meta description, og:image/og:title (how links unfurl), canonical, viewport, lang, favicon, JSON-LD and h1 count.
 
 ## Hardening and sharing
 

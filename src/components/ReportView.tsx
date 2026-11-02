@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Category, Finding, Report } from "@/engine/types";
 import { grade } from "@/engine/score";
+import { PRESET_NOTES } from "@/engine/presets";
 
 const SECTIONS: { key: Category[]; title: string; blurb: string }[] = [
   { key: ["consistency", "quality"], title: "What an engineer would notice", blurb: "measured from the DOM" },
@@ -30,6 +31,7 @@ export function ReportView({ report }: { report: Report }) {
           <p className="url">
             {report.input.url ? <a href={report.page.finalUrl} target="_blank" rel="noreferrer">{report.page.finalUrl}</a> : "HTML pasted in"} · {report.input.pageType} · {report.page.elementCount} elements · {report.page.wordCount} words · {report.page.fonts.slice(0, 3).join(", ") || "no fonts detected"}
           </p>
+          <p className="url preset">Preset “{report.input.pageType}”: {PRESET_NOTES[report.input.pageType]}{report.mobile ? ` · Mobile 390px: ${report.mobile.overflow ? "scrolls sideways" : "no overflow"}` : ""}</p>
         </div>
         <div className="score">
           <div className="n">{report.score}<small>/100</small></div>
@@ -112,6 +114,13 @@ export function ReportView({ report }: { report: Report }) {
         </div>
 
         <aside className="shot">
+          {report.screenshot.mobile && report.screenshot.mobileSize && (
+            <details className="mob">
+              <summary>Phone, 390px{report.mobile?.overflow ? " · scrolls sideways" : ""}</summary>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/api/report/${report.id}/screenshot?which=mobile`} alt="Mobile viewport" width={report.screenshot.mobileSize.w} height={report.screenshot.mobileSize.h} />
+            </details>
+          )}
           <div className="shotbar"><span>Full page at {report.page.viewport.width}px</span><span>{active ? `${active.rects?.length || 0} box${(active.rects?.length || 0) === 1 ? "" : "es"}` : "hover a finding"}</span></div>
           <div className="inner">
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -13,7 +13,7 @@ async function main() {
   const args = process.argv.slice(2);
   const target = args.find((a) => !a.startsWith("--"));
   if (!target) {
-    console.error("usage: squint <url|file.html> [--type portfolio] [--goal '...'] [--json] [--no-impeccable] [--no-judge] [--fail-under N]");
+    console.error("usage: squint <url|file.html> [--type portfolio] [--goal '...'] [--json] [--no-impeccable] [--no-judge] [--no-mobile] [--fail-under N]");
     process.exit(1);
   }
   const opt = (name: string) => { const i = args.indexOf(`--${name}`); return i >= 0 ? args[i + 1] : undefined; };
@@ -25,6 +25,7 @@ async function main() {
     goal: opt("goal"),
     skipImpeccable: has("no-impeccable"),
     skipJudge: has("no-judge"),
+    skipMobile: has("no-mobile"),
   });
   await closeBrowser();
   if (has("json")) {

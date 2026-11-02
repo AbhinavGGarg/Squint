@@ -108,7 +108,8 @@ export interface Report {
   judge?: JudgeResult;
   judgeSkipped?: string;
   engines: { name: string; ok: boolean; note?: string; durationMs: number }[];
-  screenshot: { viewport: string; full: string; fullSize: { w: number; h: number } }; // file names in the cache dir + PNG size
+  screenshot: { viewport: string; full: string; fullSize: { w: number; h: number }; mobile?: string; mobileSize?: { w: number; h: number } };
+  mobile?: { scrollWidth: number; overflow: boolean; tinyText: number; smallTargets: number; durationMs: number };
 }
 
 /** One element as captured in the browser. */
@@ -153,6 +154,9 @@ export interface El {
     flex: string; // "row" | "column" | "" for flex/grid containers
     cursor: string;
     bgClip: string;
+    backdrop: string; // "blur" when a backdrop-filter is set
+    filter: string;
+    textAlign: string;
   };
 }
 
@@ -161,6 +165,7 @@ export interface Snapshot {
   url: string;
   viewport: { width: number; height: number };
   fullHeight: number;
+  scrollWidth: number;
   bodyBg: string;
   bodyText: string;
   fonts: string[];

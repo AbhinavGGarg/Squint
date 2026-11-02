@@ -13,12 +13,12 @@ type Summary = Pick<Report, "id" | "createdAt" | "score" | "input" | "page">;
 
 interface Store {
   name: string;
-  save(report: Report, pngs: { viewport: Buffer; full: Buffer }): Promise<void>;
+  save(report: Report, pngs: { viewport: Buffer; full: Buffer; mobile?: Buffer }): Promise<void>;
   load(id: string): Promise<Report | null>;
-  screenshot(id: string, which: "viewport" | "full"): Promise<Buffer | null>;
+  screenshot(id: string, which: "viewport" | "full" | "mobile"): Promise<Buffer | null>;
   /** A directly fetchable URL for the screenshot, when the store has one (Blob). Lets us skip
    *  proxying multi-MB PNGs through a serverless function (Vercel caps responses at 4.5 MB). */
-  screenshotUrl(id: string, which: "viewport" | "full"): Promise<string | null>;
+  screenshotUrl(id: string, which: "viewport" | "full" | "mobile"): Promise<string | null>;
   list(limit: number): Promise<Summary[]>;
   /** Reviewer feedback on a finding: the dataset nobody else has. */
   saveFeedback(fb: Feedback): Promise<void>;
@@ -53,6 +53,7 @@ function fileStore(): Store {
         writeFile(path.join(d, "report.json"), JSON.stringify(report, null, 2)),
         writeFile(path.join(d, "viewport.png"), pngs.viewport),
         writeFile(path.join(d, "full.png"), pngs.full),
+        ...(pngs.mobile ? [writeFile(path.join(d, "mobile.png"), pngs.mobile)] : []),
       ]);
     },
     async load(id) {
@@ -113,6 +114,7 @@ function blobStore(): Store {
         put(key(report.id, "report.json"), JSON.stringify(report), { ...opts, contentType: "application/json" }),
         put(key(report.id, "viewport.png"), pngs.viewport, { ...opts, contentType: "image/png" }),
         put(key(report.id, "full.png"), pngs.full, { ...opts, contentType: "image/png" }),
+        ...(pngs.mobile ? [put(key(report.id, "mobile.png"), pngs.mobile, { ...opts, contentType: "image/png" })] : []),
       ]);
       base = j.url.slice(0, j.url.indexOf(`/${key(report.id, "report.json")}`));
     },
@@ -153,9 +155,9 @@ function blobStore(): Store {
 const store: Store = process.env.BLOB_READ_WRITE_TOKEN ? blobStore() : fileStore();
 export const storeName = store.name;
 
-export const saveReport = (report: Report, pngs: { viewport: Buffer; full: Buffer }) => store.save(report, pngs);
+export const saveReport = (report: Report, pngs: { viewport: Buffer; full: Buffer; mobile?: Buffer }) => store.save(report, pngs);
 export const loadReport = (id: string) => store.load(id);
-export const loadScreenshot = (id: string, which: "viewport" | "full") => store.screenshot(id, which);
-export const screenshotUrl = (id: string, which: "viewport" | "full") => store.screenshotUrl(id, which);
+export const loadScreenshot = (id: string, which: "viewport" | "full" | "mobile") => store.screenshot(id, which);
+export const screenshotUrl = (id: string, which: "viewport" | "full" | "mobile") => store.screenshotUrl(id, which);
 export const listReports = (limit = 20) => store.list(limit);
 export const saveFeedback = (fb: Feedback) => store.saveFeedback(fb);

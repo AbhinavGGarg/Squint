@@ -18,15 +18,15 @@ export default async function Home() {
       <RunForm />
       <section className="how">
         <div>
-          <h3>Measured, not guessed</h3>
+          <h2>Measured, not guessed</h2>
           <p>Every consistency finding comes from DOM geometry and computed styles: “h2 at 56px here, 44px there”, “content fills 29% of this card”. Vision models score 58% on simple spatial tasks; a headless browser scores 100%.</p>
         </div>
         <div>
-          <h3>Generic, not “AI”</h3>
+          <h2>Generic, not “AI”</h2>
           <p>Purple gradients, glow, emoji icons, three equal cards, cream + serif + sage, “unlock the power of”. Ranked by how often real people call them out, with thresholds borrowed from Impeccable&apos;s 62-rule detector.</p>
         </div>
         <div>
-          <h3>Ten-second test <span className="soon">Pro, coming soon</span></h3>
+          <h2>Ten-second test <span className="soon">Pro, coming soon</span></h2>
           <p>A reviewer that never saw your code looks at the first screen alone and answers: what is this, who is it for, why should I care, and what to change for this page&apos;s goal. Critiques follow Google&apos;s UICrit format: expected standard, current design, fix.</p>
         </div>
       </section>

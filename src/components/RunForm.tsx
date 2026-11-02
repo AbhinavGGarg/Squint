@@ -67,8 +67,8 @@ export function RunForm() {
           </select>
         </div>
         <div className="field">
-          <label htmlFor="goal">What should a stranger know after 10 seconds? (optional, used by the Pro ten-second test)</label>
-          <input id="goal" placeholder="e.g. that I founded a club and can ship" value={goal} onChange={(e) => setGoal(e.target.value)} maxLength={500} />
+          <label htmlFor="goal">Goal in one line (optional)</label>
+          <input id="goal" placeholder="What should a stranger know after 10 seconds? e.g. that I founded a club and can ship" value={goal} onChange={(e) => setGoal(e.target.value)} maxLength={500} />
         </div>
       </div>
       <button className="btn" type="submit" disabled={busy}>{busy ? "Working…" : "Run the report"}</button>

@@ -1,0 +1,28 @@
+name: "Squint"
+description: "Run the squint test on a deployed URL: measured design lint, AI-default fingerprints, mobile and link-preview checks. Fails the job below a score."
+branding: { icon: "eye", color: "black" }
+inputs:
+  url:
+    description: "Public URL to scan (a preview deployment works)."
+    required: true
+  type:
+    description: "Page type preset: landing | portfolio | hackathon | ecommerce | docs | other"
+    default: "landing"
+  fail-under:
+    description: "Fail the job if the score is below this number (0 disables)."
+    default: "0"
+  host:
+    description: "Squint host to use."
+    default: "https://squint-rosy.vercel.app"
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        set -o pipefail
+        FAIL="${{ inputs.fail-under }}"
+        ARGS=( "${{ inputs.url }}" --type "${{ inputs.type }}" --host "${{ inputs.host }}" --fresh )
+        if [ "$FAIL" != "0" ]; then ARGS+=( --fail-under "$FAIL" ); fi
+        npx -y squint-test@latest "${ARGS[@]}" | tee squint.txt
+        echo "## Squint" >> "$GITHUB_STEP_SUMMARY"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"; cat squint.txt >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"

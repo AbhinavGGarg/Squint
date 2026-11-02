@@ -53,14 +53,14 @@ form.run { margin-top: 28px; display: grid; gap: 14px; max-width: 760px; }
 .status .mono { color: var(--ink-3); }
 
 .recent { margin-top: 56px; border-top: 1px solid var(--rule); padding-top: 16px; }
-.recent h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); margin-bottom: 10px; }
+.recent h2 { font-size: 17px; margin-bottom: 10px; }
 .recent a { display: grid; grid-template-columns: 56px 1fr auto; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); align-items: baseline; }
 .recent a:hover { background: var(--wash); }
 .recent .n { font-family: var(--mono); font-size: 20px; font-weight: 600; }
 .recent .t { color: var(--ink-3); font-size: 14px; }
 
 .how { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; border-top: 1px solid var(--rule); padding-top: 24px; }
-.how h3 { margin-bottom: 6px; }
+.how h2 { font-size: 17px; margin-bottom: 6px; }
 .how .soon { font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--ink-3); margin-left: 8px; }
 .how p { color: var(--ink-2); font-size: 15px; }
 .foot { margin: 72px 0 40px; color: var(--ink-3); font-size: 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
@@ -93,6 +93,10 @@ form.run { margin-top: 28px; display: grid; gap: 14px; max-width: 760px; }
 .shot .box.on { opacity: 1; }
 .shot .box.dim { opacity: .45; }
 .shot .box.secondary { border-style: dashed; }
+.rhead .url.preset { font-size: 13px; color: var(--ink-3); margin-top: 4px; }
+.mob { border-bottom: 1px solid var(--rule); background: #fff; }
+.mob summary { font-size: 12px; color: var(--ink-3); padding: 6px 10px; cursor: pointer; }
+.mob img { display: block; width: 195px; height: auto; margin: 0 auto 10px; border: 1px solid var(--rule-2); }
 .shotbar { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); padding: 6px 10px; border-bottom: 1px solid var(--rule); background: #fff; position: sticky; top: 0; z-index: 2; }
 
 .sec { margin-top: 10px; }

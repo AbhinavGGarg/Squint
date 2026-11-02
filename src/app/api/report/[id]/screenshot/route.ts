@@ -2,7 +2,8 @@ import { loadScreenshot, screenshotUrl } from "@/engine/store";
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const which = new URL(req.url).searchParams.get("which") === "viewport" ? "viewport" : "full";
+  const w = new URL(req.url).searchParams.get("which");
+  const which = w === "viewport" ? "viewport" : w === "mobile" ? "mobile" : "full";
   const direct = await screenshotUrl(id, which).catch(() => null);
   if (direct) return Response.redirect(direct, 302);
   const png = await loadScreenshot(id, which).catch(() => null);

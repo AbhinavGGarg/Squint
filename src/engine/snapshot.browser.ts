@@ -170,6 +170,9 @@ export function captureSnapshot(): unknown {
         flex,
         cursor: cs.cursor,
         bgClip: (cs as unknown as { webkitBackgroundClip?: string }).webkitBackgroundClip || cs.backgroundClip || "",
+        backdrop: ((cs as unknown as { backdropFilter?: string; webkitBackdropFilter?: string }).backdropFilter || (cs as unknown as { webkitBackdropFilter?: string }).webkitBackdropFilter || "none") === "none" ? "" : "blur",
+        filter: cs.filter === "none" ? "" : cs.filter.slice(0, 80),
+        textAlign: cs.textAlign,
       },
     });
   }
@@ -201,6 +204,7 @@ export function captureSnapshot(): unknown {
     url: location.href,
     viewport: { width: vw, height: vh },
     fullHeight,
+    scrollWidth: Math.max(document.documentElement.scrollWidth, document.body ? document.body.scrollWidth : 0),
     bodyBg,
     bodyText: bodyCs ? bodyCs.color : "rgb(0, 0, 0)",
     fonts: Array.from(fonts),

@@ -8,6 +8,8 @@ Squint builds on the following. Code was read and re-implemented in TypeScript w
 | [UXly](https://github.com/asynkron/UXly) | MIT | Algorithms for misaligned siblings, uneven gaps, nested panels, cramped padding, radius sprawl, and the decaying-weight score. |
 | [vibecoded-design-tells](https://github.com/JCarterJohnson/vibecoded-design-tells) | MIT (code) | Ranked catalogue of tells and their evidence from a Reddit corpus; cream-palette hexes; tell numbering in finding text. |
 | [UICrit](https://github.com/google-research-datasets/uicrit), Duan et al., UIST '24 | CC-BY-4.0 | Critique format ("The expected standard is … In the current design, … To fix this, …") and the few-shot examples in `src/engine/judge/judge.ts`. |
+| [slop-detect](https://github.com/ravidsrk/slop-detect) | MIT | Rule ideas and prevalence weights for the second fingerprint batch (accent stripe, glassmorphism, perma-dark, numbered steps, stat banner, sparkle badges, logo bar, window chrome, gradient avatars, aurora), copy patterns (filler openers/closers, whether-you're, fake social proof), AEO-style head checks. Re-implemented; nothing copied. |
+| Adrian Krebs, "Design slop" (500 Show HN launches, 2026) | blog post, cited | Prevalence figures quoted in finding text. |
 | [ai-pattern-detection](https://github.com/halans/ai-pattern-detection) | MIT | Contrastive-reframe pattern and placeholder patterns. |
 | [Slopdar](https://github.com/Slopdar/slopdar) | MIT (code only; name and data excluded) | Em-dash density threshold, emoji-as-icon signal. |
 | [no-slop](https://github.com/blahajcoding/no-slop) | MIT | Status-pill-with-dot and icon-in-box heuristics. |
