@@ -9,6 +9,7 @@ import type { El, Finding, Snapshot } from "../types";
 import { byIndex, childrenOf, distinct, hasBg, hasBorder, hasShadow, isPanel, label, median, mk, overlap1D, round, ancestors } from "./util";
 
 const CITE_UXLY = "Thresholds from UXly (MIT)";
+const SVG_TAGS = new Set(["svg", "path", "line", "circle", "rect", "ellipse", "polygon", "polyline", "g", "use", "defs", "mask", "clippath", "text", "tspan"]);
 
 export function consistencyRules(snap: Snapshot): Finding[] {
   const out: Finding[] = [];
@@ -30,7 +31,7 @@ function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
   const T_MIN = 2, T_MAX = 3;
   const seen = new Set<string>();
   for (const [, group] of kids) {
-    const g = group.filter((e) => e.tag !== "svg" && e.tag !== "path" && e.r.w >= 4 && e.r.h >= 4);
+    const g = group.filter((e) => !SVG_TAGS.has(e.tag) && e.r.w >= 4 && e.r.h >= 4);
     if (g.length < 2 || g.length > 60) continue;
     for (let i = 0; i < g.length; i++) {
       for (let j = i + 1; j < g.length; j++) {
@@ -72,7 +73,15 @@ function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
       }
     }
   }
-  return out.slice(0, 8);
+  // Collapse findings with identical evidence (e.g. repeated decorative rows) into one.
+  const seenEv = new Map<string, Finding>();
+  for (const f of out) {
+    const key = f.evidence.replace(/\d+/g, "#");
+    const prev = seenEv.get(key);
+    if (prev) { prev.data = { ...prev.data, count: ((prev.data?.count as number) || 1) + 1 }; prev.rects = [...(prev.rects || []), ...(f.rects || [])].slice(0, 12); }
+    else seenEv.set(key, f);
+  }
+  return [...seenEv.values()].map((f) => ((f.data?.count as number) > 1 ? { ...f, title: `${f.title} (×${f.data!.count})` } : f)).slice(0, 8);
 }
 
 /* ---------- uneven gaps between repeated items (UXly analyzeRepeatedItemGaps) ---------- */
@@ -126,7 +135,7 @@ function headingDrift(snap: Snapshot, idx: Map<number, El>): Finding[] {
   const byLevel = new Map<number, El[]>();
   for (const h of snap.headings) {
     const e = idx.get(h.i);
-    if (!e || !e.tlen) continue;
+    if (!e || !e.tlen || !h.text.trim()) continue;
     const anc = ancestors(e, idx);
     if (anc.some((a) => NAVISH.has(a.tag))) continue; // nav/footer headings legitimately differ
     if (!byLevel.has(h.level)) byLevel.set(h.level, []);
@@ -141,10 +150,11 @@ function headingDrift(snap: Snapshot, idx: Map<number, El>): Finding[] {
     const small = hs.find((h) => Math.abs(h.s.fontSize - min) < 0.6)!;
     const big = hs.find((h) => Math.abs(h.s.fontSize - max) < 0.6)!;
     const weights = distinct(hs.map((h) => h.s.fontWeight), 50);
+    const name = (e: El) => (snap.headings.find((h) => h.i === e.i)?.text || e.text || e.cls || `<${e.tag}>`).slice(0, 50);
     out.push(mk({
       rule: "heading-size-drift", source: "squint", category: "consistency", severity: max / min >= 1.2 ? "error" : "warn", confidence: "measured",
       title: `h${level} headings render at ${sizes.length} different sizes`,
-      evidence: `“${big.text || big.cls}” is ${round(max)}px while “${small.text || small.cls}” is ${round(min)}px (${round(max / min, 2)}×). Sizes seen: ${sizes.map((s) => round(s)).join(", ")}px${weights.length > 1 ? `; weights: ${weights.join(", ")}` : ""}. Same semantic level should get the same treatment.`,
+      evidence: `“${name(big)}” is ${round(max)}px while “${name(small)}” is ${round(min)}px (${round(max / min, 2)}×). Sizes seen: ${sizes.map((s) => round(s)).join(", ")}px${weights.length > 1 ? `; weights: ${weights.join(", ")}` : ""}. Same semantic level should get the same treatment.`,
       fix: `Pick one size for h${level} and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.`,
       rects: [big.r, small.r], citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
       data: { sizes, level },

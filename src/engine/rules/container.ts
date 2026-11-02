@@ -139,12 +139,15 @@ function nestedPanels(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, 
   const vw = snap.viewport.width, vh = snap.viewport.height;
   const pairs: [El, El][] = [];
   const SKIP_OUTER = new Set(["dialog", "figure", "pre", "code", "table", "form", "nav", "header", "footer", "main", "section", "article", "aside", "body"]);
+  // A "card" here means something with a real enclosure: a background, a shadow, or a border on
+  // all four sides. A hairline border-top/bottom is a divider between list rows, not a card.
+  const cardish = (e: El) => isPanel(e) && (hasBg(e) || hasShadow(e) || e.s.border.every((w) => w > 0));
   for (const inner of snap.els) {
-    if (!isPanel(inner) || !(hasShadow(inner) || hasBorder(inner))) continue;
+    if (!cardish(inner) || !(hasShadow(inner) || hasBorder(inner) || hasBg(inner))) continue;
     if (inner.tlen < 10) continue;
     let outer: El | undefined;
     for (const a of ancestors(inner, idx, 10)) {
-      if (isPanel(a)) { outer = a; break; }
+      if (cardish(a)) { outer = a; break; }
     }
     if (!outer || SKIP_OUTER.has(outer.tag) || outer.land) continue;
     if (outer.r.w > 0.9 * vw && outer.r.h > 0.8 * vh) continue; // page shell
@@ -153,7 +156,7 @@ function nestedPanels(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, 
     if (parentOfInner && parentOfInner !== outer && parentOfInner.s.flex && (kids.get(parentOfInner.i) || []).length >= 3) continue;
     if (inner.r.w > 0.95 * outer.r.w && inner.r.h > 0.85 * outer.r.h) continue;
     if (area(inner.r) / area(outer.r) >= 0.85) continue;
-    if (!(hasShadow(outer) || hasBorder(outer))) continue; // outer must look like a card too
+    if (!(hasShadow(outer) || hasBg(outer) || outer.s.border.every((w) => w > 0))) continue; // outer must look like a card too
     pairs.push([inner, outer]);
   }
   if (!pairs.length) return [];
