@@ -36,7 +36,12 @@ async function launch(kind: "proxied" | "direct"): Promise<Browser> {
   if (RENDERER === "serverless") {
     const [{ chromium: pw }, sparticuz] = await Promise.all([import("playwright-core"), import("@sparticuz/chromium")]);
     const executablePath = await sparticuz.default.executablePath();
-    return pw.launch({ headless: true, executablePath, args: sparticuz.default.args, proxy });
+    const b = await pw.launch({ headless: true, executablePath, args: sparticuz.default.args, proxy });
+    // @sparticuz/chromium runs --single-process; when its last page closes the whole browser exits.
+    // Keep one blank page open for the browser's lifetime so later renders (the mobile pass, the
+    // next request on a warm function) find it alive.
+    await b.newPage().catch(() => {});
+    return b;
   }
   const { chromium } = await import("playwright");
   return chromium.launch({ headless: true, proxy, args: ["--disable-dev-shm-usage"] }) as unknown as Promise<Browser>;
@@ -67,7 +72,9 @@ function isLocal(url?: string) {
 export async function render(input: RenderInput): Promise<RenderResult> {
   const viewport = input.viewport ?? { width: 1440, height: 900 };
   const timeout = input.timeoutMs ?? 30_000;
-  const browser = await getBrowser(isLocal(input.url) || !PROXY ? "direct" : "proxied");
+  const kind = isLocal(input.url) || !PROXY ? "direct" : "proxied";
+  let browser = await getBrowser(kind);
+  if (!browser.isConnected()) { browsers[kind] = null; browser = await getBrowser(kind); }
   const context = await browser.newContext({
     viewport,
     deviceScaleFactor: 1,
@@ -76,8 +83,15 @@ export async function render(input: RenderInput): Promise<RenderResult> {
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36 Squint/0.1",
     reducedMotion: "reduce",
   });
+  let onDisconnect: (() => void) | undefined;
+  const disconnected = new Promise<never>((_, rej) => {
+    onDisconnect = () => rej(new Error("browser disconnected during render"));
+    browser.once("disconnected", onDisconnect);
+  });
+  disconnected.catch(() => {}); // the listener is removed in finally; never let this reject unhandled
   try {
     const page = await context.newPage();
+    const work = (async () => {
     if (input.url) {
       const resp = await page.goto(input.url, { waitUntil: "domcontentloaded", timeout });
       await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
@@ -107,8 +121,11 @@ export async function render(input: RenderInput): Promise<RenderResult> {
     const snapshot = (await page.evaluate(SNAPSHOT_SCRIPT)) as Snapshot;
     const html = await page.content();
     return { snapshot, viewportPng, fullPng, html, finalUrl: page.url() };
+    })();
+    return await Promise.race([work, disconnected]);
   } finally {
-    await context.close();
+    if (onDisconnect) browser.off("disconnected", onDisconnect);
+    await context.close().catch(() => {});
   }
 }
 

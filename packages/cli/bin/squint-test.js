@@ -17,7 +17,7 @@ const has = (n) => args.includes(`--${n}`);
 const host = (opt("host") || process.env.SQUINT_HOST || "https://squint-rosy.vercel.app").replace(/\/$/, "");
 
 if (!url || has("help")) {
-  console.error(`usage: squint-test <url> [--type landing|portfolio|hackathon|ecommerce|docs|other] [--goal "..."] [--fresh] [--json] [--fail-under N] [--host https://...]`);
+  console.error(`usage: squint-test <url> [--type landing|portfolio|hackathon|ecommerce|docs|other] [--goal "..."] [--fresh] [--json] [--fail-under N] [--timeout SEC] [--host https://...]`);
   process.exit(url ? 0 : 1);
 }
 
@@ -28,15 +28,19 @@ const grade = (s) => (s >= 90 ? "A" : s >= 75 ? "B" : s >= 60 ? "C" : s >= 40 ? 
   const t0 = Date.now();
   if (!has("json")) process.stderr.write(`squint-test · ${url}\n`);
   let res;
+  const tick = has("json") ? null : setInterval(() => process.stderr.write(`  …rendering, ${Math.round((Date.now() - t0) / 1000)}s\n`), 10_000);
   try {
     res = await fetch(`${host}/api/analyze`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ url, pageType: opt("type") || "other", goal: opt("goal"), fresh: has("fresh") }),
+      signal: AbortSignal.timeout(Number(opt("timeout") || 180) * 1000),
     });
   } catch (e) {
-    console.error(`could not reach ${host}: ${e.message}`);
+    console.error(e.name === "TimeoutError" ? `no answer from ${host} after ${opt("timeout") || 180}s (--timeout to change)` : `could not reach ${host}: ${e.message}`);
     process.exit(1);
+  } finally {
+    if (tick) clearInterval(tick);
   }
   const j = await res.json().catch(() => ({}));
   if (!res.ok) { console.error(`error: ${j.error || res.status}`); process.exit(1); }

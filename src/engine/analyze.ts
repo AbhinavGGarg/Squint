@@ -51,14 +51,19 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
 
   // Appeal metrics and Impeccable can run in parallel with each other.
   const t2 = Date.now();
-  const [appeal, imp, mob] = await Promise.all([
+  const [appeal, imp] = await Promise.all([
     appealMetrics(r.viewportPng, r.snapshot).then((a) => ({ ok: true as const, a })).catch((e) => ({ ok: false as const, e })),
     input.skipImpeccable ? Promise.resolve(null) : runImpeccable({ url: input.url, html: r.html }).catch((e) => ({ findings: [], note: String(e), ok: false })),
-    input.skipMobile ? Promise.resolve(null)
-      : render({ url: input.url, html: input.html, viewport: { width: 390, height: 844 }, timeoutMs: 20_000 })
-          .then((m) => ({ ok: true as const, m }))
-          .catch((e) => ({ ok: false as const, e })),
   ]);
+  // The mobile pass runs AFTER the other engines, on its own: opening a second browser context while
+  // other work is in flight crashes the serverless Chromium build. It also gets a hard deadline so a
+  // dead browser can never hang the request.
+  const t2m = Date.now();
+  const mob = input.skipMobile ? null
+    : await Promise.race([
+        render({ url: input.url, html: input.html, viewport: { width: 390, height: 844 }, timeoutMs: 20_000 }).then((m) => ({ ok: true as const, m })),
+        new Promise<{ ok: false; e: string }>((res) => setTimeout(() => res({ ok: false, e: "mobile render timed out (35s)" }), 35_000)),
+      ]).catch((e) => ({ ok: false as const, e: String(e) }));
   let mobilePng: Buffer | undefined;
   let mobileInfo: Report["mobile"];
   if (mob) {
@@ -70,10 +75,10 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
         scrollWidth: mob.m.snapshot.scrollWidth, overflow: mob.m.snapshot.scrollWidth > 394,
         tinyText: (mf.find((f) => f.rule === "mobile-tiny-text")?.title.match(/^\d+/)?.[0] ?? 0) as number,
         smallTargets: (mf.find((f) => f.rule === "mobile-tap-targets")?.title.match(/^\d+/)?.[0] ?? 0) as number,
-        durationMs: Date.now() - t2,
+        durationMs: Date.now() - t2m,
       };
-      engines.push({ name: "mobile-390", ok: true, durationMs: Date.now() - t2, note: `${mf.length} findings` });
-    } else engines.push({ name: "mobile-390", ok: false, durationMs: Date.now() - t2, note: String(mob.e).slice(0, 120) });
+      engines.push({ name: "mobile-390", ok: true, durationMs: Date.now() - t2m, note: `${mf.length} findings` });
+    } else engines.push({ name: "mobile-390", ok: false, durationMs: Date.now() - t2m, note: String(mob.e).slice(0, 120) });
   }
   if (appeal.ok) {
     findings.push(...appeal.a.findings);

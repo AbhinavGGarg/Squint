@@ -8,7 +8,7 @@ export const maxDuration = 300;
 
 const TYPES = new Set<PageType>(["portfolio", "landing", "hackathon", "ecommerce", "docs", "other"]);
 const CACHE_TTL = Number(process.env.SQUINT_CACHE_TTL_SEC || 86_400); // 24h
-const INFLIGHT_TTL = 150; // seconds a scan may hold the slot
+const INFLIGHT_TTL = 90; // seconds a scan may hold the slot (a crashed function never releases it, so keep this short)
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   if (inflightKey) {
     const won = await kvSetNX(inflightKey, ip, INFLIGHT_TTL);
     if (!won) {
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 25; i++) {
         await sleep(2000);
         const id = await kvGet(key!);
         if (id) return Response.json({ id, cached: true, shared: true });
