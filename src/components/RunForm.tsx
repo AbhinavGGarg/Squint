@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const STEPS = ["Rendering in headless Chromium", "Measuring DOM geometry and computed styles", "Running Impeccable's detector", "Scoring first impression", "Asking the judge (if a key is set)"];
+const STEPS = ["Rendering in headless Chromium", "Measuring DOM geometry and computed styles", "Running Impeccable's detector", "Scoring first impression", "Writing the report"];
 
 export function RunForm() {
   const router = useRouter();
@@ -67,7 +67,7 @@ export function RunForm() {
           </select>
         </div>
         <div className="field">
-          <label htmlFor="goal">What should a stranger know after 10 seconds? (optional)</label>
+          <label htmlFor="goal">What should a stranger know after 10 seconds? (optional, used by the Pro ten-second test)</label>
           <input id="goal" placeholder="e.g. that I founded a club and can ship" value={goal} onChange={(e) => setGoal(e.target.value)} maxLength={500} />
         </div>
       </div>

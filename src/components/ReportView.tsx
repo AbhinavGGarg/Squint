@@ -39,7 +39,9 @@ export function ReportView({ report }: { report: Report }) {
       <div className="subs">
         <Sub k="Consistency" v={report.subScores.consistency} d="alignment, type scale, spacing" />
         <Sub k="Not generic" v={report.subScores.generic} d="AI fingerprints, copy" />
-        <Sub k="Clarity" v={report.subScores.clarity} d={report.judge ? "ten-second test" : "needs an LLM key"} />
+        {report.judge
+          ? <Sub k="Clarity" v={report.subScores.clarity} d="ten-second test" />
+          : <SubLocked k="Clarity" d="ten-second test · Pro" />}
         <Sub k="First impression" v={report.subScores.appeal} d={report.metrics ? `${report.metrics.complexityLeaves} leaves · M ${report.metrics.colorfulness}` : "—"} />
       </div>
 
@@ -63,8 +65,13 @@ export function ReportView({ report }: { report: Report }) {
             </div>
           )}
           {!report.judge && (
-            <div className="note">
-              {report.judgeSkipped || "Judge did not run."} Add <code>ANTHROPIC_API_KEY=…</code> or <code>OPENAI_API_KEY=…</code> to <code>.env.local</code> and re-run to get the ten-second test, generic-copy rewrites and advice tailored to the page&apos;s goal.
+            <div className="pro">
+              <div className="tag">Pro · coming soon</div>
+              <h2>Ten-second test and tailored advice</h2>
+              <p>
+                A reviewer that has never seen your code looks at the first screen alone and answers what this is, who it&apos;s for and why anyone should care; finds copy that could be on any site and rewrites it with facts from your page; and gives advice conditioned on what the page is for{report.input.goal ? <> (you said: &ldquo;{report.input.goal}&rdquo;)</> : null}. Critiques follow Google&apos;s UICrit format: expected standard, current design, fix.
+              </p>
+              <p className="small">Everything above this box is measured and free. This part costs us per scan, so it&apos;ll be the paid tier.</p>
             </div>
           )}
 
@@ -119,6 +126,17 @@ export function ReportView({ report }: { report: Report }) {
         </aside>
       </div>
     </main>
+  );
+}
+
+function SubLocked({ k, d }: { k: string; d: string }) {
+  return (
+    <div className="locked">
+      <div className="k">{k}</div>
+      <div className="v">&mdash;</div>
+      <div className="bar"><i style={{ width: 0 }} /></div>
+      <div className="d">{d}</div>
+    </div>
   );
 }
 

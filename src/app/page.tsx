@@ -26,8 +26,8 @@ export default async function Home() {
           <p>Purple gradients, glow, emoji icons, three equal cards, cream + serif + sage, “unlock the power of”. Ranked by how often real people call them out, with thresholds borrowed from Impeccable&apos;s 62-rule detector.</p>
         </div>
         <div>
-          <h3>Ten-second test</h3>
-          <p>With an LLM key, a judge that never saw your code looks at the first screen alone and answers: what is this, who is it for, why should I care. Critiques follow Google&apos;s UICrit format: expected standard, current design, fix.</p>
+          <h3>Ten-second test <span className="soon">Pro, coming soon</span></h3>
+          <p>A reviewer that never saw your code looks at the first screen alone and answers: what is this, who is it for, why should I care, and what to change for this page&apos;s goal. Critiques follow Google&apos;s UICrit format: expected standard, current design, fix.</p>
         </div>
       </section>
       {recent.length > 0 && (

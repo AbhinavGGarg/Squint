@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
   // Native/binary packages must not be bundled by Next.
@@ -7,6 +8,8 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/analyze": ["./node_modules/@sparticuz/chromium/bin/**", "./node_modules/impeccable/**"],
   },
+  // Pin the project root so a package-lock.json in a parent folder is ignored.
+  turbopack: { root: path.resolve(__dirname) },
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
 };
 
