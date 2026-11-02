@@ -79,8 +79,10 @@ export async function render(input: RenderInput): Promise<RenderResult> {
   try {
     const page = await context.newPage();
     if (input.url) {
-      await page.goto(input.url, { waitUntil: "domcontentloaded", timeout });
+      const resp = await page.goto(input.url, { waitUntil: "domcontentloaded", timeout });
       await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+      await detectBotCheck(page, resp?.status() ?? 200);
+      await dismissConsent(page);
     } else if (input.html) {
       await page.setContent(input.html, { waitUntil: "load", timeout });
     } else {
@@ -108,6 +110,45 @@ export async function render(input: RenderInput): Promise<RenderResult> {
   } finally {
     await context.close();
   }
+}
+
+/** Cloudflare / WAF challenge pages render fine but contain nothing of the real site. Fail loudly. */
+async function detectBotCheck(page: import("playwright-core").Page, status: number) {
+  const title = (await page.title().catch(() => "")) || "";
+  const text = await page.evaluate(() => (document.body?.innerText || "").slice(0, 2000)).catch(() => "");
+  const looksBlocked =
+    /just a moment|attention required|access denied|verify you are human|checking your browser|enable javascript and cookies|ddos protection|captcha/i.test(title + " " + text) &&
+    text.length < 2000;
+  if (looksBlocked || status === 403 || status === 429 || status === 503) {
+    const words = text.split(/\s+/).filter(Boolean).length;
+    if (looksBlocked || words < 80) throw new Error(`BLOCKED_BY_BOT_CHECK (${status}: ${title.slice(0, 60)})`);
+  }
+}
+
+/** Click the obvious "accept" on consent dialogs and hide leftover overlays so they don't skew measurement. */
+async function dismissConsent(page: import("playwright-core").Page) {
+  const SELECTORS = [
+    "#onetrust-accept-btn-handler", "#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll", ".cc-btn.cc-dismiss", ".cc-allow",
+    "[data-testid='cookie-policy-manage-dialog-accept-button']", "#didomi-notice-agree-button", ".fc-cta-consent", "#truste-consent-button",
+    "button#accept-cookies", "button.accept-cookies", "[aria-label*='accept cookies' i]", "[aria-label*='accept all' i]",
+  ];
+  for (const sel of SELECTORS) {
+    const el = page.locator(sel).first();
+    if (await el.isVisible({ timeout: 150 }).catch(() => false)) { await el.click({ timeout: 1000 }).catch(() => {}); await page.waitForTimeout(300); return; }
+  }
+  // Generic: a visible button inside something named cookie/consent/gdpr whose label says accept/agree/allow/got it.
+  const clicked = await page.evaluate(() => {
+    const roots = Array.from(document.querySelectorAll("[id*='cookie' i],[class*='cookie' i],[id*='consent' i],[class*='consent' i],[id*='gdpr' i],[class*='gdpr' i],[aria-label*='cookie' i]"));
+    for (const root of roots) {
+      const btns = Array.from(root.querySelectorAll("button, a[role=button], [role=button]")) as HTMLElement[];
+      const b = btns.find((x) => /^(accept( all)?( cookies)?|agree|allow( all)?|got it|ok(ay)?|i understand|continue)$/i.test((x.innerText || "").trim()));
+      if (b) { b.click(); return true; }
+    }
+    return false;
+  }).catch(() => false);
+  if (clicked) await page.waitForTimeout(300);
+  // Whatever is left: hide fixed/sticky consent overlays so the screenshot and the first-screen metrics see the page.
+  await page.addStyleTag({ content: "[id*='cookie' i][style*='position: fixed'],[class*='cookie-banner' i],[class*='cookie-consent' i],[class*='cookieconsent' i],[id*='cookie-banner' i],[id*='cookieconsent' i],#onetrust-consent-sdk,#CybotCookiebotDialog,.cc-window{display:none !important}" }).catch(() => {});
 }
 
 export async function closeBrowser() {

@@ -98,7 +98,19 @@ form.run { margin-top: 28px; display: grid; gap: 14px; max-width: 760px; }
 .sec { margin-top: 10px; }
 .sec h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2); padding: 18px 0 8px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; }
 .sec h2 span { font-weight: 400; color: var(--ink-3); text-transform: none; letter-spacing: 0; }
-.f { display: grid; grid-template-columns: 64px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); cursor: default; }
+.f { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); cursor: default; align-items: start; }
+.crop { position: relative; border: 1px solid var(--rule-2); background-repeat: no-repeat; background-color: var(--wash); flex: none; }
+.crop i { position: absolute; border: 2px solid var(--red); box-sizing: border-box; }
+.fb { margin-top: 8px; font-size: 12px; color: var(--ink-3); display: flex; gap: 8px; align-items: center; }
+.fb button { background: none; border: 1px solid var(--rule-2); border-radius: 3px; padding: 1px 8px; font-size: 12px; cursor: pointer; color: var(--ink-2); }
+.fb button:hover { border-color: var(--ink); color: var(--ink); }
+.share { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px 0 0; }
+.share img { margin-left: auto; }
+.btn.small { padding: 7px 12px; font-size: 14px; }
+.prompt { flex-basis: 100%; display: grid; gap: 8px; margin-top: 4px; }
+.prompt textarea { width: 100%; font-family: var(--mono); font-size: 12px; border: 1px solid var(--rule-2); border-radius: 3px; padding: 10px; }
+.prompt p { font-size: 13px; color: var(--ink-2); }
+.prompt .btn { justify-self: start; }
 .f:hover { background: var(--wash); margin: 0 -10px; padding-left: 10px; padding-right: 10px; }
 .f .sev { font-family: var(--mono); font-size: 12px; padding-top: 3px; }
 .f .sev.error { color: var(--red); }
@@ -139,6 +151,8 @@ form.run { margin-top: 28px; display: grid; gap: 14px; max-width: 760px; }
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
+  .f { grid-template-columns: 64px 1fr; }
+  .crop { grid-column: 2; }
   .shot { position: static; max-height: 60vh; order: -1; }
   .subs { grid-template-columns: 1fr 1fr; }
   .subs > div:nth-child(2) { border-right: 0; }

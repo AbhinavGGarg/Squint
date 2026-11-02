@@ -20,6 +20,19 @@ interface Store {
    *  proxying multi-MB PNGs through a serverless function (Vercel caps responses at 4.5 MB). */
   screenshotUrl(id: string, which: "viewport" | "full"): Promise<string | null>;
   list(limit: number): Promise<Summary[]>;
+  /** Reviewer feedback on a finding: the dataset nobody else has. */
+  saveFeedback(fb: Feedback): Promise<void>;
+}
+
+export interface Feedback {
+  reportId: string;
+  findingId: string;
+  rule: string;
+  verdict: "right" | "wrong" | "missing";
+  note?: string;
+  url?: string;
+  pageType?: string;
+  at: string;
 }
 
 function checkId(id: string) {
@@ -49,6 +62,11 @@ function fileStore(): Store {
       try { return await readFile(path.join(dir(id), `${which}.png`)); } catch { return null; }
     },
     async screenshotUrl() { return null; },
+    async saveFeedback(fb) {
+      const d = path.join(ROOT, "feedback", checkId(fb.reportId));
+      await mkdir(d, { recursive: true });
+      await writeFile(path.join(d, `${fb.findingId.replace(/[^a-z0-9_-]/gi, "_")}.json`), JSON.stringify(fb, null, 2));
+    },
     async list(limit) {
       try {
         const ids = await readdir(path.join(ROOT, "reports"));
@@ -110,6 +128,10 @@ function blobStore(): Store {
     async screenshotUrl(id, which) {
       try { return await urlFor(id, `${which}.png`); } catch { return null; }
     },
+    async saveFeedback(fb) {
+      const { put } = await import("@vercel/blob");
+      await put(`squint/feedback/${checkId(fb.reportId)}/${fb.findingId.replace(/[^a-z0-9_-]/gi, "_")}.json`, JSON.stringify(fb), { access: "public", addRandomSuffix: false, contentType: "application/json" });
+    },
     async list(limit) {
       try {
         const { list } = await import("@vercel/blob");
@@ -136,3 +158,4 @@ export const loadReport = (id: string) => store.load(id);
 export const loadScreenshot = (id: string, which: "viewport" | "full") => store.screenshot(id, which);
 export const screenshotUrl = (id: string, which: "viewport" | "full") => store.screenshotUrl(id, which);
 export const listReports = (limit = 20) => store.list(limit);
+export const saveFeedback = (fb: Feedback) => store.saveFeedback(fb);

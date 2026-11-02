@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Category, Finding, Report } from "@/engine/types";
 import { grade } from "@/engine/score";
 
@@ -18,6 +18,7 @@ export function ReportView({ report }: { report: Report }) {
   const { w: imgW, h: imgH } = report.screenshot.fullSize;
   const byId = useMemo(() => new Map(report.findings.map((f) => [f.id, f])), [report.findings]);
   const active = hover ? byId.get(hover) : undefined;
+  const shotUrl = `/api/report/${report.id}/screenshot?which=full`;
   const counts = { error: 0, warn: 0, info: 0 };
   for (const f of report.findings) counts[f.severity]++;
 
@@ -44,6 +45,8 @@ export function ReportView({ report }: { report: Report }) {
           : <SubLocked k="Clarity" d="ten-second test · Pro" />}
         <Sub k="First impression" v={report.subScores.appeal} d={report.metrics ? `${report.metrics.complexityLeaves} leaves · M ${report.metrics.colorfulness}` : "—"} />
       </div>
+
+      <ShareBox report={report} />
 
       <div className="layout">
         <div>
@@ -95,7 +98,7 @@ export function ReportView({ report }: { report: Report }) {
                 <h2>{s.title} <span>{fs.length ? `${fs.length} · ${s.blurb}` : s.blurb}</span></h2>
                 {fs.length === 0 && <p className="empty">Nothing flagged.</p>}
                 {fs.map((f) => (
-                  <FindingRow key={f.id} f={f} onHover={setHover} />
+                  <FindingRow key={f.id} f={f} onHover={setHover} shotUrl={shotUrl} imgW={imgW} imgH={imgH} reportId={report.id} />
                 ))}
               </section>
             );
@@ -112,7 +115,7 @@ export function ReportView({ report }: { report: Report }) {
           <div className="shotbar"><span>Full page at {report.page.viewport.width}px</span><span>{active ? `${active.rects?.length || 0} box${(active.rects?.length || 0) === 1 ? "" : "es"}` : "hover a finding"}</span></div>
           <div className="inner">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/api/report/${report.id}/screenshot?which=full`} alt="Full-page screenshot" width={imgW} height={imgH} />
+            <img src={shotUrl} alt="Full-page screenshot" width={imgW} height={imgH} />
             {report.findings.flatMap((f) =>
               (f.rects || []).map((r, i) => (
                 <div
@@ -151,7 +154,8 @@ function Sub({ k, v, d }: { k: string; v: number; d: string }) {
   );
 }
 
-function FindingRow({ f, onHover }: { f: Finding; onHover: (id: string | null) => void }) {
+function FindingRow({ f, onHover, shotUrl, imgW, imgH, reportId }: { f: Finding; onHover: (id: string | null) => void; shotUrl: string; imgW: number; imgH: number; reportId: string }) {
+  const r = f.rects?.[0];
   return (
     <div className="f" onMouseEnter={() => onHover(f.id)} onMouseLeave={() => onHover(null)}>
       <div className={`sev ${f.severity}`}>
@@ -163,7 +167,101 @@ function FindingRow({ f, onHover }: { f: Finding; onHover: (id: string | null) =
         <p className="ev">{f.evidence}</p>
         <p className="fix">{f.fix}</p>
         {f.citation && <p className="cite">{f.citation}</p>}
+        <Feedback reportId={reportId} findingId={f.id} />
       </div>
+      {r && imgW > 0 && <Crop rect={r} shotUrl={shotUrl} imgW={imgW} imgH={imgH} />}
+    </div>
+  );
+}
+
+/** A cropped view of the full-page screenshot around a finding's first box, done with CSS only. */
+function Crop({ rect, shotUrl, imgW, imgH }: { rect: { x: number; y: number; w: number; h: number }; shotUrl: string; imgW: number; imgH: number }) {
+  const W = 180, H = 120;
+  const pad = 24;
+  const x0 = Math.max(0, rect.x - pad), y0 = Math.max(0, rect.y - pad);
+  const cw = Math.min(imgW - x0, rect.w + pad * 2), ch = Math.min(imgH - y0, rect.h + pad * 2);
+  const scale = Math.min(W / cw, H / ch, 1);
+  const bw = imgW * scale, bh = imgH * scale;
+  const ox = -x0 * scale + (W - cw * scale) / 2, oy = -y0 * scale + (H - ch * scale) / 2;
+  return (
+    <div className="crop" style={{ width: W, height: H, backgroundImage: `url(${shotUrl})`, backgroundSize: `${bw}px ${bh}px`, backgroundPosition: `${ox}px ${oy}px` }} aria-hidden>
+      <i style={{ left: (W - rect.w * scale) / 2, top: (H - rect.h * scale) / 2, width: rect.w * scale, height: rect.h * scale }} />
+    </div>
+  );
+}
+
+function Feedback({ reportId, findingId }: { reportId: string; findingId: string }) {
+  const key = `fb:${reportId}:${findingId}`;
+  const [sent, setSent] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    // Read the remembered verdict after mount (localStorage isn't available during SSR).
+    const t = setTimeout(() => { try { setSent(localStorage.getItem(key)); } catch {} setHydrated(true); }, 0);
+    return () => clearTimeout(t);
+  }, [key]);
+  async function send(verdict: "right" | "wrong") {
+    setSent(verdict);
+    try { localStorage.setItem(key, verdict); } catch {}
+    await fetch("/api/feedback", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ reportId, findingId, verdict }) }).catch(() => {});
+  }
+  if (!hydrated) return <div className="fb" />;
+  return (
+    <div className="fb">
+      {sent ? <span>Thanks — marked {sent}.</span> : (<>
+        <span>Is this right?</span>
+        <button type="button" onClick={() => send("right")}>Yes</button>
+        <button type="button" onClick={() => send("wrong")}>No</button>
+      </>)}
+    </div>
+  );
+}
+
+/** A paste-into-your-agent prompt built from the measured findings. */
+function buildFixPrompt(report: Report): string {
+  const fs = report.findings.filter((f) => f.severity !== "info" && f.confidence !== "judgment");
+  const lines = [
+    `You are fixing design issues on ${report.input.url || "this page"} (${report.input.pageType}). Squint measured the rendered page in headless Chromium and found the following. Each item has the evidence (what was measured) and a fix. Apply the fixes in the source; do not change copy unless asked; keep the visual intent. Make one commit per item.`,
+    "",
+  ];
+  fs.forEach((f, i) => {
+    lines.push(`${i + 1}. ${f.title}`);
+    lines.push(`   Evidence: ${f.evidence}`);
+    lines.push(`   Fix: ${f.fix}`);
+    lines.push("");
+  });
+  if (report.judge?.genericCopy.length) {
+    lines.push("Copy that could be on any site, with suggested rewrites:");
+    for (const g of report.judge.genericCopy) lines.push(`- "${g.quote}" → "${g.rewrite}"`);
+    lines.push("");
+  }
+  lines.push(`When done, re-run the report at ${typeof location !== "undefined" ? location.origin : ""}/ and compare the score (${report.score}/100 now).`);
+  return lines.join("\n");
+}
+
+function ShareBox({ report }: { report: Report }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const origin = typeof location !== "undefined" ? location.origin : "";
+  const link = `${origin}/r/${report.id}`;
+  const badge = `[![Squint](${origin}/api/badge/${report.id})](${link})`;
+  const prompt = useMemo(() => buildFixPrompt(report), [report]);
+  async function copy(what: string, text: string) {
+    try { await navigator.clipboard.writeText(text); setCopied(what); setTimeout(() => setCopied(null), 1500); } catch {}
+  }
+  return (
+    <div className="share">
+      <button type="button" className="btn small" onClick={() => setShowPrompt((v) => !v)}>{showPrompt ? "Hide fix prompt" : "Get a fix prompt for Cursor / Claude Code"}</button>
+      <button type="button" className="btn secondary small" onClick={() => copy("link", link)}>{copied === "link" ? "Copied" : "Copy report link"}</button>
+      <button type="button" className="btn secondary small" onClick={() => copy("badge", badge)}>{copied === "badge" ? "Copied" : "Copy README badge"}</button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/api/badge/${report.id}`} alt={`Squint ${report.score}`} height={20} />
+      {showPrompt && (
+        <div className="prompt">
+          <textarea readOnly value={prompt} rows={14} />
+          <button type="button" className="btn small" onClick={() => copy("prompt", prompt)}>{copied === "prompt" ? "Copied" : "Copy prompt"}</button>
+          <p>Paste this into your coding agent in the repo. It lists every measured finding with its evidence; the agent applies the fixes, you re-run Squint.</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -66,6 +66,16 @@ Then in the dashboard: attach a Blob store (above), add `ANTHROPIC_API_KEY` or `
 
 A scan on Vercel takes 10–40s plus a few seconds of cold start while Chromium unpacks.
 
+## Hardening and sharing
+
+- **Rate limit:** 5 scans/minute and 60/day per IP (`SQUINT_RATE_PER_MIN`, `SQUINT_RATE_PER_DAY`). Counted only for scans that actually run.
+- **Cache:** the same URL + page type within 24h returns the existing report instantly (`SQUINT_CACHE_TTL_SEC`). Send `fresh: true` to force a rescan.
+- **In-flight dedupe:** two people scanning the same URL at the same moment share one browser session and get the same report.
+- **Storage for the above:** Upstash Redis over REST when `KV_REST_API_URL`/`KV_REST_API_TOKEN` (or `UPSTASH_REDIS_REST_*`) are set; otherwise in-memory, which is fine locally and still limits abuse per function instance on Vercel. On Vercel: Storage → connect an Upstash Redis store to the project.
+- **Consent dialogs** are clicked away and leftover cookie overlays hidden before measuring. **Bot-check pages** (Cloudflare "Just a moment", 403/429/503 challenge pages) fail with a clear message instead of a bogus score.
+- **Share:** every report has an Open Graph card (`/api/report/<id>/og`), a shields-style badge (`/api/badge/<id>`), a copyable README snippet, and a **fix prompt** that lists the measured findings for pasting into Cursor or Claude Code.
+- **Feedback:** every finding has a right/wrong control. Verdicts are stored (`.squint/feedback/` locally, `squint/feedback/` in Blob) with the rule id, URL and page type. This is the calibration dataset; keep it.
+
 ## Configuration
 
 `.env.local`:
