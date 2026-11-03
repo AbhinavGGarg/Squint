@@ -9,6 +9,7 @@ import type { El, Finding, Snapshot } from "../types";
 import { byIndex, childrenOf, distinct, hasBg, hasBorder, hasShadow, inArtwork, isPanel, label, median, mk, overlap1D, round, ancestors } from "./util";
 
 const CITE_UXLY = "Thresholds from UXly (MIT)";
+const SECTIONISH = new Set(["section", "header", "footer", "nav", "main", "article", "aside", "form"]);
 const SVG_TAGS = new Set(["svg", "path", "line", "circle", "rect", "ellipse", "polygon", "polyline", "g", "use", "defs", "mask", "clippath", "text", "tspan"]);
 
 export function consistencyRules(snap: Snapshot): Finding[] {
@@ -34,15 +35,19 @@ function misalignedSiblings(kids: Map<number, El[]>, idx: Map<number, El>): Find
     const parent = idx.get(pid);
     if (parent && inArtwork(parent, idx)) continue; // bars in a chart graphic are "misaligned" on purpose
     // Inline text fragments (a word-by-word animated headline, a <span> inside a sentence) flow with the text, not a grid.
-    const g = group.filter((e) => !SVG_TAGS.has(e.tag) && e.r.w >= 4 && e.r.h >= 4 && e.s.display !== "inline" && e.s.position !== "absolute");
+    const g = group.filter((e) => !SVG_TAGS.has(e.tag) && !SECTIONISH.has(e.tag) && !e.land && e.r.w >= 4 && e.r.h >= 4 && e.s.display !== "inline" && e.s.position !== "absolute");
     if (g.length < 2 || g.length > 60) continue;
     for (let i = 0; i < g.length; i++) {
       for (let j = i + 1; j < g.length; j++) {
+        // A heading next to a wordless box (an illustration, a divider) has nothing to align to; an
+        // optically outdented heading is a decision, not a slip.
+        const isH = (e: El) => /^h[1-6]$/.test(e.tag);
+        if ((isH(g[i]) && !g[j].tlen) || (isH(g[j]) && !g[i].tlen)) continue;
         const a = g[i].r, b = g[j].r;
         const yOv = overlap1D(a.y, a.y + a.h, b.y, b.y + b.h);
         if (yOv >= 0.5 * Math.min(a.h, b.h)) {
           const top = Math.abs(a.y - b.y), bot = Math.abs(a.y + a.h - (b.y + b.h));
-          const centered = Math.abs(a.h - b.h) > 1 && top > 0 && bot > 0 && Math.abs(top - bot) <= 1;
+          const centered = Math.abs(a.h - b.h) > 1 && top > 0 && bot > 0 && Math.abs(top - bot) <= 2;
           // Two text runs at different sizes sharing a baseline have different tops by design.
           const baseline = g[i].tlen > 0 && g[j].tlen > 0 && Math.abs(g[i].s.fontSize - g[j].s.fontSize) > 1;
           const bottomAligned = Math.abs(a.h - b.h) > 1 && bot <= 1; // align-items: flex-end; the tops differ by design
@@ -62,7 +67,7 @@ function misalignedSiblings(kids: Map<number, El[]>, idx: Map<number, El>): Find
         const xOv = overlap1D(a.x, a.x + a.w, b.x, b.x + b.w);
         if (xOv >= 0.5 * Math.min(a.w, b.w)) {
           const left = Math.abs(a.x - b.x), right = Math.abs(a.x + a.w - (b.x + b.w));
-          const centered = Math.abs(a.w - b.w) > 1 && left > 0 && right > 0 && Math.abs(left - right) <= 1;
+          const centered = Math.abs(a.w - b.w) > 1 && left > 0 && right > 0 && Math.abs(left - right) <= 2;
           const rightAligned = Math.abs(a.w - b.w) > 1 && right <= 1;
           if (left >= T_MIN && left <= T_MAX && !centered && !rightAligned) {
             const key = `l${g[i].i}-${g[j].i}`;
@@ -102,12 +107,14 @@ function unevenGaps(kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
       if (!byTag.has(e.tag)) byTag.set(e.tag, []);
       byTag.get(e.tag)!.push(e);
     }
-    for (const [, items] of byTag) {
-      if (items.length < 3) continue;
+    for (const [, items0] of byTag) {
+      // Inline runs (<b>, <span> in prose) sit where the text puts them; only laid-out boxes have a rhythm.
+      const items = items0.filter((e) => e.s.display !== "inline" && e.s.position !== "absolute");
+      if (items.length < 4) continue;
       const mw = items.reduce((s, e) => s + e.r.w, 0) / items.length;
       const mh = items.reduce((s, e) => s + e.r.h, 0) / items.length;
       const similar = items.filter((e) => Math.abs(e.r.w - mw) <= 0.2 * mw && Math.abs(e.r.h - mh) <= 0.2 * mh);
-      if (similar.length < 3) continue;
+      if (similar.length < 4) continue;
       const ySpread = Math.max(...similar.map((e) => e.r.y)) - Math.min(...similar.map((e) => e.r.y));
       const xSpread = Math.max(...similar.map((e) => e.r.x)) - Math.min(...similar.map((e) => e.r.x));
       const vertical = ySpread >= xSpread;
@@ -183,7 +190,7 @@ function headingDrift(snap: Snapshot, idx: Map<number, El>): Finding[] {
       continue;
     }
     out.push(mk({
-      rule: "heading-size-drift", source: "squint", category: "consistency", severity: max / min >= 1.2 ? "error" : "warn", confidence: "measured",
+      rule: "heading-size-drift", source: "squint", category: "consistency", severity: max / min >= 1.5 ? "error" : max / min >= 1.2 ? "warn" : "info", confidence: "measured",
       title: odd ? `One h${level} is a different size from the other ${hs.length - 1}` : `h${level} headings render at ${sizes.length} different sizes`,
       evidence: odd
         ? `“${name(odd)}” is ${round(odd.s.fontSize)}px; the other h${level}s are ${sizes.filter((s) => s !== loners[0]).map((s) => round(s)).join("/")}px (${sizeList}). Same semantic level should get the same treatment.`
@@ -261,29 +268,34 @@ function radiusSprawl(snap: Snapshot): Finding[] {
 function crampedPadding(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
   const out: Finding[] = [];
   const seen = new Map<string, Finding>();
-  const SKIP = new Set(["span", "a", "b", "i", "em", "strong", "input", "select", "textarea", "td", "th", "tr", "table", "li", "label", "img", "svg", "code"]);
+  // Controls and inline things size themselves; forms and tables are wrappers. Boxes with text are what's left.
+  const SKIP = new Set(["span", "a", "b", "i", "em", "strong", "input", "select", "textarea", "button", "td", "th", "tr", "table", "li", "label", "img", "svg", "code", "pre", "form", "fieldset", "legend", "summary", "option"]);
+  const vw = snap.viewport.width;
   for (const e of snap.els) {
-    if (SKIP.has(e.tag) || e.tag === "body" || e.tag === "html" || e.tag === "main") continue;
+    if (SKIP.has(e.tag) || e.tag === "body" || e.tag === "html" || e.tag === "main" || e.land) continue;
     // Must look like a box: a background, or a border on all four sides. A single border-top is a divider.
     const boxy = (hasBg(e) && !/text/.test(e.s.bgClip)) || (e.s.border.every((w) => w > 0) && hasBorder(e));
-    if (!boxy) continue;
-    if (e.r.w < 60 || e.r.h < 20) continue;
+    if (!boxy || !e.cr) continue;
+    if (e.r.w < 60 || e.r.h < 28 || e.r.w > 0.95 * vw) continue; // chips are tight by nature; full-bleed bands have no visible side edges
     const ch = kids.get(e.i) || [];
     const hasText = !!e.text || ch.some((c) => c.text && !isPanel(c));
     if (!hasText) continue;
     if (e.s.flex && ch.every((c) => c.inter)) continue;
     if (inArtwork(e, idx)) continue;
-    const minPad = Math.max(6, 0.5 * e.s.fontSize);
-    const below = e.s.pad.filter((p) => p < minPad).length;
-    if (below >= 2 && e.s.pad.every((p) => p < 24)) {
-      const key = `${e.tag}.${e.cls}|${e.s.pad.map((p) => round(p)).join("/")}`;
+    // Measure where the text actually sits, not the CSS padding: a child's margin counts as room too.
+    const inset = [e.cr.y - e.r.y, e.r.x + e.r.w - (e.cr.x + e.cr.w), e.r.y + e.r.h - (e.cr.y + e.cr.h), e.cr.x - e.r.x];
+    if (inset.some((v) => v < -1)) continue; // content spills out of the box: an overlay, not a padding problem
+    const minPad = Math.max(3, 0.2 * e.s.fontSize);
+    const below = inset.filter((v) => v < minPad).length;
+    if (below >= 2) {
+      const key = `${e.tag}.${e.cls}|${inset.map((v) => round(v)).join("/")}`;
       const prev = seen.get(key);
       if (prev) { prev.data = { count: ((prev.data?.count as number) || 1) + 1 }; prev.rects = [...(prev.rects || []), e.r].slice(0, 8); continue; }
       const f = mk({
         rule: "cramped-padding", source: "squint", category: "consistency", severity: "warn", confidence: "measured",
         title: "Text sits too close to its box edge",
-        evidence: `${label(e)} has padding ${e.s.pad.map((p) => round(p)).join("/")}px at ${round(e.s.fontSize)}px text; ${below} sides are under ${round(minPad)}px.`,
-        fix: `Give the box at least ${round(minPad)}px on every side (about half the font size).`,
+        evidence: `${label(e)}: the text is ${inset.map((v) => round(v)).join("/")}px (top/right/bottom/left) from the box edge at ${round(e.s.fontSize)}px text; ${below} sides are under ${round(minPad)}px.`,
+        fix: `Give the box at least ${round(Math.max(8, 0.5 * e.s.fontSize))}px on every side (about half the font size).`,
         rects: [e.r], citation: CITE_UXLY,
       });
       seen.set(key, f);
@@ -302,6 +314,7 @@ function stretchedRowCards(snap: Snapshot, kids: Map<number, El[]>, idx: Map<num
     if (cards.length < 2 || cards.length > 8) continue;
     // Same row: all tops within 3px and heights within 2px (stretch).
     const top = cards[0].r.y, h = cards[0].r.h;
+    if (h > 900) continue; // page columns, not cards
     if (!cards.every((c) => Math.abs(c.r.y - top) <= 3 && Math.abs(c.r.h - h) <= 2)) continue;
     const contentHs = cards.map((c) => c.cr!.y + c.cr!.h - c.r.y); // content bottom relative to card top
     if (contentHs.some((v) => v > h + 2)) continue; // content spills past the card: an overlay/absolute child, not a stretch

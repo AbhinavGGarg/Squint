@@ -58,7 +58,7 @@ function purplePalette(snap: Snapshot): Finding[] {
       hits.push(e);
     }
   }
-  if (!hits.length) return [];
+  if (!hits.length || (hits.length < 3 && !gradients)) return []; // one violet logo is a brand, not a tell
   return [mk({
     rule: "ai-purple", source: "squint", category: "generic", severity: hits.length >= 3 ? "warn" : "info", confidence: "measured",
     title: `AI purple${gradients ? " / purple-to-blue gradient" : ""} accent`,

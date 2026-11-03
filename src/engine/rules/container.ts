@@ -65,14 +65,15 @@ function isPill(e: El) {
   const roundish = e.s.radiusPx >= Math.min(e.r.h / 2 - 1, 10);
   if (!roundish) return false;
   const t = e.text || "";
-  if (!t || t.length > 40) return false;
+  if (!t || t.length > 40 || !/[a-z]{3}/i.test(t)) return false; // "→" or "h1" in a circle is an icon, not a badge
   if (["button", "input", "select", "a", "summary", "option"].includes(e.tag)) return false;
   return true;
 }
 
 function decorativePills(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
   const out: Finding[] = [];
-  const pills = snap.els.filter((e) => isPill(e) && !e.inter);
+  // A pill inside a link or button is part of that control (the arrow circle on a card link).
+  const pills = snap.els.filter((e) => isPill(e) && !e.inter && !ancestors(e, idx, 6).some((a) => a.inter) && !inArtwork(e, idx));
   if (!pills.length) return out;
   const groups = new Map<number, El[]>();
   for (const p of pills) {
@@ -141,18 +142,20 @@ function nestedPanels(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, 
   const vw = snap.viewport.width, vh = snap.viewport.height;
   const pairs: [El, El][] = [];
   const SKIP_OUTER = new Set(["dialog", "figure", "pre", "code", "table", "form", "nav", "header", "footer", "main", "section", "article", "aside", "body"]);
+  const SKIP_INNER = new Set(["form", "input", "textarea", "button", "select", "pre", "code", "table", "figure", "nav", "a", "label"]);
   // A "card" here means something with a real enclosure: a background, a shadow, or a border on
   // all four sides. A hairline border-top/bottom is a divider between list rows, not a card.
   const cardish = (e: El) => isPanel(e) && (hasBg(e) || hasShadow(e) || e.s.border.every((w) => w > 0));
   for (const inner of snap.els) {
     if (!cardish(inner) || !(hasShadow(inner) || hasBorder(inner) || hasBg(inner))) continue;
-    if (inner.tlen < 10 || inner.words < 3 || inArtwork(inner, idx)) continue;
+    if (SKIP_INNER.has(inner.tag) || inner.tlen < 10 || inner.words < 3 || inArtwork(inner, idx)) continue;
     let outer: El | undefined;
     for (const a of ancestors(inner, idx, 10)) {
       if (cardish(a)) { outer = a; break; }
     }
     if (!outer || SKIP_OUTER.has(outer.tag) || outer.land) continue;
-    if (outer.r.w > 0.9 * vw && outer.r.h > 0.8 * vh) continue; // page shell
+    if (outer.r.w > 0.9 * vw) continue; // a full-width band (header, page shell) is layout, not a card
+    void vh;
     const parentOfInner = idx.get(inner.p);
     if (outer.s.flex === "grid" || (outer.s.flex && (kids.get(outer.i) || []).length >= 3)) continue; // a grid wrapper
     if (parentOfInner && parentOfInner !== outer && parentOfInner.s.flex && (kids.get(parentOfInner.i) || []).length >= 3) continue;

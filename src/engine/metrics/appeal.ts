@@ -46,8 +46,20 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
   const colorfulness = Math.sqrt(sdrg ** 2 + sdyb ** 2) + 0.3 * Math.sqrt(mrg ** 2 + myb ** 2);
   const distinctHues = [...hueBins].filter((c) => c > n * 0.004).length;
 
-  // --- Whitespace ratio: pixels within a small distance of the body background ---
-  const bg = parseColor(snap.bodyBg) || { r: 255, g: 255, b: 255, a: 1 };
+  // --- Whitespace ratio: pixels within a small distance of the page background ---
+  // The background is what the screenshot says it is (the most common colour, quantised), not what
+  // <body> declares: Hacker News paints a beige table on a white body, Impeccable uses oklch().
+  const counts = new Map<number, number>();
+  for (let y = 0; y < h; y += 3) for (let x = 0; x < w; x += 3) {
+    const [r, g, b] = px(x, y);
+    const k = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+  let modeKey = 0, modeN = 0;
+  for (const [k, c] of counts) if (c > modeN) { modeN = c; modeKey = k; }
+  const declared = parseColor(snap.bodyBg);
+  const bg = { r: ((modeKey >> 10) & 31) * 8 + 4, g: ((modeKey >> 5) & 31) * 8 + 4, b: (modeKey & 31) * 8 + 4, a: 1 };
+  if (declared && Math.abs(declared.r - bg.r) + Math.abs(declared.g - bg.g) + Math.abs(declared.b - bg.b) < 24) { bg.r = declared.r; bg.g = declared.g; bg.b = declared.b; }
   let near = 0;
   for (let y = 0; y < h; y += 2) for (let x = 0; x < w; x += 2) {
     const [r, g, b] = px(x, y);
@@ -68,7 +80,7 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
   }
   // Photos, product shots and video frames are content, not layout clutter: a dashboard screenshot
   // in the hero is one object to the eye, however many pixels it has. Mask them like text.
-  const MEDIA = new Set(["img", "video", "canvas", "picture", "iframe"]);
+  const MEDIA = new Set(["img", "video", "canvas", "picture", "iframe", "svg"]);
   const isMedia = (e: { tag: string; r: { w: number; h: number } }) => MEDIA.has(e.tag) && e.r.w >= 160 && e.r.h >= 120;
   for (const e of snap.els) {
     if (!(e.text || isMedia(e)) || e.r.y > vh || (e.text && e.r.h > 0.5 * vh)) continue;
@@ -80,17 +92,17 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
     for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) gray[y * w + x] = fill;
   }
   const MIN = 12; // px, vizweb stops at <10×10 on the original; we work at 800 wide
-  const ENTROPY_SPLIT = 0.35; // bits over 32 intensity bins; a flat region is ~0, any edge or text pushes past this
+  const ENTROPY_SPLIT = 0.35; // bits over 16 intensity bins; a flat region is ~0, a real edge pushes past this
   let leaves = 0;
-  const hist = new Float32Array(32);
+  const hist = new Float32Array(16);
   const entropy = (x0: number, y0: number, x1: number, y1: number) => {
     hist.fill(0);
     let cnt = 0;
     // Sample densely enough that 1px text strokes register at every block size.
     const step = Math.max(1, Math.floor(Math.min(x1 - x0, y1 - y0) / 96));
-    for (let y = y0; y < y1; y += step) for (let x = x0; x < x1; x += step) { hist[Math.min(31, gray[y * w + x] >> 3)]++; cnt++; }
+    for (let y = y0; y < y1; y += step) for (let x = x0; x < x1; x += step) { hist[Math.min(15, gray[y * w + x] >> 4)]++; cnt++; }
     let e = 0;
-    for (let i = 0; i < 32; i++) if (hist[i]) { const p = hist[i] / cnt; e -= p * Math.log2(p); }
+    for (let i = 0; i < 16; i++) if (hist[i]) { const p = hist[i] / cnt; e -= p * Math.log2(p); }
     return e;
   };
   const split = (x0: number, y0: number, x1: number, y1: number, depth: number) => {
@@ -118,7 +130,7 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
     whitespaceRatio: round(whitespaceRatio, 3),
     textDensity: round(textDensity, 3),
     distinctHues,
-    dominantBackground: snap.bodyBg,
+    dominantBackground: `rgb(${bg.r}, ${bg.g}, ${bg.b})`,
   };
 
   // --- Score: Reinecke's direction of effects, calibrated on a small sample of sites.
@@ -130,7 +142,8 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
   const findings: Finding[] = [];
   const cx = leaves;
   if (cx > 900) score -= 25; else if (cx > 600) score -= 15; else if (cx > 350) score -= 6;
-  if (colorfulness > 70) score -= 10; else if (colorfulness > 50) score -= 5;
+  if (distinctHues >= 4) { if (colorfulness > 70) score -= 10; else if (colorfulness > 50) score -= 5; } // one brand colour at full strength is not "colourful"
+
   if (whitespaceRatio < 0.35) score -= 12; else if (whitespaceRatio < 0.5) score -= 5;
   if (textDensity > 0.45) score -= 4;
   if (distinctHues > 12) score -= 5;
@@ -145,7 +158,7 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
       citation: "Reinecke et al. CHI 2013; Tuch et al.: complexity drives the 50ms impression",
     }));
   }
-  if (colorfulness > 50 || distinctHues > 12) {
+  if ((colorfulness > 50 && distinctHues >= 4) || distinctHues > 12) {
     findings.push(mk({
       rule: "high-colorfulness", source: "metrics", category: "appeal", severity: "info", confidence: "heuristic",
       title: `Colourful first screen (M = ${round(colorfulness)}, ${distinctHues} hue bands)`,

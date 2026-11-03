@@ -4,7 +4,7 @@
  * 32px. Runs on a second render; findings are "quality".
  */
 import type { El, Finding, Snapshot } from "../types";
-import { ancestors, byIndex, label, mk, round } from "./util";
+import { ancestors, byIndex, inArtwork, label, mk, round } from "./util";
 
 export function mobileRules(m: Snapshot): Finding[] {
   const out: Finding[] = [];
@@ -26,7 +26,8 @@ export function mobileRules(m: Snapshot): Finding[] {
     }));
   }
   // Tiny text
-  const tiny = m.els.filter((e) => e.text && e.words >= 3 && e.s.fontSize < 12);
+  // Text inside a mockup or illustration is a picture of text; it is not for reading.
+  const tiny = m.els.filter((e) => e.text && e.words >= 3 && e.s.fontSize < 12 && !inArtwork(e, idx));
   const tinyWords = tiny.reduce((s, e) => s + e.words, 0);
   if (tinyWords >= 20) {
     out.push(mk({
@@ -40,18 +41,25 @@ export function mobileRules(m: Snapshot): Finding[] {
   // Visually-hidden (sr-only) links are 1×1 by design; skip anything that small or named as such.
   // Inline links inside a sentence are exempt in WCAG 2.5.8 and measure as the line height, so
   // only block-ish controls (buttons, nav links, icon buttons) count.
+  // WCAG 2.5.8: 24px minimum, except targets inline in a sentence, and except targets with
+  // enough space around them. So: never inline links; under 24px always counts; 24–32px counts
+  // only when another control is crowding it (within 12px).
+  const controls = m.els.filter((e) => e.inter && e.r.w > 2 && e.r.h > 2);
+  const crowded = (e: El) => controls.some((o) => o !== e && o.p !== e.i && e.p !== o.i &&
+    Math.max(0, Math.max(o.r.x - (e.r.x + e.r.w), e.r.x - (o.r.x + o.r.w))) < 12 &&
+    Math.max(0, Math.max(o.r.y - (e.r.y + e.r.h), e.r.y - (o.r.y + o.r.h))) < 12);
   const small = m.els.filter((e: El) =>
     e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text &&
-    (e.r.h < 32 || e.r.w < 32) && e.r.w > 2 && e.r.h > 2 &&
-    !(e.tag === "a" && e.s.display === "inline" && e.r.w >= 44) &&
-    !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight);
+    e.s.display !== "inline" && e.r.w > 2 && e.r.h > 2 &&
+    !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight && !inArtwork(e, idx) &&
+    (e.r.h < 24 || e.r.w < 24 || ((e.r.h < 32 || e.r.w < 32) && crowded(e))));
   if (small.length >= 3) {
     out.push(mk({
       rule: "mobile-tap-targets", source: "squint", category: "quality", severity: small.length >= 8 ? "warn" : "info", confidence: "measured",
       title: `${small.length} tap targets under 32px on a phone`,
       evidence: `e.g. ${small.slice(0, 3).map((e) => `${label(e)} ${round(e.r.w)}×${round(e.r.h)}px`).join("; ")}. Apple's floor is 44pt, WCAG's 24px.`,
-      fix: "Give links and buttons padding so the hit area is at least 44×44px on touch screens.",
-      citation: "WCAG 2.5.8 target size; Apple HIG 44pt",
+      fix: "Give links and buttons padding so the hit area is at least 44×44px on touch screens, or at least 24px with space around it.",
+      citation: "WCAG 2.5.8 target size (24px, with spacing and inline exceptions); Apple HIG 44pt",
     }));
   }
   return out;

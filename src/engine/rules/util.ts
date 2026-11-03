@@ -134,7 +134,7 @@ export function isArtworkNamed(e: El) {
 }
 /** True when the element or an ancestor (up to `depth`) is artwork by name, or the element is wordless box-art. */
 export function inArtwork(e: El, idx: Map<number, El>, depth = 8) {
-  if (isArtworkNamed(e)) return true;
+  if (e.hid || isArtworkNamed(e)) return true; // aria-hidden: the author says it's decoration
   for (const a of ancestors(e, idx, depth)) if (isArtworkNamed(a)) return true;
   // Structural: a box bigger than a thumbnail with (almost) no words in it is a picture, not a card.
   if (e.words < 4 && e.r.w >= 120 && e.r.h >= 120 && (e.s.position === "absolute" || e.s.overflow === "hidden")) return true;

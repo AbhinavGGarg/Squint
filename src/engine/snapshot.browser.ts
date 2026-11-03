@@ -106,7 +106,8 @@ export function captureSnapshot(): unknown {
     const dt = directText(n);
     const tlen = (n.textContent || "").replace(/\s+/g, " ").trim().length;
     const level = /^h[1-6]$/.test(tag) ? parseInt(tag[1]) : 0;
-    if (level) headings.push({ level, text: (n.textContent || "").replace(/\s+/g, " ").trim().slice(0, 140), i });
+    // innerText keeps the spaces between block-level spans ("Your idea" + "deserves" stays two words).
+    if (level) headings.push({ level, text: ((n as HTMLElement).innerText || n.textContent || "").replace(/\s+/g, " ").trim().slice(0, 140), i });
 
     const isInter =
       INTERACTIVE.has(tag) ||
@@ -137,6 +138,7 @@ export function captureSnapshot(): unknown {
       id: n.id || "",
       cls: (typeof n.className === "string" ? n.className : "").split(/\s+/).filter(Boolean).slice(0, 6).join(" "),
       role: n.getAttribute("role") || "",
+      hid: !!n.closest('[aria-hidden="true"]'),
       r,
       text: dt.slice(0, 120),
       tlen,

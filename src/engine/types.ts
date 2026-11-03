@@ -123,6 +123,7 @@ export interface El {
   id: string;
   cls: string;
   role: string; // explicit role attr
+  hid?: boolean; // inside aria-hidden="true": decorative to assistive tech, usually a mockup or illustration
   r: Rect; // bounding rect in page coords
   text: string; // direct text (not descendants), trimmed, ≤120 chars
   tlen: number; // full textContent length
