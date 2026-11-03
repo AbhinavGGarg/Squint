@@ -1,6 +1,6 @@
 {
   "name": "squint-test",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Run the squint test on a URL: measured design lint, AI-default fingerprints, first-impression metrics. Zero dependencies; talks to a hosted Squint.",
   "bin": {
     "squint-test": "bin/squint-test.js"

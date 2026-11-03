@@ -9,6 +9,12 @@ export interface RenderInput {
   timeoutMs?: number;
   /** Second render inside the same request (the mobile pass): keep the browser we already have. */
   reuseBrowser?: boolean;
+  /**
+   * Light mode: a second attempt after the page exhausted the browser. Images and media are
+   * blocked, the scroll-through and full-page capture are capped. Geometry and copy rules still
+   * see the real DOM; container-fill and the first-impression metrics see a page without pictures.
+   */
+  light?: boolean;
 }
 
 export interface RenderResult {
@@ -17,7 +23,24 @@ export interface RenderResult {
   fullPng: Buffer;
   html: string;
   finalUrl: string;
+  /** How the page was rendered: "full", or "light" when images/media were blocked. */
+  mode: "full" | "light";
+  /** Requests the renderer refused to make (trackers, video, chat widgets) on this render. */
+  blockedRequests: number;
 }
+
+/**
+ * Third-party scripts that never change the layout but cost a serverless Chromium dearly:
+ * analytics, session replay, chat widgets, ad pixels. Blocked on serverless and in light mode.
+ * Consent SDKs are deliberately NOT here: some sites render differently until they load, and
+ * dismissConsent() handles them.
+ */
+const HEAVY_THIRD_PARTY =
+  /(^|\.)(googletagmanager\.com|google-analytics\.com|analytics\.google\.com|doubleclick\.net|googlesyndication\.com|googleadservices\.com|connect\.facebook\.net|facebook\.com\/tr|hotjar\.com|static\.hotjar\.com|segment\.(io|com)|cdn\.segment\.com|intercom\.io|intercomcdn\.com|widget\.intercom\.io|crisp\.chat|drift\.com|driftt\.com|fullstory\.com|mixpanel\.com|amplitude\.com|clarity\.ms|hs-scripts\.com|hs-analytics\.net|hubspot\.com\/.*\.js|sentry\.io|sentry-cdn\.com|datadoghq(-browser-agent)?\.com|newrelic\.com|nr-data\.net|optimizely\.com|analytics\.tiktok\.com|snap\.licdn\.com|bat\.bing\.com|px\.ads\.linkedin\.com|cdn\.heapanalytics\.com|js\.hsforms\.net|static\.ads-twitter\.com|t\.co\/i\/adsct|plausible\.io|posthog\.com|rudderstack\.com|cdn\.mouseflow\.com|script\.crazyegg\.com|smartlook\.com|vwo\.com|visualwebsiteoptimizer\.com|chatlio|tawk\.to|zdassets\.com|zopim\.com|livechatinc\.com|olark\.com|kustomerapp\.com|app\.link|branch\.io)/i;
+/** Resource types that only ever cost memory on a measurement render. */
+const BLOCKED_TYPES = new Set(["media", "websocket", "eventsource", "texttrack", "manifest"]);
+/** Light mode also drops every raster/vector image except data: URIs (which never cost a request). */
+const LIGHT_BLOCKED_TYPES = new Set([...BLOCKED_TYPES, "image"]);
 
 const PROXY = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || "";
 /**
@@ -33,6 +56,34 @@ const RENDERER = (process.env.SQUINT_RENDERER || (process.env.VERCEL || process.
 // is unreliable for loopback, so we keep them separate.
 const browsers: Record<"proxied" | "direct", Promise<Browser> | null> = { proxied: null, direct: null };
 let renders = 0;
+
+/**
+ * One render at a time per process. On Vercel's Fluid Compute a warm function serves many
+ * requests at once; two Chromiums in one 2 GB function means ERR_INSUFFICIENT_RESOURCES for
+ * both, and the "fresh browser" logic below would otherwise close a browser mid-render.
+ * Requests queue here instead. More than MAX_INFLIGHT accepted (running + queued) is refused
+ * immediately so a burst degrades into fast 503s rather than a pile of timeouts.
+ */
+let chain: Promise<unknown> = Promise.resolve();
+let inflight = 0;
+const MAX_INFLIGHT = Number(process.env.SQUINT_MAX_INFLIGHT || 3);
+export class RenderBusyError extends Error {
+  constructor() { super("RENDER_BUSY: this instance already has " + MAX_INFLIGHT + " scans in flight"); }
+}
+async function serialized<T>(fn: () => Promise<T>): Promise<T> {
+  if (inflight >= MAX_INFLIGHT) throw new RenderBusyError();
+  inflight++;
+  const prev = chain;
+  let release!: () => void;
+  chain = new Promise<void>((r) => (release = r));
+  try {
+    await prev;
+    return await fn();
+  } finally {
+    inflight--;
+    release();
+  }
+}
 
 async function launch(kind: "proxied" | "direct"): Promise<Browser> {
   const proxy = kind === "proxied" && PROXY ? { server: PROXY } : undefined;
@@ -72,7 +123,11 @@ function isLocal(url?: string) {
   }
 }
 
-export async function render(input: RenderInput): Promise<RenderResult> {
+export function render(input: RenderInput): Promise<RenderResult> {
+  return serialized(() => renderInner(input));
+}
+
+async function renderInner(input: RenderInput): Promise<RenderResult> {
   const viewport = input.viewport ?? { width: 1440, height: 900 };
   const timeout = input.timeoutMs ?? 30_000;
   const kind = isLocal(input.url) || !PROXY ? "direct" : "proxied";
@@ -87,6 +142,7 @@ export async function render(input: RenderInput): Promise<RenderResult> {
     browser = await getBrowser(kind);
   }
   renders++;
+  const light = !!input.light;
   const context = await browser.newContext({
     viewport,
     deviceScaleFactor: 1,
@@ -94,7 +150,28 @@ export async function render(input: RenderInput): Promise<RenderResult> {
     userAgent:
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36 Squint/0.1",
     reducedMotion: "reduce",
+    serviceWorkers: "block",
   });
+  // Serverless Chromium has ~2 GB and one process. Refuse what never changes the layout.
+  let blockedRequests = 0;
+  if (RENDERER === "serverless" || light) {
+    const types = light ? LIGHT_BLOCKED_TYPES : BLOCKED_TYPES;
+    await context.route("**/*", (route) => {
+      const req = route.request();
+      const type = req.resourceType();
+      const url = req.url();
+      const block =
+        (types.has(type) && !url.startsWith("data:")) ||
+        ((type === "script" || type === "xhr" || type === "fetch" || type === "other" || type === "ping") && HEAVY_THIRD_PARTY.test(url)) ||
+        type === "ping";
+      if (block) { blockedRequests++; return route.abort("blockedbyclient"); }
+      return route.continue();
+    });
+  }
+  // The scroll-through wakes lazy sections; the full-page capture is the single most expensive
+  // call on a long page. Both are capped harder on serverless and harder again in light mode.
+  const scrollCap = light ? 6_000 : RENDERER === "serverless" ? 10_000 : 12_000;
+  const captureCap = light ? 6_000 : RENDERER === "serverless" ? 12_000 : 24_000;
   let onDisconnect: (() => void) | undefined;
   const disconnected = new Promise<never>((_, rej) => {
     onDisconnect = () => rej(new Error("browser disconnected during render"));
@@ -118,21 +195,25 @@ export async function render(input: RenderInput): Promise<RenderResult> {
     await page.evaluate(() => (document as unknown as { fonts?: { ready: Promise<unknown> } }).fonts?.ready).catch(() => {});
     await page.waitForTimeout(400);
     // Trigger lazy-loaded sections by scrolling through, then return to top.
-    await page.evaluate(async () => {
+    await page.evaluate(async (cap: number) => {
       const h = document.documentElement.scrollHeight;
-      for (let y = 0; y < Math.min(h, 12_000); y += 700) {
+      for (let y = 0; y < Math.min(h, cap); y += 700) {
         window.scrollTo(0, y);
         await new Promise((r) => setTimeout(r, 40));
       }
       window.scrollTo(0, 0);
-    });
+    }, scrollCap);
     await page.waitForTimeout(250);
 
-    const viewportPng = await page.screenshot({ type: "png", fullPage: false });
-    const fullPng = await page.screenshot({ type: "png", fullPage: true });
+    const fullHeight = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight || 0)).catch(() => viewport.height);
+    const viewportPng = await page.screenshot({ type: "png", fullPage: false, animations: "disabled", caret: "hide" });
+    const fullPng = await page.screenshot({
+      type: "png", fullPage: true, animations: "disabled", caret: "hide",
+      ...(fullHeight > captureCap ? { clip: { x: 0, y: 0, width: viewport.width, height: captureCap } } : {}),
+    });
     const snapshot = (await page.evaluate(SNAPSHOT_SCRIPT)) as Snapshot;
     const html = await page.content();
-    return { snapshot, viewportPng, fullPng, html, finalUrl: page.url() };
+    return { snapshot, viewportPng, fullPng, html, finalUrl: page.url(), mode: light ? "light" as const : "full" as const, blockedRequests };
     })();
     return await Promise.race([work, disconnected]);
   } finally {

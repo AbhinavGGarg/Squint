@@ -66,8 +66,12 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
     const [r, g, b] = px(x, y);
     gray[y * w + x] = 0.299 * r + 0.587 * g + 0.114 * b;
   }
+  // Photos, product shots and video frames are content, not layout clutter: a dashboard screenshot
+  // in the hero is one object to the eye, however many pixels it has. Mask them like text.
+  const MEDIA = new Set(["img", "video", "canvas", "picture", "iframe"]);
+  const isMedia = (e: { tag: string; r: { w: number; h: number } }) => MEDIA.has(e.tag) && e.r.w >= 160 && e.r.h >= 120;
   for (const e of snap.els) {
-    if (!e.text || e.r.y > vh || e.r.h > 0.5 * vh) continue;
+    if (!(e.text || isMedia(e)) || e.r.y > vh || (e.text && e.r.h > 0.5 * vh)) continue;
     const x0 = Math.max(0, Math.floor(e.r.x * scale)), x1 = Math.min(w, Math.ceil((e.r.x + e.r.w) * scale));
     const y0 = Math.max(0, Math.floor(e.r.y * scale)), y1 = Math.min(h, Math.ceil((e.r.y + e.r.h) * scale));
     // Use the pixel just outside the box as the fill so text on a coloured panel is erased to that panel.
@@ -120,26 +124,28 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
   // --- Score: Reinecke's direction of effects, calibrated on a small sample of sites.
   // Complexity bands (quadtree leaves on an 800px-wide first screen with text masked):
   // calm pages ≈ 50–250, busy marketing pages ≈ 500+, very busy 900+.
+  // Complexity is the strong predictor and gets the weight; colourfulness is the weak one.
+  // Text amount was not a negative in Reinecke's model, so a wordy first screen is barely touched.
   let score = 100;
   const findings: Finding[] = [];
   const cx = leaves;
-  if (cx > 900) score -= 30; else if (cx > 500) score -= 18; else if (cx > 300) score -= 8;
-  if (colorfulness > 60) score -= 15; else if (colorfulness > 40) score -= 6;
+  if (cx > 900) score -= 25; else if (cx > 600) score -= 15; else if (cx > 350) score -= 6;
+  if (colorfulness > 70) score -= 10; else if (colorfulness > 50) score -= 5;
   if (whitespaceRatio < 0.35) score -= 12; else if (whitespaceRatio < 0.5) score -= 5;
-  if (textDensity > 0.35) score -= 10;
-  if (distinctHues > 8) score -= 8;
+  if (textDensity > 0.45) score -= 4;
+  if (distinctHues > 12) score -= 5;
   score = Math.max(0, Math.min(100, score));
 
-  if (cx > 500) {
+  if (cx > 600) {
     findings.push(mk({
       rule: "high-visual-complexity", source: "metrics", category: "appeal", severity: cx > 900 ? "warn" : "info", confidence: "heuristic",
       title: "Above-the-fold is visually busy",
-      evidence: `Quadtree decomposition of the first screen (text masked out) needs ${cx} leaves (calm pages run 50–250; busy ones 500+). Whitespace share ${round(whitespaceRatio * 100)}%, text covers ${round(textDensity * 100)}% of the viewport.`,
+      evidence: `Quadtree decomposition of the first screen (text and photos masked out) needs ${cx} leaves (calm pages run 50–250; busy ones 600+). Whitespace share ${round(whitespaceRatio * 100)}%, text covers ${round(textDensity * 100)}% of the viewport.`,
       fix: "Remove one thing from the first screen. Reinecke's data says people rate low- and medium-complexity pages the same and punish high complexity; the gain is all in cutting, not adding.",
       citation: "Reinecke et al. CHI 2013; Tuch et al.: complexity drives the 50ms impression",
     }));
   }
-  if (colorfulness > 40 || distinctHues > 8) {
+  if (colorfulness > 50 || distinctHues > 12) {
     findings.push(mk({
       rule: "high-colorfulness", source: "metrics", category: "appeal", severity: "info", confidence: "heuristic",
       title: `Colourful first screen (M = ${round(colorfulness)}, ${distinctHues} hue bands)`,

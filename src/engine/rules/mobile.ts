@@ -14,7 +14,9 @@ export function mobileRules(m: Snapshot): Finding[] {
   const clipped = (e: El) => ancestors(e, idx, 12).some((a) => /hidden|auto|scroll|clip/.test(a.s.overflow));
   // Overflow: page wider than the viewport, or elements poking out of it.
   const wide = m.els.filter((e) => e.r.x + e.r.w > vw + 4 && e.r.w > 40 && e.s.position !== "fixed" && e.tag !== "html" && e.tag !== "body" && !clipped(e));
-  if (m.scrollWidth > vw + 4 || wide.length >= 1) {
+  // If the document itself does not scroll sideways, whatever pokes out is clipped somewhere we
+  // could not see (overflow-x on html, a transform, a scroll-snap track). Nothing is broken for the reader.
+  if (m.scrollWidth > vw + 4) {
     out.push(mk({
       rule: "mobile-overflow", source: "squint", category: "quality", severity: m.scrollWidth > vw + 4 ? "error" : "warn", confidence: "measured",
       title: m.scrollWidth > vw + 4 ? `Page scrolls sideways on a phone (${m.scrollWidth}px wide at ${vw}px)` : `${wide.length} element${wide.length > 1 ? "s" : ""} wider than the phone screen`,
@@ -36,7 +38,13 @@ export function mobileRules(m: Snapshot): Finding[] {
   }
   // Tap targets
   // Visually-hidden (sr-only) links are 1×1 by design; skip anything that small or named as such.
-  const small = m.els.filter((e: El) => e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text && (e.r.h < 32 || e.r.w < 32) && e.r.w > 2 && e.r.h > 2 && !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight);
+  // Inline links inside a sentence are exempt in WCAG 2.5.8 and measure as the line height, so
+  // only block-ish controls (buttons, nav links, icon buttons) count.
+  const small = m.els.filter((e: El) =>
+    e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text &&
+    (e.r.h < 32 || e.r.w < 32) && e.r.w > 2 && e.r.h > 2 &&
+    !(e.tag === "a" && e.s.display === "inline" && e.r.w >= 44) &&
+    !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight);
   if (small.length >= 3) {
     out.push(mk({
       rule: "mobile-tap-targets", source: "squint", category: "quality", severity: small.length >= 8 ? "warn" : "info", confidence: "measured",

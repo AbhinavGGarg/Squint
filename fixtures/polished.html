@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledger — invoicing for small studios</title>
+<meta name="description" content="Ledger sends invoices, chases late payers and reconciles your bank feed. Built for studios of two to twenty.">
+<meta property="og:title" content="Ledger">
+<meta property="og:image" content="https://ledger.example/og.png">
+<link rel="canonical" href="https://ledger.example/">
+<link rel="icon" href="data:,">
+<style>
+  /* A deliberately well-made page in the style of a large product company: white background, one
+     accent, product illustrations drawn with DOM. Everything that looks like a Stripe false
+     positive lives here, so the rules must stay quiet. */
+  :root { --ink: #0a2540; --muted: #425466; --accent: #0a7f5a; --line: #e3e8ee; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: var(--ink); background: #fff; line-height: 1.5; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  /* nav: logo | links ........... sign in  (3 li with one big gap: grouping, not sloppiness) */
+  nav { display: flex; align-items: center; height: 64px; }
+  nav ul { display: flex; list-style: none; margin: 0 0 0 auto; padding: 0; }
+  nav li { margin-left: 24px; } nav li:last-child { margin-left: 139px; }
+  nav a { color: var(--ink); text-decoration: none; font-size: 15px; padding: 10px 4px; display: inline-block; }
+  .logo { font-weight: 700; font-size: 20px; }
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; padding: 72px 0; }
+  h1 { font-size: 56px; line-height: 1.05; margin: 0 0 20px; letter-spacing: -0.02em; }
+  .lede { font-size: 20px; color: var(--muted); margin: 0 0 28px; max-width: 34em; }
+  .cta { display: inline-block; background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; }
+  /* product illustration: a mock browser window with no words in it */
+  .browser-graphic__window { width: 520px; height: 380px; border-radius: 10px; box-shadow: 0 20px 60px rgba(10,37,64,.18); background: #fff; position: relative; overflow: hidden; border: 1px solid var(--line); }
+  .browser-graphic__bar { height: 32px; background: #f6f9fc; border-bottom: 1px solid var(--line); }
+  .browser-graphic__page { position: absolute; top: 48px; left: 24px; right: 24px; bottom: 24px; }
+  .billing-plan-graphic { position: absolute; bottom: 0; left: 0; right: 0; height: 180px; display: flex; align-items: flex-end; gap: 14px; }
+  .billing-plan-graphic__bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; opacity: .85; }
+  section { padding: 64px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 32px; margin: 0 0 12px; }
+  .sub { color: var(--muted); font-size: 18px; margin: 0 0 32px; max-width: 40em; }
+  /* a row of two real content cards */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 28px; }
+  .card h3 { font-size: 22px; margin: 0 0 8px; }
+  .card p { margin: 0; color: var(--muted); }
+  .card a { color: var(--accent); }
+  /* stat row: three real numbers, same size */
+  .stats { display: flex; gap: 48px; margin-top: 40px; }
+  .stats div { font-size: 15px; color: var(--muted); }
+  .stats b { display: block; font-size: 34px; color: var(--ink); line-height: 1.1; }
+  pre { background: #f6f9fc; border: 1px solid var(--line); border-radius: 8px; padding: 20px; font-size: 14px; overflow-x: auto; }
+  footer { padding: 40px 0; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  @media (max-width: 720px) { nav li { margin-left: 16px; } nav li:last-child { margin-left: 16px; } .hero, .cards { grid-template-columns: 1fr; } .browser-graphic__window { width: 100%; height: 280px; } h1 { font-size: 36px; } .stats { flex-wrap: wrap; gap: 24px; } }
+</style>
+</head>
+<body>
+<header class="wrap">
+  <nav>
+    <a class="logo" href="/">Ledger</a>
+    <ul>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/docs">Docs</a></li>
+      <li><a href="/login">Sign in</a></li>
+    </ul>
+  </nav>
+</header>
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Invoices that chase themselves.</h1>
+      <p class="lede">Ledger sends the invoice, nudges the client on day 15 and day 30, and matches the payment to your bank feed when it lands. For studios of two to twenty people.</p>
+      <a class="cta" href="/start">Start with one client</a>
+    </div>
+    <div class="browser-graphic__window" aria-hidden="true">
+      <div class="browser-graphic__bar"></div>
+      <div class="browser-graphic__page">
+        <div class="billing-plan-graphic">
+          <div class="billing-plan-graphic__bar" style="height:40%"></div>
+          <div class="billing-plan-graphic__bar" style="height:62%"></div>
+          <div class="billing-plan-graphic__bar" style="height:55%"></div>
+          <div class="billing-plan-graphic__bar" style="height:81%"></div>
+          <div class="billing-plan-graphic__bar" style="height:70%"></div>
+          <div class="billing-plan-graphic__bar" style="height:96%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Two things it does that your spreadsheet doesn't</h2>
+    <p class="sub">Both were built after watching a design studio in Leeds spend a Friday afternoon on money that was already owed to them.</p>
+    <div class="cards">
+      <div class="card">
+        <h3>Reminders with a tone you chose</h3>
+        <p>Day 15 is friendly, day 30 is firm, day 45 copies the person who signed the contract. You write each one once; Ledger fills in the amount, the invoice number and the <a href="/docs/reminders">payment link</a>.</p>
+      </div>
+      <div class="card">
+        <h3>Reconciliation that reads the reference</h3>
+        <p>When £4,200.00 arrives with "INV-0931" in the reference, that invoice is marked paid and the client's reminder sequence stops. Partial payments get a line, not a guess. See <a href="/docs/bank-feeds">how bank feeds connect</a>.</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div><b>11 days</b>median time to payment, down from 34</div>
+      <div><b>£2.1m</b>invoiced through Ledger in 2025</div>
+      <div><b>312</b>studios, mostly under ten people</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Send an invoice from a script</h2>
+    <p class="sub">Everything in the app is on the API. This is the whole call.</p>
+<pre><code>curl https://api.ledger.example/v1/invoices \
+  -u sk_live_…: \
+  -d customer=cus_8Hn2 \
+  -d "reply_to=accounts@example.com" \
+  -d amount=420000 -d currency=gbp</code></pre>
+  </section>
+</main>
+<footer class="wrap">
+  © 2026 Ledger Software Ltd · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · Registered in England, no. 1234567.
+</footer>
+</body>
+</html>

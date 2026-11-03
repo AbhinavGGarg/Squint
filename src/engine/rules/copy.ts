@@ -8,7 +8,11 @@ import type { Finding, Snapshot } from "../types";
 import { byIndex, mk, round } from "./util";
 
 const BUZZWORDS = ["streamline your", "empower your", "supercharge your", "unleash your", "unleash the power", "leverage the power", "built for the modern", "trusted by leading", "trusted by the world", "best-in-class", "industry-leading", "world-class", "enterprise-grade", "next-generation", "cutting-edge", "transform your business", "revolutionize", "game-changer", "game changing", "mission-critical", "best of breed", "future-proof", "future proof", "seamless experience", "seamlessly integrate", "drive engagement", "drive growth", "drive results", "harness the power", "unlock the power", "unlock your", "take it to the next level", "to the next level", "effortlessly", "all-in-one", "reimagined", "in today's digital age", "in today's fast-paced world", "the future of", "elevate your", "built with love", "made with ❤"];
-const PLACEHOLDERS = [/lorem ipsum/i, /\bjohn doe\b/i, /\bjane doe\b/i, /\[(topic|name|company|product|your [a-z ]+)\]/i, /\byour name\b/i, /\bcompany name\b/i, /\bexample\.com\b/i, /\bsarah j(ohnson)?\.?,? (product manager|ceo)/i, /\bacme (corp|inc)/i, /\bplaceholder text\b/i];
+// Applied to prose only: code samples, form labels and inputs legitimately say example.com or "Your name".
+const PLACEHOLDERS = [/lorem ipsum/i, /\bjohn doe\b/i, /\bjane doe\b/i, /\[(topic|name|company|product|your [a-z ]+)\]/i, /\bcompany name\b/i, /\bsarah j(ohnson)?\.?,? (product manager|ceo)/i, /\bacme (corp|inc)/i, /\bplaceholder text\b/i];
+// Only a template's hero says "Your Name" in a heading.
+const HEADING_PLACEHOLDERS = [/^your name$/i, /^(your|my) (portfolio|project|product|company|startup)( name)?$/i, /^(product|project|site|company) name$/i, /^hello,? i'?m \[?your name\]?/i];
+const CODEISH = new Set(["pre", "code", "kbd", "samp", "label", "input", "textarea", "select", "option", "form", "table"]);
 const CONTRASTIVE = /\b(?:it['’]s|this is|we['’]re|that['’]s)\s+not\s+(?:just|only|merely|simply)\s+(?:a |an |about )?[^.,;:—–]{2,60}[,;:—–.]\s*(?:it['’]s|this is|we['’]re|that['’]s|but)\s+/giu;
 const FILLER_OPENERS = /\b(in today'?s (fast-paced|digital|modern|ever-changing|rapidly evolving) \w+|welcome to (the future|a new era|the next generation)|imagine a world|are you tired of|say goodbye to|say hello to|meet your new|the (ultimate|all-in-one|smarter) way to)\b/gi;
 const WHETHER_YOURE = /\bwhether you'?re (a |an )?[^.,;]{3,40},? or (a |an )?[^.,;]{3,40}/gi;
@@ -105,7 +109,12 @@ export function copyRules(snap: Snapshot): Finding[] {
   }
 
   // Placeholders
-  const ph = PLACEHOLDERS.map((re) => text.match(re)?.[0]).filter(Boolean) as string[];
+  const codeish = new Set<number>();
+  for (const e of snap.els) if (CODEISH.has(e.tag)) codeish.add(e.i);
+  const inCode = (i: number) => { let cur = idx.get(i); for (let d = 0; cur && d < 12; d++) { if (codeish.has(cur.i)) return true; cur = idx.get(cur.p); } return false; };
+  const prose = codeish.size ? snap.els.filter((e) => e.text && !inCode(e.i) && !isQuoted(e.i)).map((e) => e.text).join(" ") : text;
+  const ph = PLACEHOLDERS.map((re) => prose.match(re)?.[0]).filter(Boolean) as string[];
+  for (const h of snap.headings) if (h.level <= 3 && HEADING_PLACEHOLDERS.some((re) => re.test(h.text.trim()))) ph.push(h.text.trim());
   if (ph.length) {
     out.push(mk({
       rule: "placeholder-content", source: "squint", category: "copy", severity: "error", confidence: "measured",

@@ -30,12 +30,19 @@ const grade = (s) => (s >= 90 ? "A" : s >= 75 ? "B" : s >= 60 ? "C" : s >= 40 ? 
   let res;
   const tick = has("json") ? null : setInterval(() => process.stderr.write(`  …rendering, ${Math.round((Date.now() - t0) / 1000)}s\n`), 10_000);
   try {
-    res = await fetch(`${host}/api/analyze`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ url, pageType: opt("type") || "other", goal: opt("goal"), fresh: has("fresh") }),
-      signal: AbortSignal.timeout(Number(opt("timeout") || 180) * 1000),
-    });
+    for (let attempt = 0; ; attempt++) {
+      res = await fetch(`${host}/api/analyze`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url, pageType: opt("type") || "other", goal: opt("goal"), fresh: has("fresh") }),
+        signal: AbortSignal.timeout(Number(opt("timeout") || 180) * 1000),
+      });
+      // 503 = the hosted engine is busy; it says when to come back. Three polite retries, then give up.
+      if (res.status !== 503 || attempt >= 3) break;
+      const wait = Math.min(60, Number(res.headers.get("retry-after")) || 30);
+      if (!has("json")) process.stderr.write(`  …engine busy, retrying in ${wait}s\n`);
+      await new Promise((r) => setTimeout(r, wait * 1000));
+    }
   } catch (e) {
     console.error(e.name === "TimeoutError" ? `no answer from ${host} after ${opt("timeout") || 180}s (--timeout to change)` : `could not reach ${host}: ${e.message}`);
     process.exit(1);

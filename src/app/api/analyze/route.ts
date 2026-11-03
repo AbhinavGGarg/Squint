@@ -69,9 +69,13 @@ export async function POST(req: Request) {
     return Response.json({ id: report.id, score: report.score });
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);
+    if (/RENDER_BUSY/.test(msg)) {
+      return Response.json({ error: "Squint is busy right now; try again in half a minute." }, { status: 503, headers: { "retry-after": "30" } });
+    }
     const friendly =
       /BLOCKED_BY_BOT_CHECK/.test(msg) ? "That site shows a bot-check page to headless browsers (Cloudflare or similar), so it can't be measured from here. Paste its HTML instead, or run Squint locally."
       : /ERR_NAME_NOT_RESOLVED/.test(msg) ? "That domain doesn't resolve. Check the spelling."
+      : /disconnected|ERR_INSUFFICIENT_RESOURCES|Target .*closed|crashed/i.test(msg) ? "That page is heavier than the hosted browser can hold, even with images and video blocked. Paste its HTML instead, or run Squint locally where Chromium has more memory."
       : /ERR_CONNECTION|ERR_TUNNEL|ERR_SSL|net::/.test(msg) ? `Couldn't load that page (${msg.match(/net::[A-Z_]+/)?.[0] || "network error"}).`
       : /Timeout/i.test(msg) ? "The page took too long to load (30s). Heavy sites or ones that wait on third-party scripts can do this; try again or paste the HTML."
       : msg.slice(0, 300);

@@ -110,6 +110,8 @@ export interface Report {
   engines: { name: string; ok: boolean; note?: string; durationMs: number }[];
   screenshot: { viewport: string; full: string; fullSize: { w: number; h: number }; mobile?: string; mobileSize?: { w: number; h: number } };
   mobile?: { scrollWidth: number; overflow: boolean; tinyText: number; smallTargets: number; durationMs: number };
+  /** Set when the page was too heavy for the hosted browser and was re-rendered without images/media. */
+  renderMode?: "light";
 }
 
 /** One element as captured in the browser. */

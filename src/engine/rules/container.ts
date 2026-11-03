@@ -5,7 +5,7 @@
  * portfolio findings that started this project.
  */
 import type { El, Finding, Snapshot } from "../types";
-import { ancestors, area, byIndex, childrenOf, hasBg, hasBorder, hasShadow, isPanel, label, mk, round } from "./util";
+import { ancestors, area, byIndex, childrenOf, hasBg, hasBorder, hasShadow, inArtwork, isPanel, label, mk, round } from "./util";
 
 export function containerRules(snap: Snapshot): Finding[] {
   const kids = childrenOf(snap);
@@ -27,6 +27,8 @@ function containerVsContent(snap: Snapshot, kids: Map<number, El[]>, idx: Map<nu
     if (e.land) continue; // sections/heros are allowed to breathe
     if (e.r.w > 0.92 * vw) continue; // full-bleed bands are layout, not cards
     if (e.r.h < 140) continue;
+    // A card is a box with words in it. A box with none is a picture (mock window, diagram, device frame).
+    if (e.words < 2 || inArtwork(e, idx)) continue;
     const ch = kids.get(e.i) || [];
     if (ch.some((c) => isPanel(c) && c.r.h > 0.6 * e.r.h)) continue; // a wrapper around a real card
     const fill = area(e.cr) / area(e.r);
@@ -144,7 +146,7 @@ function nestedPanels(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, 
   const cardish = (e: El) => isPanel(e) && (hasBg(e) || hasShadow(e) || e.s.border.every((w) => w > 0));
   for (const inner of snap.els) {
     if (!cardish(inner) || !(hasShadow(inner) || hasBorder(inner) || hasBg(inner))) continue;
-    if (inner.tlen < 10) continue;
+    if (inner.tlen < 10 || inner.words < 3 || inArtwork(inner, idx)) continue;
     let outer: El | undefined;
     for (const a of ancestors(inner, idx, 10)) {
       if (cardish(a)) { outer = a; break; }

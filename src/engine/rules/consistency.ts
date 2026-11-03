@@ -6,7 +6,7 @@
  * (Apache-2.0, github.com/pbakaus/impeccable). See NOTICES.md.
  */
 import type { El, Finding, Snapshot } from "../types";
-import { byIndex, childrenOf, distinct, hasBg, hasBorder, hasShadow, isPanel, label, median, mk, overlap1D, round, ancestors } from "./util";
+import { byIndex, childrenOf, distinct, hasBg, hasBorder, hasShadow, inArtwork, isPanel, label, median, mk, overlap1D, round, ancestors } from "./util";
 
 const CITE_UXLY = "Thresholds from UXly (MIT)";
 const SVG_TAGS = new Set(["svg", "path", "line", "circle", "rect", "ellipse", "polygon", "polyline", "g", "use", "defs", "mask", "clippath", "text", "tspan"]);
@@ -15,23 +15,26 @@ export function consistencyRules(snap: Snapshot): Finding[] {
   const out: Finding[] = [];
   const kids = childrenOf(snap);
   const idx = byIndex(snap);
-  out.push(...misalignedSiblings(kids));
-  out.push(...unevenGaps(kids));
+  out.push(...misalignedSiblings(kids, idx));
+  out.push(...unevenGaps(kids, idx));
   out.push(...headingDrift(snap, idx));
   out.push(...flatHierarchy(snap));
   out.push(...radiusSprawl(snap));
-  out.push(...crampedPadding(snap, kids));
-  out.push(...stretchedRowCards(snap, kids));
+  out.push(...crampedPadding(snap, kids, idx));
+  out.push(...stretchedRowCards(snap, kids, idx));
   return out;
 }
 
 /* ---------- misaligned siblings (UXly analyzeSiblingAlignment) ---------- */
-function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
+function misalignedSiblings(kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
   const out: Finding[] = [];
   const T_MIN = 2, T_MAX = 3;
   const seen = new Set<string>();
-  for (const [, group] of kids) {
-    const g = group.filter((e) => !SVG_TAGS.has(e.tag) && e.r.w >= 4 && e.r.h >= 4);
+  for (const [pid, group] of kids) {
+    const parent = idx.get(pid);
+    if (parent && inArtwork(parent, idx)) continue; // bars in a chart graphic are "misaligned" on purpose
+    // Inline text fragments (a word-by-word animated headline, a <span> inside a sentence) flow with the text, not a grid.
+    const g = group.filter((e) => !SVG_TAGS.has(e.tag) && e.r.w >= 4 && e.r.h >= 4 && e.s.display !== "inline" && e.s.position !== "absolute");
     if (g.length < 2 || g.length > 60) continue;
     for (let i = 0; i < g.length; i++) {
       for (let j = i + 1; j < g.length; j++) {
@@ -42,7 +45,8 @@ function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
           const centered = Math.abs(a.h - b.h) > 1 && top > 0 && bot > 0 && Math.abs(top - bot) <= 1;
           // Two text runs at different sizes sharing a baseline have different tops by design.
           const baseline = g[i].tlen > 0 && g[j].tlen > 0 && Math.abs(g[i].s.fontSize - g[j].s.fontSize) > 1;
-          if (top >= T_MIN && top <= T_MAX && !centered && !baseline) {
+          const bottomAligned = Math.abs(a.h - b.h) > 1 && bot <= 1; // align-items: flex-end; the tops differ by design
+          if (top >= T_MIN && top <= T_MAX && !centered && !baseline && !bottomAligned) {
             const key = `t${g[i].i}-${g[j].i}`;
             if (seen.has(key)) continue;
             seen.add(key);
@@ -59,7 +63,8 @@ function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
         if (xOv >= 0.5 * Math.min(a.w, b.w)) {
           const left = Math.abs(a.x - b.x), right = Math.abs(a.x + a.w - (b.x + b.w));
           const centered = Math.abs(a.w - b.w) > 1 && left > 0 && right > 0 && Math.abs(left - right) <= 1;
-          if (left >= T_MIN && left <= T_MAX && !centered) {
+          const rightAligned = Math.abs(a.w - b.w) > 1 && right <= 1;
+          if (left >= T_MIN && left <= T_MAX && !centered && !rightAligned) {
             const key = `l${g[i].i}-${g[j].i}`;
             if (seen.has(key)) continue;
             seen.add(key);
@@ -87,9 +92,11 @@ function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
 }
 
 /* ---------- uneven gaps between repeated items (UXly analyzeRepeatedItemGaps) ---------- */
-function unevenGaps(kids: Map<number, El[]>): Finding[] {
+function unevenGaps(kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
   const out: Finding[] = [];
-  for (const [, group] of kids) {
+  for (const [pid, group] of kids) {
+    const parent = idx.get(pid);
+    if (parent && inArtwork(parent, idx)) continue;
     const byTag = new Map<string, El[]>();
     for (const e of group) {
       if (!byTag.has(e.tag)) byTag.set(e.tag, []);
@@ -111,12 +118,16 @@ function unevenGaps(kids: Map<number, El[]>): Finding[] {
         gaps.push(vertical ? c.y - (p.y + p.h) : c.x - (p.x + p.w));
       }
       const med = median(gaps);
-      if (med > 100 || gaps.some((g) => g < -5)) continue;
+      if (med > 100 || med < 6 || gaps.some((g) => g < -5)) continue; // sub-6px gaps are internal spacing, not rhythm
       const maxDev = Math.max(...gaps.map((g) => Math.abs(g - med)));
       const mn = Math.min(...gaps), mx = Math.max(...gaps);
-      if (mn > 0 && mx / mn > 10) continue;
+      // Sloppiness is a small deviation. A gap 3× another is grouping (logo | links ... | sign in), not a mistake.
+      if (mn > 0 && mx / mn > 3) continue;
       if (maxDev > 2 * Math.max(med, 1)) continue;
-      if (maxDev > 2) {
+      // A mirrored pattern (4, 28, 28, 4) is a structure: pairs, or a header/footer around a list.
+      const mirrored = gaps.length >= 3 && gaps.every((g, i) => Math.abs(g - gaps[gaps.length - 1 - i]) <= 1) && distinct(gaps, 1).length > 1;
+      if (mirrored) continue;
+      if (maxDev >= 3) {
         out.push(mk({
           rule: "uneven-gaps", source: "squint", category: "consistency", severity: "warn", confidence: "measured",
           title: `Uneven spacing between ${sorted.length} repeated ${sorted[0].tag} items`,
@@ -153,13 +164,33 @@ function headingDrift(snap: Snapshot, idx: Map<number, El>): Finding[] {
     const big = hs.find((h) => Math.abs(h.s.fontSize - max) < 0.6)!;
     const weights = distinct(hs.map((h) => h.s.fontWeight), 50);
     const name = (e: El) => (snap.headings.find((h) => h.i === e.i)?.text || e.text || e.cls || `<${e.tag}>`).slice(0, 50);
+    // Drift is one heading that wandered off: a size used by a single heading while the rest cluster.
+    // A level used at two sizes, several headings each, is a system (section vs sub-section) and only a note.
+    const counts = sizes.map((s) => hs.filter((h) => Math.abs(h.s.fontSize - s) <= 0.6).length);
+    const loners = sizes.filter((_, k) => counts[k] === 1);
+    const systematic = hs.length >= 4 && loners.length === 0 && sizes.length <= 3;
+    const odd = loners.length === 1 && hs.length >= 3 ? hs.find((h) => Math.abs(h.s.fontSize - loners[0]) <= 0.6)! : null;
+    const sizeList = sizes.map((s, k) => `${round(s)}px ×${counts[k]}`).join(", ");
+    if (systematic) {
+      out.push(mk({
+        rule: "heading-size-drift", source: "squint", category: "consistency", severity: "info", confidence: "heuristic",
+        title: `h${level} is used at ${sizes.length} sizes, consistently`,
+        evidence: `Sizes: ${sizeList}. “${name(big)}” is ${round(max)}px, “${name(small)}” is ${round(min)}px. Each size is used more than once, so this is a system rather than drift; but it means the same tag is doing two jobs.`,
+        fix: `If the ${round(min)}px ones are sub-sections, make them h${Math.min(level + 1, 6)}. Screen readers and search engines only see the tag.`,
+        rects: [big.r, small.r], citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+        data: { sizes, counts, level },
+      }));
+      continue;
+    }
     out.push(mk({
       rule: "heading-size-drift", source: "squint", category: "consistency", severity: max / min >= 1.2 ? "error" : "warn", confidence: "measured",
-      title: `h${level} headings render at ${sizes.length} different sizes`,
-      evidence: `“${name(big)}” is ${round(max)}px while “${name(small)}” is ${round(min)}px (${round(max / min, 2)}×). Sizes seen: ${sizes.map((s) => round(s)).join(", ")}px${weights.length > 1 ? `; weights: ${weights.join(", ")}` : ""}. Same semantic level should get the same treatment.`,
+      title: odd ? `One h${level} is a different size from the other ${hs.length - 1}` : `h${level} headings render at ${sizes.length} different sizes`,
+      evidence: odd
+        ? `“${name(odd)}” is ${round(odd.s.fontSize)}px; the other h${level}s are ${sizes.filter((s) => s !== loners[0]).map((s) => round(s)).join("/")}px (${sizeList}). Same semantic level should get the same treatment.`
+        : `“${name(big)}” is ${round(max)}px while “${name(small)}” is ${round(min)}px (${round(max / min, 2)}×). Sizes seen: ${sizeList}${weights.length > 1 ? `; weights: ${weights.join(", ")}` : ""}. Same semantic level should get the same treatment.`,
       fix: `Pick one size for h${level} and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.`,
-      rects: [big.r, small.r], citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
-      data: { sizes, level },
+      rects: odd ? [odd.r, (odd === big ? small : big).r] : [big.r, small.r], citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      data: { sizes, counts, level },
     }));
   }
   return out;
@@ -227,8 +258,9 @@ function radiusSprawl(snap: Snapshot): Finding[] {
 }
 
 /* ---------- cramped padding (UXly analyzeCrampedPadding, Impeccable cramped-padding) ---------- */
-function crampedPadding(snap: Snapshot, kids: Map<number, El[]>): Finding[] {
+function crampedPadding(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
   const out: Finding[] = [];
+  const seen = new Map<string, Finding>();
   const SKIP = new Set(["span", "a", "b", "i", "em", "strong", "input", "select", "textarea", "td", "th", "tr", "table", "li", "label", "img", "svg", "code"]);
   for (const e of snap.els) {
     if (SKIP.has(e.tag) || e.tag === "body" || e.tag === "html" || e.tag === "main") continue;
@@ -240,33 +272,44 @@ function crampedPadding(snap: Snapshot, kids: Map<number, El[]>): Finding[] {
     const hasText = !!e.text || ch.some((c) => c.text && !isPanel(c));
     if (!hasText) continue;
     if (e.s.flex && ch.every((c) => c.inter)) continue;
+    if (inArtwork(e, idx)) continue;
     const minPad = Math.max(6, 0.5 * e.s.fontSize);
     const below = e.s.pad.filter((p) => p < minPad).length;
     if (below >= 2 && e.s.pad.every((p) => p < 24)) {
-      out.push(mk({
+      const key = `${e.tag}.${e.cls}|${e.s.pad.map((p) => round(p)).join("/")}`;
+      const prev = seen.get(key);
+      if (prev) { prev.data = { count: ((prev.data?.count as number) || 1) + 1 }; prev.rects = [...(prev.rects || []), e.r].slice(0, 8); continue; }
+      const f = mk({
         rule: "cramped-padding", source: "squint", category: "consistency", severity: "warn", confidence: "measured",
         title: "Text sits too close to its box edge",
         evidence: `${label(e)} has padding ${e.s.pad.map((p) => round(p)).join("/")}px at ${round(e.s.fontSize)}px text; ${below} sides are under ${round(minPad)}px.`,
         fix: `Give the box at least ${round(minPad)}px on every side (about half the font size).`,
         rects: [e.r], citation: CITE_UXLY,
-      }));
+      });
+      seen.set(key, f);
+      out.push(f);
     }
   }
-  return out.slice(0, 5);
+  return out.map((f) => ((f.data?.count as number) > 1 ? { ...f, title: `${f.title} (×${f.data!.count})` } : f)).slice(0, 5);
 }
 
 /* ---------- row of cards stretched to the tallest one (the stat-tile finding) ---------- */
-function stretchedRowCards(snap: Snapshot, kids: Map<number, El[]>): Finding[] {
+function stretchedRowCards(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
   const out: Finding[] = [];
+  const seen = new Set<string>();
   for (const [, group] of kids) {
-    const cards = group.filter((e) => isPanel(e) && e.cr);
+    const cards = group.filter((e) => isPanel(e) && e.cr && e.words >= 1 && !inArtwork(e, idx));
     if (cards.length < 2 || cards.length > 8) continue;
     // Same row: all tops within 3px and heights within 2px (stretch).
     const top = cards[0].r.y, h = cards[0].r.h;
     if (!cards.every((c) => Math.abs(c.r.y - top) <= 3 && Math.abs(c.r.h - h) <= 2)) continue;
     const contentHs = cards.map((c) => c.cr!.y + c.cr!.h - c.r.y); // content bottom relative to card top
+    if (contentHs.some((v) => v > h + 2)) continue; // content spills past the card: an overlay/absolute child, not a stretch
     const tallest = Math.max(...contentHs);
     const shortest = Math.min(...contentHs);
+    const key = `${round(h)}|${contentHs.map((v) => round(v)).join(",")}`;
+    if (seen.has(key)) continue; // identical rows (a hidden duplicate for a carousel/breakpoint)
+    seen.add(key);
     const fontSize = Math.max(14, median(cards.map((c) => c.s.fontSize)));
     if (tallest - shortest < 3 * fontSize) continue; // ≥ ~3 lines of difference
     const slack = cards.map((c, i) => round(h - contentHs[i]));

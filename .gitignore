@@ -44,3 +44,4 @@ next-env.d.ts
 .squint/
 .env.local
 src/engine/snapshot.generated.ts
+calib/

@@ -27,6 +27,15 @@ const CASES: Case[] = [
     mustNotHave: ["ai-purple", "neon-glow", "emoji-as-icons", "three-equal-cards", "marketing-buzzwords", "cards-in-cards", "container-vs-content", "decorative-badge", "heading-size-drift", "cramped-padding"],
     scoreAbove: 85,
   },
+  {
+    // A polished product page in the manner of a large company: DOM-drawn illustrations, a bar
+    // chart graphic, a nav with a grouped gap, inline links in prose, example.com in a code sample.
+    // Everything here is a decision, so the geometry and copy rules must stay quiet.
+    file: "fixtures/polished.html", type: "landing",
+    mustHave: [],
+    mustNotHave: ["container-vs-content", "stretched-row-cards", "misaligned-siblings", "uneven-gaps", "cramped-padding", "cards-in-cards", "placeholder-content", "tasteful-default", "heading-size-drift", "decorative-badge", "mobile-tap-targets"],
+    scoreAbove: 85,
+  },
 ];
 
 async function main() {

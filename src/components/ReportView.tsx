@@ -32,6 +32,9 @@ export function ReportView({ report }: { report: Report }) {
             {report.input.url ? <a href={report.page.finalUrl} target="_blank" rel="noreferrer">{report.page.finalUrl}</a> : "HTML pasted in"} · {report.input.pageType} · {report.page.elementCount} elements · {report.page.wordCount} words · {report.page.fonts.slice(0, 3).join(", ") || "no fonts detected"}
           </p>
           <p className="url preset">Preset “{report.input.pageType}”: {PRESET_NOTES[report.input.pageType]}{report.mobile ? ` · Mobile 390px: ${report.mobile.overflow ? "scrolls sideways" : "no overflow"}` : ""}</p>
+          {report.renderMode === "light" && (
+            <p className="url preset"><b>Light render.</b> This page was too heavy for the hosted browser on the first try (video, WebGL or very large images), so it was measured a second time with images and media blocked. Geometry, type and copy findings are intact; card-fill, first-impression metrics and the mobile pass were withheld because they would be wrong without pictures. Screenshots show the page without its images.</p>
+          )}
         </div>
         <div className="score">
           <div className="n">{report.score}<small>/100</small></div>

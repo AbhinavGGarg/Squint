@@ -28,6 +28,8 @@ export interface AnalyzeInput {
 }
 
 const SEV = { error: 0, warn: 1, info: 2 } as const;
+/** Errors that mean the browser process itself gave up, not that the site was unreachable. */
+const BROWSER_DIED = /disconnected|Target (page|context|browser).*closed|has been closed|crashed|ERR_INSUFFICIENT_RESOURCES|Protocol error|Navigation failed because page was closed|Execution context was destroyed/i;
 const CONF = { measured: 0, heuristic: 1, judgment: 2 } as const;
 
 export async function analyze(input: AnalyzeInput): Promise<Report> {
@@ -36,15 +38,36 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
   const engines: Report["engines"] = [];
   const t0 = Date.now();
 
-  const r = await render({ url: input.url, html: input.html });
-  engines.push({ name: "render", ok: true, durationMs: Date.now() - t0, note: `${rendererName()} · ${r.snapshot.els.length} elements, ${r.snapshot.fullHeight}px tall · store: ${storeName}` });
+  let r: Awaited<ReturnType<typeof render>>;
+  let renderNote = "";
+  try {
+    r = await render({ url: input.url, html: input.html });
+  } catch (e) {
+    // The page exhausted the browser (single-process serverless Chromium dies on WebGL heroes,
+    // autoplaying video, 30 MB of hero imagery). One more try without images and media.
+    if (!BROWSER_DIED.test(String(e)) || !input.url) throw e;
+    const t = Date.now();
+    r = await render({ url: input.url, light: true });
+    renderNote = ` · first attempt killed the browser (${String(e instanceof Error ? e.message : e).match(/net::[A-Z_]+|disconnected|closed|crashed/i)?.[0] || "error"}), re-rendered in light mode in ${Date.now() - t}ms`;
+  }
+  const blocked = r.blockedRequests ? ` · ${r.blockedRequests} tracker/media requests blocked` : "";
+  engines.push({ name: "render", ok: true, durationMs: Date.now() - t0, note: `${rendererName()} · ${r.snapshot.els.length} elements, ${r.snapshot.fullHeight}px tall${blocked}${renderNote} · store: ${storeName}` });
+  const lightMode = r.mode === "light";
 
   resetIds();
   let findings: Finding[] = [];
   const t1 = Date.now();
   try {
     findings.push(...consistencyRules(r.snapshot), ...containerRules(r.snapshot), ...fingerprintRules(r.snapshot), ...fingerprintRules2(r.snapshot), ...copyRules(r.snapshot), ...technicalRules(r.html, r.snapshot));
-    engines.push({ name: "squint-rules", ok: true, durationMs: Date.now() - t1, note: `${findings.length} findings` });
+    let dropped = 0;
+    if (lightMode) {
+      // Without images an unsized <img> collapses to nothing, so "this card is mostly empty" would be our fault, not the site's.
+      const IMAGE_SENSITIVE = new Set(["container-vs-content", "stretched-row-cards", "whitespace-share", "visual-complexity", "colourfulness"]);
+      const before = findings.length;
+      findings = findings.filter((f) => !IMAGE_SENSITIVE.has(f.rule));
+      dropped = before - findings.length;
+    }
+    engines.push({ name: "squint-rules", ok: true, durationMs: Date.now() - t1, note: `${findings.length} findings${dropped ? ` · ${dropped} image-dependent findings withheld (light mode)` : ""}` });
   } catch (e) {
     engines.push({ name: "squint-rules", ok: false, durationMs: Date.now() - t1, note: String(e) });
   }
@@ -52,7 +75,9 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
   // Appeal metrics and Impeccable can run in parallel with each other.
   const t2 = Date.now();
   const [appeal, imp] = await Promise.all([
-    appealMetrics(r.viewportPng, r.snapshot).then((a) => ({ ok: true as const, a })).catch((e) => ({ ok: false as const, e })),
+    lightMode
+      ? Promise.resolve({ ok: false as const, e: "skipped: light-mode screenshot has no images, so complexity and colourfulness would be wrong" })
+      : appealMetrics(r.viewportPng, r.snapshot).then((a) => ({ ok: true as const, a })).catch((e) => ({ ok: false as const, e })),
     input.skipImpeccable ? Promise.resolve(null) : runImpeccable({ url: input.url, html: r.html }).catch((e) => ({ findings: [], note: String(e), ok: false })),
   ]);
   // The mobile pass runs AFTER the other engines, on its own: opening a second browser context while
@@ -60,6 +85,7 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
   // dead browser can never hang the request.
   const t2m = Date.now();
   const mob = input.skipMobile ? null
+    : lightMode ? { ok: false as const, e: "skipped: the page needed light mode on desktop, a second render would not survive" }
     : await Promise.race([
         render({ url: input.url, html: input.html, viewport: { width: 390, height: 844 }, timeoutMs: 20_000, reuseBrowser: true }).then((m) => ({ ok: true as const, m })),
         new Promise<{ ok: false; e: string }>((res) => setTimeout(() => res({ ok: false, e: "mobile render timed out (35s)" }), 35_000)),
@@ -133,6 +159,7 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
     engines,
     screenshot: { viewport: "viewport.png", full: "full.png", fullSize: await pngSize(r.fullPng), ...(mobilePng ? { mobile: "mobile.png", mobileSize: await pngSize(mobilePng) } : {}) },
     mobile: mobileInfo,
+    ...(lightMode ? { renderMode: "light" as const } : {}),
   };
   await saveReport(report, { viewport: r.viewportPng, full: r.fullPng, mobile: mobilePng });
   return report;

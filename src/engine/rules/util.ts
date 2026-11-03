@@ -121,6 +121,26 @@ export function ancestors(e: El, idx: Map<number, El>, max = 20): El[] {
   return out;
 }
 
+/**
+ * Illustrations built out of DOM: mock browser windows, animated system diagrams, bar charts drawn
+ * with divs, device frames. They are pictures, not content cards, and every geometry rule that
+ * treats them as cards ("this card is 99% empty", "these bars are misaligned") is measuring the
+ * artist's choices. Detected by naming (authors name these things) and by structure (boxes with
+ * almost no words, positioned absolutely, often clipped).
+ */
+const ARTWORK_NAME = /(^|[-_ ])(graphic|graphics|illustration|illus|animation|animated|anim|lottie|canvas|mock|mockup|artwork|visual|visuals|decor|decoration|decorative|device|frame|window|browser|skeleton|scene|particles|orbit|orb|blob|glow|shape|shapes|diagram|chart|sparkline|marquee|ticker)([-_ ]|$)/i;
+export function isArtworkNamed(e: El) {
+  return ARTWORK_NAME.test(e.cls) || ARTWORK_NAME.test(e.id) || e.role === "img" || e.role === "presentation" || e.role === "none";
+}
+/** True when the element or an ancestor (up to `depth`) is artwork by name, or the element is wordless box-art. */
+export function inArtwork(e: El, idx: Map<number, El>, depth = 8) {
+  if (isArtworkNamed(e)) return true;
+  for (const a of ancestors(e, idx, depth)) if (isArtworkNamed(a)) return true;
+  // Structural: a box bigger than a thumbnail with (almost) no words in it is a picture, not a card.
+  if (e.words < 4 && e.r.w >= 120 && e.r.h >= 120 && (e.s.position === "absolute" || e.s.overflow === "hidden")) return true;
+  return false;
+}
+
 export function label(e: El) {
   const t = e.text || "";
   const name = e.tag + (e.id ? `#${e.id}` : "") + (e.cls ? "." + e.cls.split(" ").slice(0, 2).join(".") : "");

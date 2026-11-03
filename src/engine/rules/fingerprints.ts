@@ -226,7 +226,9 @@ function eyebrowChip(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number, E
 function tastefulDefault(snap: Snapshot): Finding[] {
   const bg = parseColor(snap.bodyBg);
   if (!bg) return [];
-  const cream = CREAM_BG.some(([r, g, b]) => Math.abs(bg.r - r) + Math.abs(bg.g - g) + Math.abs(bg.b - b) <= 18) || (bg.r > 240 && bg.g > 235 && bg.b > 215 && bg.r - bg.b >= 6);
+  // Cream is warm off-white. Pure white and cool greys are not the tell, whatever the accent.
+  const warm = bg.r - bg.b >= 4 && bg.r + bg.g + bg.b < 762;
+  const cream = warm && (CREAM_BG.some(([r, g, b]) => Math.abs(bg.r - r) + Math.abs(bg.g - g) + Math.abs(bg.b - b) <= 18) || (bg.r > 240 && bg.g > 235 && bg.b > 215 && bg.r - bg.b >= 6));
   if (!cream) return [];
   const serif = snap.els.some((e) => /^h[1-2]$/.test(e.tag) && SERIF_DISPLAY.includes(e.s.fontFamily.toLowerCase()));
   const green = snap.els.filter((e) => {
