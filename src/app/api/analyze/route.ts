@@ -1,5 +1,6 @@
 import { analyze } from "@/engine/analyze";
-import { cacheKeyForUrl, checkRateLimit, clientIp, kvDel, kvGet, kvSet, kvSetNX } from "@/engine/kv";
+import { cacheKeyForUrl, checkRateLimit, clientIp, kvDel, kvGet, kvSet, kvSetNX, rememberReport } from "@/engine/kv";
+import { currentUserId } from "@/auth";
 import { loadReport } from "@/engine/store";
 import type { PageType } from "@/engine/types";
 
@@ -29,12 +30,16 @@ export async function POST(req: Request) {
   if (html.length > 3_000_000) return Response.json({ error: "HTML too large (3 MB max)." }, { status: 413 });
   const pageType = TYPES.has(body.pageType as PageType) ? (body.pageType as PageType) : "other";
   const goal = (body.goal || "").slice(0, 500) || undefined;
+  const userId = await currentUserId();
 
   // 1. Cache: the same URL + page type within 24h returns the existing report instantly.
   const key = url ? cacheKeyForUrl(url, pageType) : null;
   if (key && !body.fresh) {
     const cachedId = await kvGet(key);
-    if (cachedId && (await loadReport(cachedId))) return Response.json({ id: cachedId, cached: true });
+    if (cachedId && (await loadReport(cachedId))) {
+      if (userId) await rememberReport(userId, cachedId);
+      return Response.json({ id: cachedId, cached: true });
+    }
   }
 
   // 2. Rate limit per client, counted only for scans that actually run.
@@ -50,7 +55,7 @@ export async function POST(req: Request) {
       for (let i = 0; i < 25; i++) {
         await sleep(2000);
         const id = await kvGet(key!);
-        if (id) return Response.json({ id, cached: true, shared: true });
+        if (id) { if (userId) await rememberReport(userId, id); return Response.json({ id, cached: true, shared: true }); }
         if ((await kvGet(inflightKey)) === null) break; // the other scan failed; fall through and run our own
       }
       await kvSetNX(inflightKey, ip, INFLIGHT_TTL);
@@ -60,6 +65,7 @@ export async function POST(req: Request) {
   try {
     const report = await analyze({ url: url || undefined, html: html || undefined, pageType, goal });
     if (key) await kvSet(key, report.id, CACHE_TTL);
+    if (userId) await rememberReport(userId, report.id);
     return Response.json({ id: report.id, score: report.score });
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);

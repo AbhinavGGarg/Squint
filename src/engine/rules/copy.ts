@@ -18,7 +18,12 @@ const GENERIC_H1 = /\b(unlock|transform|supercharge|elevate|empower|reimagine|re
 
 export function copyRules(snap: Snapshot): Finding[] {
   const out: Finding[] = [];
-  const text = snap.text || "";
+  // Text inside blockquote/cite/q is quoted from elsewhere; don't score it as the page's own copy.
+  const quoted = new Set<number>();
+  for (const e of snap.els) if (e.tag === "blockquote" || e.tag === "q" || e.tag === "cite") quoted.add(e.i);
+  const idx0 = byIndex(snap);
+  const isQuoted = (i: number) => { let cur = idx0.get(i); for (let d = 0; cur && d < 12; d++) { if (quoted.has(cur.i)) return true; cur = idx0.get(cur.p); } return false; };
+  const text = quoted.size ? snap.els.filter((e) => e.text && !isQuoted(e.i)).map((e) => e.text).join(" ") : (snap.text || "");
   const lower = text.toLowerCase();
   const idx = byIndex(snap);
 

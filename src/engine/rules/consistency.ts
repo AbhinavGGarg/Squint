@@ -40,7 +40,9 @@ function misalignedSiblings(kids: Map<number, El[]>): Finding[] {
         if (yOv >= 0.5 * Math.min(a.h, b.h)) {
           const top = Math.abs(a.y - b.y), bot = Math.abs(a.y + a.h - (b.y + b.h));
           const centered = Math.abs(a.h - b.h) > 1 && top > 0 && bot > 0 && Math.abs(top - bot) <= 1;
-          if (top >= T_MIN && top <= T_MAX && !centered) {
+          // Two text runs at different sizes sharing a baseline have different tops by design.
+          const baseline = g[i].tlen > 0 && g[j].tlen > 0 && Math.abs(g[i].s.fontSize - g[j].s.fontSize) > 1;
+          if (top >= T_MIN && top <= T_MAX && !centered && !baseline) {
             const key = `t${g[i].i}-${g[j].i}`;
             if (seen.has(key)) continue;
             seen.add(key);

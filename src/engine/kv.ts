@@ -128,3 +128,14 @@ export function cacheKeyForUrl(url: string, pageType: string): string {
     return `cache:${pageType}:${url}`;
   }
 }
+
+/* ---------- per-user report history (a JSON array of ids, newest first, capped) ---------- */
+export async function rememberReport(userId: string, reportId: string): Promise<void> {
+  const key = `user:${userId}:reports`;
+  const cur = JSON.parse((await kvGet(key)) || "[]") as string[];
+  const next = [reportId, ...cur.filter((x) => x !== reportId)].slice(0, 200);
+  await kvSet(key, JSON.stringify(next), 60 * 60 * 24 * 365);
+}
+export async function userReports(userId: string): Promise<string[]> {
+  return JSON.parse((await kvGet(`user:${userId}:reports`)) || "[]") as string[];
+}

@@ -224,8 +224,10 @@ function capsLabels(snap: Snapshot, idx: Map<number, El>): Finding[] {
   const NAV = new Set(["nav", "header", "footer", "button", "a"]);
   const hits = snap.els.filter((e) => {
     if (!e.text || e.text.length < 3 || e.text.length > 40 || NAV.has(e.tag)) return false;
-    if (e.s.textTransform !== "uppercase" && e.text !== e.text.toUpperCase()) return false;
-    if (parseFloat(e.s.letterSpacing) < 0.5) return false;
+    const tracking = parseFloat(e.s.letterSpacing) || 0; // "normal" parses as NaN
+    const transformed = e.s.textTransform === "uppercase";
+    const naturalCaps = e.text === e.text.toUpperCase() && /[A-Z]{4,}/.test(e.text); // "URL", "ERROR" are acronyms/labels, not a style
+    if (!(transformed || naturalCaps) || tracking < 0.5) return false;
     if (e.s.fontSize > 15) return false;
     const p = idx.get(e.p);
     return !(p && NAV.has(p.tag));

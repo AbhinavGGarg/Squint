@@ -84,6 +84,17 @@ A scan on Vercel takes 10–40s plus a few seconds of cold start while Chromium 
 
 **Mobile pass** renders the page again at 390px and reports horizontal overflow, text under 12px and tap targets under 32px. **Technical checks** read the HTML for title, meta description, og:image/og:title (how links unfurl), canonical, viewport, lang, favicon, JSON-LD and h1 count.
 
+## Sign-in (optional) and custom domain
+
+Scanning never requires an account. With Google sign-in configured, a **Sign in** link appears in the masthead, scans you run while signed in are attached to you, and `/me` lists them. Setup:
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → Create credentials → OAuth client ID → Web application. Authorized redirect URI: `https://<your-domain>/api/auth/callback/google` (add `http://localhost:3000/api/auth/callback/google` for local dev). The consent screen needs an app name and your email; External user type is fine.
+2. Vercel → Settings → Environment Variables: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and `AUTH_SECRET` (any long random string; `openssl rand -base64 32`). Redeploy.
+
+Without those three variables the sign-in link is hidden and nothing else changes.
+
+**Custom domain:** Vercel → Settings → Domains → add it. Vercel shows the records to create at your registrar (an `A` record to `76.76.21.21` for the apex and a `CNAME` to `cname.vercel-dns.com` for `www`, or just the CNAME for a subdomain). Then set `NEXT_PUBLIC_SITE_URL=https://<your-domain>` so Open Graph cards and badges use it, and update the Google redirect URI above.
+
 ## Hardening and sharing
 
 - **Rate limit:** 5 scans/minute and 60/day per IP (`SQUINT_RATE_PER_MIN`, `SQUINT_RATE_PER_DAY`). Counted only for scans that actually run.
