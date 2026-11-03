@@ -52,7 +52,8 @@ export function mobileRules(m: Snapshot): Finding[] {
     e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text &&
     e.s.display !== "inline" && e.r.w > 2 && e.r.h > 2 &&
     !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight && !inArtwork(e, idx) &&
-    (e.r.h < 20 || e.r.w < 20 || ((e.r.h < 32 || e.r.w < 32) && crowded(e))));
+    !ancestors(e, idx, 12).some((a) => a.tag === "footer" || a.role === "contentinfo") && // footer link columns are a convention
+    (e.r.h < 20 || e.r.w < 20 || ((e.r.h < 24 || e.r.w < 24) && crowded(e))));
   // The same link repeated across twelve cards is one decision, not twelve.
   const distinct = new Map<string, El>();
   for (const e of small) { const k = `${e.text}|${round(e.r.w)}x${round(e.r.h)}`; if (!distinct.has(k)) distinct.set(k, e); }

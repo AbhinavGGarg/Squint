@@ -65,6 +65,7 @@ export interface AppealMetrics {
   textDensity: number; // 0–1 share of viewport covered by text boxes
   distinctHues: number;
   dominantBackground: string;
+  maskedBoxes?: number; // text/media boxes painted out before the quadtree ran (diagnostic)
 }
 
 export interface JudgeResult {

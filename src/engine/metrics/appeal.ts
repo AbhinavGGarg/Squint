@@ -82,13 +82,27 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
   // in the hero is one object to the eye, however many pixels it has. Mask them like text.
   const MEDIA = new Set(["img", "video", "canvas", "picture", "iframe", "svg"]);
   const isMedia = (e: { tag: string; r: { w: number; h: number } }) => MEDIA.has(e.tag) && e.r.w >= 160 && e.r.h >= 120;
+  let masked = 0;
   for (const e of snap.els) {
     if (!(e.text || isMedia(e)) || e.r.y > vh || (e.text && e.r.h > 0.5 * vh)) continue;
-    const x0 = Math.max(0, Math.floor(e.r.x * scale)), x1 = Math.min(w, Math.ceil((e.r.x + e.r.w) * scale));
-    const y0 = Math.max(0, Math.floor(e.r.y * scale)), y1 = Math.min(h, Math.ceil((e.r.y + e.r.h) * scale));
-    // Use the pixel just outside the box as the fill so text on a coloured panel is erased to that panel.
-    const sx = Math.max(0, x0 - 2), sy = Math.min(h - 1, Math.max(0, y0 + Math.floor((y1 - y0) / 2)));
-    const fill = x0 > 2 ? gray[sy * w + sx] : bgGray;
+    // Fallback fonts (a serverless Chromium has few) paint ascenders and descenders past the line box;
+    // grow the mask a little so those slivers do not survive as edges.
+    const padY = e.text ? Math.max(2, 0.3 * e.s.fontSize * scale) : 1, padX = 2;
+    const x0 = Math.max(0, Math.floor(e.r.x * scale - padX)), x1 = Math.min(w, Math.ceil((e.r.x + e.r.w) * scale + padX));
+    const y0 = Math.max(0, Math.floor(e.r.y * scale - padY)), y1 = Math.min(h, Math.ceil((e.r.y + e.r.h) * scale + padY));
+    masked++;
+    // Fill with the median of a ring of samples just outside the box, so text on a coloured panel is
+    // erased to that panel; one pixel would be the neighbouring word's ink on a dense page.
+    const ring: number[] = [];
+    for (let k = 0; k < 6; k++) {
+      const xs = x0 + Math.floor(((x1 - x0) * (k + 0.5)) / 6), ys = y0 + Math.floor(((y1 - y0) * (k + 0.5)) / 6);
+      if (y0 - 2 >= 0) ring.push(gray[(y0 - 2) * w + Math.min(w - 1, xs)]);
+      if (y1 + 1 < h) ring.push(gray[(y1 + 1) * w + Math.min(w - 1, xs)]);
+      if (x0 - 2 >= 0) ring.push(gray[Math.min(h - 1, ys) * w + x0 - 2]);
+      if (x1 + 1 < w) ring.push(gray[Math.min(h - 1, ys) * w + x1 + 1]);
+    }
+    ring.sort((a, b) => a - b);
+    const fill = ring.length ? ring[ring.length >> 1] : bgGray;
     for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) gray[y * w + x] = fill;
   }
   const MIN = 12; // px, vizweb stops at <10×10 on the original; we work at 800 wide
@@ -131,6 +145,7 @@ export async function appealMetrics(viewportPng: Buffer, snap: Snapshot): Promis
     textDensity: round(textDensity, 3),
     distinctHues,
     dominantBackground: `rgb(${bg.r}, ${bg.g}, ${bg.b})`,
+    maskedBoxes: masked,
   };
 
   // --- Score: Reinecke's direction of effects, calibrated on a small sample of sites.

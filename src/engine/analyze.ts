@@ -108,7 +108,7 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
   }
   if (appeal.ok) {
     findings.push(...appeal.a.findings);
-    engines.push({ name: "appeal-metrics", ok: true, durationMs: Date.now() - t2 });
+    engines.push({ name: "appeal-metrics", ok: true, durationMs: Date.now() - t2, note: `${appeal.a.metrics.complexityLeaves} leaves after masking ${appeal.a.metrics.maskedBoxes ?? 0} boxes · bg ${appeal.a.metrics.dominantBackground} · whitespace ${Math.round(appeal.a.metrics.whitespaceRatio * 100)}%` });
   } else engines.push({ name: "appeal-metrics", ok: false, durationMs: Date.now() - t2, note: String(appeal.e) });
   if (imp) {
     // Drop Impeccable findings that duplicate ours.

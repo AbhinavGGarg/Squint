@@ -42,7 +42,10 @@ function misalignedSiblings(kids: Map<number, El[]>, idx: Map<number, El>): Find
         // A heading next to a wordless box (an illustration, a divider) has nothing to align to; an
         // optically outdented heading is a decision, not a slip.
         const isH = (e: El) => /^h[1-6]$/.test(e.tag);
-        if ((isH(g[i]) && !g[j].tlen) || (isH(g[j]) && !g[i].tlen)) continue;
+        const headingPair = isH(g[i]) || isH(g[j]);
+        if (headingPair && (!g[j].tlen || !g[i].tlen)) continue;
+        // An avatar beside a text column is aligned to the cap height on purpose.
+        const imgText = (g[i].tag === "img" && g[j].tlen > 0) || (g[j].tag === "img" && g[i].tlen > 0);
         const a = g[i].r, b = g[j].r;
         const yOv = overlap1D(a.y, a.y + a.h, b.y, b.y + b.h);
         if (yOv >= 0.5 * Math.min(a.h, b.h)) {
@@ -51,7 +54,7 @@ function misalignedSiblings(kids: Map<number, El[]>, idx: Map<number, El>): Find
           // Two text runs at different sizes sharing a baseline have different tops by design.
           const baseline = g[i].tlen > 0 && g[j].tlen > 0 && Math.abs(g[i].s.fontSize - g[j].s.fontSize) > 1;
           const bottomAligned = Math.abs(a.h - b.h) > 1 && bot <= 1; // align-items: flex-end; the tops differ by design
-          if (top >= T_MIN && top <= T_MAX && !centered && !baseline && !bottomAligned) {
+          if (top >= T_MIN && top <= T_MAX && !centered && !baseline && !bottomAligned && !imgText) {
             const key = `t${g[i].i}-${g[j].i}`;
             if (seen.has(key)) continue;
             seen.add(key);
@@ -69,7 +72,7 @@ function misalignedSiblings(kids: Map<number, El[]>, idx: Map<number, El>): Find
           const left = Math.abs(a.x - b.x), right = Math.abs(a.x + a.w - (b.x + b.w));
           const centered = Math.abs(a.w - b.w) > 1 && left > 0 && right > 0 && Math.abs(left - right) <= 2;
           const rightAligned = Math.abs(a.w - b.w) > 1 && right <= 1;
-          if (left >= T_MIN && left <= T_MAX && !centered && !rightAligned) {
+          if (left >= T_MIN && left <= T_MAX && !centered && !rightAligned && !headingPair) { // headings are optically outdented on purpose
             const key = `l${g[i].i}-${g[j].i}`;
             if (seen.has(key)) continue;
             seen.add(key);
@@ -134,6 +137,9 @@ function unevenGaps(kids: Map<number, El[]>, idx: Map<number, El>): Finding[] {
       // A mirrored pattern (4, 28, 28, 4) is a structure: pairs, or a header/footer around a list.
       const mirrored = gaps.length >= 3 && gaps.every((g, i) => Math.abs(g - gaps[gaps.length - 1 - i]) <= 1) && distinct(gaps, 1).length > 1;
       if (mirrored) continue;
+      // Every gap equal except the first or last: a section break before/after a group, not sloppiness.
+      const allEqual = (xs: number[]) => xs.every((g) => Math.abs(g - xs[0]) <= 2);
+      if (gaps.length >= 3 && (allEqual(gaps.slice(1)) || allEqual(gaps.slice(0, -1)))) continue;
       if (maxDev >= 3) {
         out.push(mk({
           rule: "uneven-gaps", source: "squint", category: "consistency", severity: "warn", confidence: "measured",
@@ -271,8 +277,12 @@ function crampedPadding(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number
   // Controls and inline things size themselves; forms and tables are wrappers. Boxes with text are what's left.
   const SKIP = new Set(["span", "a", "b", "i", "em", "strong", "input", "select", "textarea", "button", "td", "th", "tr", "table", "li", "label", "img", "svg", "code", "pre", "form", "fieldset", "legend", "summary", "option"]);
   const vw = snap.viewport.width;
+  // A card with a picture filling it has a content rect that is the picture; the text inset is unknowable.
+  const MEDIA = new Set(["img", "video", "svg", "canvas", "picture", "iframe"]);
+  const hasBigMedia = new Set<number>();
+  for (const m of snap.els) if (MEDIA.has(m.tag) && m.r.w >= 80 && m.r.h >= 60) for (const a of ancestors(m, idx, 6)) if (m.r.w * m.r.h >= 0.3 * a.r.w * a.r.h) hasBigMedia.add(a.i);
   for (const e of snap.els) {
-    if (SKIP.has(e.tag) || e.tag === "body" || e.tag === "html" || e.tag === "main" || e.land) continue;
+    if (SKIP.has(e.tag) || e.tag === "body" || e.tag === "html" || e.tag === "main" || e.land || hasBigMedia.has(e.i)) continue;
     // Must look like a box: a background, or a border on all four sides. A single border-top is a divider.
     const boxy = (hasBg(e) && !/text/.test(e.s.bgClip)) || (e.s.border.every((w) => w > 0) && hasBorder(e));
     if (!boxy || !e.cr) continue;
