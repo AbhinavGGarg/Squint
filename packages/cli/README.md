@@ -14,4 +14,4 @@ Zero dependencies. The hosted Squint does the rendering; point `--host` or `SQUI
 
 Exit codes: `0` ok · `2` score below `--fail-under` · `1` error. Rate limit on the public host: 5 scans a minute per IP; the same URL is cached for 24h (`--fresh` to force).
 
-Web version and reports: https://squint-rosy.vercel.app
+Web version: https://squint-rosy.vercel.app · Source: https://github.com/AbhinavGGarg/Squint

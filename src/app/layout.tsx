@@ -30,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <nav>
               <Link href="/">New report</Link>
               <Link href="/#cli">CLI</Link>
+              <a href="https://github.com/AbhinavGGarg/Squint" target="_blank" rel="noreferrer">GitHub</a>
               <HeaderAuth />
             </nav>
           </header>
