@@ -50,7 +50,7 @@ const grade = (s) => (s >= 90 ? "A" : s >= 75 ? "B" : s >= 60 ? "C" : s >= 40 ? 
     if (tick) clearInterval(tick);
   }
   const j = await res.json().catch(() => ({}));
-  if (!res.ok) { console.error(`error: ${j.error || res.status}`); process.exit(1); }
+  if (!res.ok) { console.error(`error: ${j.error || res.status}`); if (j.detail) console.error(`detail: ${j.detail}`); process.exit(1); }
   const rep = await (await fetch(`${host}/api/report/${j.id}`)).json();
   if (has("json")) { console.log(JSON.stringify(rep, null, 2)); }
   else {

@@ -94,6 +94,18 @@ export async function kvIncr(key: string, ttlSec: number): Promise<number> {
   return cur;
 }
 
+/** Give back a count taken by kvIncr (a scan that failed on our side should not cost the user a slot). */
+export async function kvDecr(key: string): Promise<void> {
+  if (kvBackend === "upstash") { try { await redis(["DECR", key]); return; } catch { /* fall through */ } }
+  const e = mem.get(key);
+  if (e) mem.set(key, { v: String(Math.max(0, Number(e.v) - 1)), exp: e.exp });
+}
+
+/** Undo checkRateLimit for a scan that never ran because the engine failed. */
+export async function refundRateLimit(ip: string): Promise<void> {
+  await Promise.all([kvDecr(`rl:m:${ip}`), kvDecr(`rl:d:${ip}`)]);
+}
+
 /* ---------- policies ---------- */
 
 export interface RateLimitResult { ok: boolean; retryAfterSec?: number; reason?: string }

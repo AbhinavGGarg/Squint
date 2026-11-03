@@ -1,4 +1,4 @@
-import type { Browser } from "playwright-core";
+import type { Browser, BrowserContext } from "playwright-core";
 import { SNAPSHOT_SCRIPT } from "./snapshot.generated";
 import type { Snapshot } from "./types";
 
@@ -55,7 +55,37 @@ const RENDERER = (process.env.SQUINT_RENDERER || (process.env.VERCEL || process.
 // the public web, one direct for localhost dev servers. Chromium's bypass list
 // is unreliable for loopback, so we keep them separate.
 const browsers: Record<"proxied" | "direct", Promise<Browser> | null> = { proxied: null, direct: null };
+/**
+ * Serverless only: ONE browser context for the browser's whole life. With @sparticuz/chromium's
+ * --single-process build, closing a context takes the browser down with it (measured: the
+ * "disconnected" event fires ~400ms after context.close(), blank page or not), so every render
+ * used to be a launch-render-die cycle, and a serverless function survives only a few launches.
+ * Pages can open and close freely inside a context; that is what each render does instead.
+ */
+const sharedContexts = new WeakMap<Browser, BrowserContext>();
+const CONTEXT_OPTIONS = {
+  deviceScaleFactor: 1,
+  ignoreHTTPSErrors: true,
+  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36 Squint/0.1",
+  reducedMotion: "reduce" as const,
+  serviceWorkers: "block" as const,
+};
 let renders = 0;
+let launches = 0;
+let lastLaunchError = "";
+/** Set when a relaunch failed on serverless: this process cannot render any more and should be recycled. */
+let poisoned = "";
+
+/** Memory and disk numbers appended to every render error, so a failure in production explains itself. */
+export async function diagnostics(): Promise<string> {
+  const os = await import("node:os");
+  const fs = await import("node:fs/promises");
+  const mu = process.memoryUsage();
+  const mb = (n: number) => Math.round(n / 1048576) + "MB";
+  let tmp = "?";
+  try { const st = await fs.statfs("/tmp"); tmp = mb(Number(st.bavail) * Number(st.bsize)); } catch { /* not every platform has statfs */ }
+  return `rss ${mb(mu.rss)}, heap ${mb(mu.heapUsed)}, sys free ${mb(os.freemem())}/${mb(os.totalmem())}, /tmp free ${tmp}, renders ${renders}, launches ${launches}, up ${Math.round(process.uptime())}s${lastLaunchError ? `, last launch error: ${lastLaunchError.slice(0, 120)}` : ""}${poisoned ? `, POISONED: ${poisoned.slice(0, 80)}` : ""}`;
+}
 
 /**
  * One render at a time per process. On Vercel's Fluid Compute a warm function serves many
@@ -71,13 +101,14 @@ export class RenderBusyError extends Error {
   constructor() { super("RENDER_BUSY: this instance already has " + MAX_INFLIGHT + " scans in flight"); }
 }
 async function serialized<T>(fn: () => Promise<T>): Promise<T> {
-  if (inflight >= MAX_INFLIGHT) throw new RenderBusyError();
+  if (inflight >= MAX_INFLIGHT || poisoned) throw new RenderBusyError();
   inflight++;
   const prev = chain;
   let release!: () => void;
   chain = new Promise<void>((r) => (release = r));
   try {
     await prev;
+    if (poisoned) throw new RenderBusyError();
     return await fn();
   } finally {
     inflight--;
@@ -85,19 +116,46 @@ async function serialized<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * A serverless function whose Chromium died and could not be relaunched is poisoned: every
+ * later scan on it would fail the same way, and the platform keeps routing to it because the
+ * Node process itself looks healthy. Refuse new scans (fast 503s the CLI retries) and exit once
+ * the queue drains, so the next request lands on a fresh function.
+ */
+function poison(reason: string) {
+  if (poisoned || RENDERER !== "serverless" || process.env.SQUINT_NO_RECYCLE) return;
+  poisoned = reason;
+  console.error(`[squint] render poisoned, recycling this instance: ${reason}`);
+  const tick = setInterval(() => {
+    if (inflight > 0) return;
+    clearInterval(tick);
+    setTimeout(() => process.exit(1), 500); // let the last response flush
+  }, 250);
+  tick.unref?.();
+}
+
 async function launch(kind: "proxied" | "direct"): Promise<Browser> {
   const proxy = kind === "proxied" && PROXY ? { server: PROXY } : undefined;
   if (RENDERER === "serverless") {
     const [{ chromium: pw }, sparticuz] = await Promise.all([import("playwright-core"), import("@sparticuz/chromium")]);
     const executablePath = await sparticuz.default.executablePath();
-    const b = await pw.launch({ headless: true, executablePath, args: sparticuz.default.args, proxy });
-    // @sparticuz/chromium runs --single-process; when its last page closes the whole browser exits.
-    // Keep one blank page open for the browser's lifetime so later renders (the mobile pass, the
-    // next request on a warm function) find it alive.
-    await b.newPage().catch(() => {});
+    launches++;
+    let b: Browser;
+    try {
+      b = await pw.launch({ headless: true, executablePath, args: sparticuz.default.args, proxy, timeout: 45_000 });
+    } catch (e) {
+      lastLaunchError = String(e instanceof Error ? e.message : e);
+      throw e;
+    }
+    // One context for life (see sharedContexts), with a blank page that is never closed so the
+    // single-process browser never runs out of pages and exits.
+    const ctx = await b.newContext({ ...CONTEXT_OPTIONS, viewport: { width: 1440, height: 900 } });
+    await ctx.newPage();
+    sharedContexts.set(b, ctx);
     return b;
   }
   const { chromium } = await import("playwright");
+  launches++;
   return chromium.launch({ headless: true, proxy, args: ["--disable-dev-shm-usage"] }) as unknown as Promise<Browser>;
 }
 
@@ -131,32 +189,32 @@ async function renderInner(input: RenderInput): Promise<RenderResult> {
   const viewport = input.viewport ?? { width: 1440, height: 900 };
   const timeout = input.timeoutMs ?? 30_000;
   const kind = isLocal(input.url) || !PROXY ? "direct" : "proxied";
-  let browser = await getBrowser(kind);
-  if (!browser.isConnected()) { browsers[kind] = null; browser = await getBrowser(kind); }
-  // On serverless a browser that has already served a heavy page is a liability: memory is
-  // never returned and the next render fails with "insufficient resources" or a dead
-  // screenshot. Give each request a fresh browser there; on a laptop/server, reuse.
-  if (RENDERER === "serverless" && renders > 0 && !input.reuseBrowser) {
-    browsers[kind] = null;
-    await browser.close().catch(() => {});
+  // One browser per process, reused for as long as it stays alive. Renders are serialized, so
+  // reuse is safe; relaunching inside a serverless function is the thing that has proven
+  // fragile (the second Chromium in one function tends to die on arrival), so it is done only
+  // when the browser is actually gone, and a failed relaunch poisons the instance.
+  let browser: Browser;
+  try {
     browser = await getBrowser(kind);
+    if (!browser.isConnected()) { browsers[kind] = null; browser = await getBrowser(kind); }
+  } catch (e) {
+    browsers[kind] = null;
+    const msg = String(e instanceof Error ? e.message : e);
+    if (launches > 1) poison(`relaunch failed: ${msg}`);
+    throw new Error(`browser launch failed: ${msg} [${await diagnostics()}]`);
   }
   renders++;
   const light = !!input.light;
-  const context = await browser.newContext({
-    viewport,
-    deviceScaleFactor: 1,
-    ignoreHTTPSErrors: true,
-    userAgent:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36 Squint/0.1",
-    reducedMotion: "reduce",
-    serviceWorkers: "block",
-  });
+  // Serverless: a page in the shared context. Elsewhere: a fresh context per render (full isolation).
+  const shared = RENDERER === "serverless" ? sharedContexts.get(browser) : undefined;
+  const context = shared ?? (await browser.newContext({ ...CONTEXT_OPTIONS, viewport }));
+  const page = await context.newPage();
+  if (shared) await page.setViewportSize(viewport);
   // Serverless Chromium has ~2 GB and one process. Refuse what never changes the layout.
   let blockedRequests = 0;
   if (RENDERER === "serverless" || light) {
     const types = light ? LIGHT_BLOCKED_TYPES : BLOCKED_TYPES;
-    await context.route("**/*", (route) => {
+    await page.route("**/*", (route) => {
       const req = route.request();
       const type = req.resourceType();
       const url = req.url();
@@ -179,7 +237,6 @@ async function renderInner(input: RenderInput): Promise<RenderResult> {
   });
   disconnected.catch(() => {}); // the listener is removed in finally; never let this reject unhandled
   try {
-    const page = await context.newPage();
     const work = (async () => {
     if (input.url) {
       const resp = await page.goto(input.url, { waitUntil: "domcontentloaded", timeout });
@@ -216,9 +273,20 @@ async function renderInner(input: RenderInput): Promise<RenderResult> {
     return { snapshot, viewportPng, fullPng, html, finalUrl: page.url(), mode: light ? "light" as const : "full" as const, blockedRequests };
     })();
     return await Promise.race([work, disconnected]);
+  } catch (e) {
+    const msg = String(e instanceof Error ? e.message : e);
+    const died = !browser.isConnected();
+    if (died && launches > 1) poison(`browser #${launches} died: ${msg.slice(0, 100)}`);
+    throw new Error(`${msg} [${died ? "browser dead, " : ""}${await diagnostics()}]`);
   } finally {
     if (onDisconnect) browser.off("disconnected", onDisconnect);
-    await context.close().catch(() => {});
+    if (shared) {
+      // Keep the context, drop the page and anything the site left behind.
+      await page.close().catch(() => {});
+      await context.clearCookies().catch(() => {});
+    } else {
+      await context.close().catch(() => {});
+    }
   }
 }
 

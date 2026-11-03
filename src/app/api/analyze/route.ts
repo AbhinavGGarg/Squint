@@ -1,5 +1,5 @@
 import { analyze } from "@/engine/analyze";
-import { cacheKeyForUrl, checkRateLimit, clientIp, kvDel, kvGet, kvSet, kvSetNX, rememberReport } from "@/engine/kv";
+import { cacheKeyForUrl, checkRateLimit, clientIp, kvDel, kvGet, kvSet, kvSetNX, refundRateLimit, rememberReport } from "@/engine/kv";
 import { currentUserId } from "@/auth";
 import { loadReport } from "@/engine/store";
 import type { PageType } from "@/engine/types";
@@ -69,6 +69,8 @@ export async function POST(req: Request) {
     return Response.json({ id: report.id, score: report.score });
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);
+    // Engine-side failures (busy, browser died, launch failed) are not the user's scan; refund the slot.
+    if (/RENDER_BUSY|disconnected|ERR_INSUFFICIENT_RESOURCES|Target .*closed|crashed|launch failed|POISONED/i.test(msg)) await refundRateLimit(ip);
     if (/RENDER_BUSY/.test(msg)) {
       return Response.json({ error: "Squint is busy right now; try again in half a minute." }, { status: 503, headers: { "retry-after": "30" } });
     }
@@ -79,7 +81,8 @@ export async function POST(req: Request) {
       : /ERR_CONNECTION|ERR_TUNNEL|ERR_SSL|net::/.test(msg) ? `Couldn't load that page (${msg.match(/net::[A-Z_]+/)?.[0] || "network error"}).`
       : /Timeout/i.test(msg) ? "The page took too long to load (30s). Heavy sites or ones that wait on third-party scripts can do this; try again or paste the HTML."
       : msg.slice(0, 300);
-    return Response.json({ error: friendly }, { status: 502 });
+    console.error(`[squint] analyze failed for ${url || "html"}: ${msg.slice(0, 600)}`);
+    return Response.json({ error: friendly, detail: msg.slice(0, 600) }, { status: 502 });
   } finally {
     if (inflightKey) await kvDel(inflightKey);
   }
