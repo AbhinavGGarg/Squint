@@ -7,6 +7,8 @@ export interface RenderInput {
   html?: string;
   viewport?: { width: number; height: number };
   timeoutMs?: number;
+  /** Second render inside the same request (the mobile pass): keep the browser we already have. */
+  reuseBrowser?: boolean;
 }
 
 export interface RenderResult {
@@ -30,6 +32,7 @@ const RENDERER = (process.env.SQUINT_RENDERER || (process.env.VERCEL || process.
 // the public web, one direct for localhost dev servers. Chromium's bypass list
 // is unreliable for loopback, so we keep them separate.
 const browsers: Record<"proxied" | "direct", Promise<Browser> | null> = { proxied: null, direct: null };
+let renders = 0;
 
 async function launch(kind: "proxied" | "direct"): Promise<Browser> {
   const proxy = kind === "proxied" && PROXY ? { server: PROXY } : undefined;
@@ -75,6 +78,15 @@ export async function render(input: RenderInput): Promise<RenderResult> {
   const kind = isLocal(input.url) || !PROXY ? "direct" : "proxied";
   let browser = await getBrowser(kind);
   if (!browser.isConnected()) { browsers[kind] = null; browser = await getBrowser(kind); }
+  // On serverless a browser that has already served a heavy page is a liability: memory is
+  // never returned and the next render fails with "insufficient resources" or a dead
+  // screenshot. Give each request a fresh browser there; on a laptop/server, reuse.
+  if (RENDERER === "serverless" && renders > 0 && !input.reuseBrowser) {
+    browsers[kind] = null;
+    await browser.close().catch(() => {});
+    browser = await getBrowser(kind);
+  }
+  renders++;
   const context = await browser.newContext({
     viewport,
     deviceScaleFactor: 1,

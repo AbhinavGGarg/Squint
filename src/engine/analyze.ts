@@ -61,7 +61,7 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
   const t2m = Date.now();
   const mob = input.skipMobile ? null
     : await Promise.race([
-        render({ url: input.url, html: input.html, viewport: { width: 390, height: 844 }, timeoutMs: 20_000 }).then((m) => ({ ok: true as const, m })),
+        render({ url: input.url, html: input.html, viewport: { width: 390, height: 844 }, timeoutMs: 20_000, reuseBrowser: true }).then((m) => ({ ok: true as const, m })),
         new Promise<{ ok: false; e: string }>((res) => setTimeout(() => res({ ok: false, e: "mobile render timed out (35s)" }), 35_000)),
       ]).catch((e) => ({ ok: false as const, e: String(e) }));
   let mobilePng: Buffer | undefined;
