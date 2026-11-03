@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   // Make sure the serverless Chromium binaries and Impeccable's CLI ship with the functions on Vercel.
   outputFileTracingIncludes: {
     "/api/analyze": ["./node_modules/@sparticuz/chromium/**", "./node_modules/playwright-core/**", "./node_modules/impeccable/**"],
+    "/notices": ["./NOTICES.md"],
   },
   // Pin the project root so a package-lock.json in a parent folder is ignored.
   turbopack: { root: path.resolve(__dirname) },

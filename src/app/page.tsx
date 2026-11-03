@@ -88,9 +88,9 @@ export default function Home() {
       </section>
 
       <section className="section" id="cli">
-        <h2>From the terminal, or in CI</h2>
-        <p className="sub">No install, no browser download. The hosted engine renders; you get the findings and an exit code.</p>
-        <pre className="term"><span className="c"># one URL, exit 2 if it scores under 70</span>{"\n"}npx squint-test https://your-site.com <span className="o">--type</span> portfolio <span className="o">--fail-under</span> 70{"\n\n"}<span className="c"># GitHub Action, on every preview deploy</span>{"\n"}- uses: AbhinavGGarg/Squint@main{"\n"}  with: {"{"} url: $&#123;&#123; steps.deploy.outputs.url &#125;&#125;, fail-under: 70 {"}"}</pre>
+        <h2>From the terminal</h2>
+        <p className="sub">No install, no browser download. The hosted engine renders; you get the findings and an exit code you can fail a build on.</p>
+        <pre className="term"><span className="c"># one URL, exit 2 if it scores under 70</span>{"\n"}npx squint-test https://your-site.com <span className="o">--type</span> portfolio <span className="o">--fail-under</span> 70{"\n\n"}<span className="c"># machine-readable, for your own scripts</span>{"\n"}npx squint-test https://your-site.com <span className="o">--json</span> &gt; squint.json</pre>
       </section>
 
       <section className="section why">

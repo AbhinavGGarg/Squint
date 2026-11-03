@@ -30,7 +30,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <nav>
               <Link href="/">New report</Link>
               <Link href="/#cli">CLI</Link>
-              <a href="https://github.com/AbhinavGGarg/Squint" target="_blank" rel="noreferrer">GitHub</a>
               <HeaderAuth />
             </nav>
           </header>
@@ -40,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               Engines: Squint rules (DOM geometry and computed styles), Impeccable (Apache-2.0), first-impression metrics after Reinecke et al. 2013, critique format from UICrit (CC-BY-4.0).
               Measured findings are facts; heuristic findings are rules that can misfire; judgment findings are a reviewer&apos;s opinion.
             </span>
-            <span><a href="https://github.com/AbhinavGGarg/Squint/blob/main/NOTICES.md" target="_blank" rel="noreferrer">Notices</a></span>
+            <span><Link href="/notices">Notices</Link></span>
           </footer>
         </div>
       </body>

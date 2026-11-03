@@ -1,6 +1,6 @@
 {
   "name": "squint-test",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Run the squint test on a URL: measured design lint, AI-default fingerprints, first-impression metrics. Zero dependencies; talks to a hosted Squint.",
   "bin": {
     "squint-test": "bin/squint-test.js"
@@ -9,10 +9,6 @@
     "bin"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AbhinavGGarg/Squint.git"
-  },
   "homepage": "https://squint-rosy.vercel.app",
   "keywords": [
     "design",
