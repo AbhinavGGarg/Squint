@@ -27,6 +27,8 @@ export interface RenderResult {
   mode: "full" | "light";
   /** Requests the renderer refused to make (trackers, video, chat widgets) on this render. */
   blockedRequests: number;
+  /** Set when the full-page screenshot had to be shortened or replaced. */
+  captureNote?: string;
 }
 
 /**
@@ -263,14 +265,30 @@ async function renderInner(input: RenderInput): Promise<RenderResult> {
     await page.waitForTimeout(250);
 
     const fullHeight = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight || 0)).catch(() => viewport.height);
-    const viewportPng = await page.screenshot({ type: "png", fullPage: false, animations: "disabled", caret: "hide" });
-    const fullPng = await page.screenshot({
-      type: "png", fullPage: true, animations: "disabled", caret: "hide",
-      ...(fullHeight > captureCap ? { clip: { x: 0, y: 0, width: viewport.width, height: captureCap } } : {}),
-    });
+    const viewportPng = await page.screenshot({ type: "png", fullPage: false, animations: "disabled", caret: "hide", timeout: 30_000 });
+    // The full-page capture is the one call that can stall on a long page full of blur filters and
+    // canvases. Try the real thing, then a shorter one, then settle for the first screen: a report
+    // with a short screenshot beats no report.
+    let fullPng: Buffer;
+    let captureNote = "";
+    try {
+      fullPng = await page.screenshot({
+        type: "png", fullPage: true, animations: "disabled", caret: "hide", timeout: 45_000,
+        ...(fullHeight > captureCap ? { clip: { x: 0, y: 0, width: viewport.width, height: captureCap } } : {}),
+      });
+    } catch (e) {
+      const first = String(e instanceof Error ? e.message : e).split("\n")[0];
+      try {
+        fullPng = await page.screenshot({ type: "png", fullPage: true, animations: "allow", caret: "hide", timeout: 20_000, clip: { x: 0, y: 0, width: viewport.width, height: Math.min(fullHeight, 4_000) } });
+        captureNote = `full-page capture failed (${first}); captured the first 4000px instead`;
+      } catch {
+        fullPng = viewportPng;
+        captureNote = `full-page capture failed (${first}); report shows the first screen only`;
+      }
+    }
     const snapshot = (await page.evaluate(SNAPSHOT_SCRIPT)) as Snapshot;
     const html = await page.content();
-    return { snapshot, viewportPng, fullPng, html, finalUrl: page.url(), mode: light ? "light" as const : "full" as const, blockedRequests };
+    return { snapshot, viewportPng, fullPng, html, finalUrl: page.url(), mode: light ? "light" as const : "full" as const, blockedRequests, captureNote };
     })();
     return await Promise.race([work, disconnected]);
   } catch (e) {

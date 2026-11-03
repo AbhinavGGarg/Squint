@@ -50,7 +50,7 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
     r = await render({ url: input.url, light: true });
     renderNote = ` · first attempt killed the browser (${String(e instanceof Error ? e.message : e).match(/net::[A-Z_]+|disconnected|closed|crashed/i)?.[0] || "error"}), re-rendered in light mode in ${Date.now() - t}ms`;
   }
-  const blocked = r.blockedRequests ? ` · ${r.blockedRequests} tracker/media requests blocked` : "";
+  const blocked = (r.blockedRequests ? ` · ${r.blockedRequests} tracker/media requests blocked` : "") + (r.captureNote ? ` · ${r.captureNote}` : "");
   engines.push({ name: "render", ok: true, durationMs: Date.now() - t0, note: `${rendererName()} · ${r.snapshot.els.length} elements, ${r.snapshot.fullHeight}px tall${blocked}${renderNote} · store: ${storeName}` });
   const lightMode = r.mode === "light";
 

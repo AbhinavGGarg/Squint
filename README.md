@@ -97,7 +97,7 @@ Without those three variables the sign-in link is hidden and nothing else change
 
 ## Hardening and sharing
 
-- **Rate limit:** 5 scans/minute and 60/day per IP (`SQUINT_RATE_PER_MIN`, `SQUINT_RATE_PER_DAY`). Counted only for scans that actually run.
+- **Rate limit:** 5 scans/minute and 60/day per IP (`SQUINT_RATE_PER_MIN`, `SQUINT_RATE_PER_DAY`). Counted only for scans that actually run; engine-side failures are refunded. Set `SQUINT_ADMIN_TOKEN` and pass it as `x-squint-token` (CLI: `--token` or `SQUINT_TOKEN`) to skip the limit for your own calibration runs.
 - **Cache:** the same URL + page type within 24h returns the existing report instantly (`SQUINT_CACHE_TTL_SEC`). Send `fresh: true` to force a rescan.
 - **In-flight dedupe:** two people scanning the same URL at the same moment share one browser session and get the same report.
 - **Light render fallback:** on the hosted version renders run one at a time per function (a burst beyond three gets a fast 503 with retry-after, which the CLI honours), one Chromium is kept alive per function and each scan is a page inside it (closing a browser context kills the single-process serverless build, so pages are the unit), analytics/chat/ad scripts and video are never fetched, and if a page still exhausts the browser (WebGL heroes, 30 MB of imagery) it is rendered once more with images blocked. The report says so, and withholds the findings that would be wrong without pictures (card fill, first-impression metrics, the mobile pass).

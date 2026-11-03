@@ -42,9 +42,11 @@ export async function POST(req: Request) {
     }
   }
 
-  // 2. Rate limit per client, counted only for scans that actually run.
+  // 2. Rate limit per client, counted only for scans that actually run. A request carrying the
+  //    admin token (SQUINT_ADMIN_TOKEN, for the owner's own calibration runs) is exempt.
   const ip = clientIp(req);
-  const rl = await checkRateLimit(ip);
+  const admin = !!process.env.SQUINT_ADMIN_TOKEN && req.headers.get("x-squint-token") === process.env.SQUINT_ADMIN_TOKEN;
+  const rl = admin ? { ok: true as const } : await checkRateLimit(ip);
   if (!rl.ok) return Response.json({ error: rl.reason }, { status: 429, headers: { "retry-after": String(rl.retryAfterSec) } });
 
   // 3. In-flight dedupe: if someone else is scanning this URL right now, wait for their report.
@@ -70,7 +72,7 @@ export async function POST(req: Request) {
   } catch (e) {
     const msg = String(e instanceof Error ? e.message : e);
     // Engine-side failures (busy, browser died, launch failed) are not the user's scan; refund the slot.
-    if (/RENDER_BUSY|disconnected|ERR_INSUFFICIENT_RESOURCES|Target .*closed|crashed|launch failed|POISONED/i.test(msg)) await refundRateLimit(ip);
+    if (!admin && /RENDER_BUSY|disconnected|ERR_INSUFFICIENT_RESOURCES|Target .*closed|crashed|launch failed|POISONED/i.test(msg)) await refundRateLimit(ip);
     if (/RENDER_BUSY/.test(msg)) {
       return Response.json({ error: "Squint is busy right now; try again in half a minute." }, { status: 503, headers: { "retry-after": "30" } });
     }

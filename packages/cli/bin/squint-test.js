@@ -33,7 +33,7 @@ const grade = (s) => (s >= 90 ? "A" : s >= 75 ? "B" : s >= 60 ? "C" : s >= 40 ? 
     for (let attempt = 0; ; attempt++) {
       res = await fetch(`${host}/api/analyze`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...(process.env.SQUINT_TOKEN || opt("token") ? { "x-squint-token": opt("token") || process.env.SQUINT_TOKEN } : {}) },
         body: JSON.stringify({ url, pageType: opt("type") || "other", goal: opt("goal"), fresh: has("fresh") }),
         signal: AbortSignal.timeout(Number(opt("timeout") || 180) * 1000),
       });
