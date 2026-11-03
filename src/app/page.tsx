@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { listReports } from "@/engine/store";
 import { grade } from "@/engine/score";
 import { RunForm } from "@/components/RunForm";
 
@@ -27,8 +25,7 @@ const CATALOGUE: { fam: string; n: string; rules: string }[] = [
   { fam: "First impression", n: "3 metrics · screenshot", rules: "Visual complexity by quadtree with text masked, colourfulness (Hasler & Süsstrunk), whitespace share. After Reinecke et al. 2013, who found complexity and colourfulness explain about half the variance in 500 ms appeal ratings." },
 ];
 
-export default async function Home() {
-  const recent = await listReports(10);
+export default function Home() {
   return (
     <main>
       <section className="hero">
@@ -103,21 +100,6 @@ export default async function Home() {
         <p><b>The score is a starting point, not a verdict.</b> It is calibrated on a handful of sites so far. Every scan and every Yes/No click makes it better, which is the whole reason it is free.</p>
       </section>
 
-      {recent.length > 0 && (
-        <section className="recent">
-          <h2>Recent reports</h2>
-          {recent.map((r) => (
-            <Link key={r.id} href={`/r/${r.id}`}>
-              <span className="n">{r.score}</span>
-              <span>
-                <cite style={{ fontStyle: "normal" }}>{r.page.title || r.input.url || "Pasted HTML"}</cite>
-                <span className="t"> · {grade(r.score).word} · {r.input.pageType}</span>
-              </span>
-              <span className="t">{new Date(r.createdAt).toLocaleDateString()}</span>
-            </Link>
-          ))}
-        </section>
-      )}
     </main>
   );
 }
