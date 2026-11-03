@@ -52,12 +52,16 @@ export function mobileRules(m: Snapshot): Finding[] {
     e.inter && (e.tag === "a" || e.tag === "button" || e.role === "button") && e.text &&
     e.s.display !== "inline" && e.r.w > 2 && e.r.h > 2 &&
     !/sr-only|visually-hidden|screen-reader/.test(e.cls) && e.r.y < m.fullHeight && !inArtwork(e, idx) &&
-    (e.r.h < 24 || e.r.w < 24 || ((e.r.h < 32 || e.r.w < 32) && crowded(e))));
-  if (small.length >= 3) {
+    (e.r.h < 20 || e.r.w < 20 || ((e.r.h < 32 || e.r.w < 32) && crowded(e))));
+  // The same link repeated across twelve cards is one decision, not twelve.
+  const distinct = new Map<string, El>();
+  for (const e of small) { const k = `${e.text}|${round(e.r.w)}x${round(e.r.h)}`; if (!distinct.has(k)) distinct.set(k, e); }
+  const smallDistinct = [...distinct.values()];
+  if (smallDistinct.length >= 3) {
     out.push(mk({
-      rule: "mobile-tap-targets", source: "squint", category: "quality", severity: small.length >= 8 ? "warn" : "info", confidence: "measured",
-      title: `${small.length} tap targets under 32px on a phone`,
-      evidence: `e.g. ${small.slice(0, 3).map((e) => `${label(e)} ${round(e.r.w)}×${round(e.r.h)}px`).join("; ")}. Apple's floor is 44pt, WCAG's 24px.`,
+      rule: "mobile-tap-targets", source: "squint", category: "quality", severity: smallDistinct.length >= 8 ? "warn" : "info", confidence: "measured",
+      title: `${smallDistinct.length} tap targets under 32px on a phone${small.length > smallDistinct.length ? ` (${small.length} with repeats)` : ""}`,
+      evidence: `e.g. ${smallDistinct.slice(0, 3).map((e) => `${label(e)} ${round(e.r.w)}×${round(e.r.h)}px`).join("; ")}. Apple's floor is 44pt, WCAG's 24px with space around it.`,
       fix: "Give links and buttons padding so the hit area is at least 44×44px on touch screens, or at least 24px with space around it.",
       citation: "WCAG 2.5.8 target size (24px, with spacing and inline exceptions); Apple HIG 44pt",
     }));
