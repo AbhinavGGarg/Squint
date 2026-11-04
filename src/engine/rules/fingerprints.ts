@@ -164,7 +164,7 @@ function iconTileStack(snap: Snapshot, kids: Map<number, El[]>, idx: Map<number,
   return [mk({
     rule: "icon-tile-stack", source: "squint", category: "generic", severity: "warn", confidence: "measured",
     title: `Rounded icon tile above ${tiles.length} headings`,
-    evidence: `${tiles.length} near-square ${round(tiles[0].r.w)}px boxes with a background sit directly above headings. The icon-in-a-tinted-square above every feature title is the default generated feature grid.`,
+    evidence: `${tiles.length} near-square ${round(tiles[0].r.w)}px ${tiles.every((t) => !hasBg(t)) ? "outlined" : "tinted"} boxes sit directly above headings. The icon-in-a-square above every feature title is the default generated feature grid; a style choice, but one every builder makes for you.`,
     fix: "Remove the tile backgrounds and let the icon sit inline with the heading, or drop the icons and let the headings carry the row.",
     rects: tiles.slice(0, 6).map((t) => t.r), citation: "Impeccable icon-tile-stack (Apache-2.0)",
   })];

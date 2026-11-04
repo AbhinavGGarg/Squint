@@ -7,12 +7,12 @@ export const dynamic = "force-dynamic";
 const EXAMPLE = {
   url: "falconhacks2026.com",
   type: "hackathon",
-  score: 68,
+  score: 85,
   findings: [
-    { sev: "error", title: "h2 headings render at 4 different sizes", ev: "“Your idea deserves a runway.” is 144px while “Before you ask.” is 60px. Sizes seen: 60, 72, 128, 144px." },
-    { sev: "warn", title: "A lone badge “Free to attend” that does nothing", ev: "A 179×39px pill with a status dot that isn't clickable and isn't one of a set. Badges imply a category system; one is decoration." },
-    { sev: "warn", title: "Rounded icon tile above 3 headings", ev: "Three 56px tinted squares sit directly above feature titles: the default generated feature grid." },
-    { sev: "warn", title: "Links to this page unfurl as a blank card", ev: "No og:image. Every share on iMessage, Discord and X renders from that tag." },
+    { sev: "warn", title: "One h2 is a different size from the other 4", ev: "4 h2s are 72px. “Before you ask.” (60px) is not. “Your idea deserves a runway.” (144px) and “No experience? Still come.” (128px) are 1.8× larger, which reads as a banner statement rather than a slip." },
+    { sev: "warn", title: "Links to this page unfurl as a blank card", ev: "No og:image. Every share on iMessage, Discord, Slack and X renders from that tag; the title and description are already there." },
+    { sev: "warn", title: "Rounded icon tile above 3 headings", ev: "Three 56px outlined squares sit directly above feature titles: the default generated feature grid. A style choice, but one every builder makes for you." },
+    { sev: "warn", title: "The default kit: 5 of its tells on one page", ev: "Status dots, icon tiles, tracked caps labels, em-dash copy and a filled tag. Any one is defensible; together they are the page every builder emits before anyone edits it." },
   ],
 };
 
@@ -38,7 +38,7 @@ export default function Home() {
           <RunForm />
         </div>
         <aside className="example" aria-label="Example report">
-          <div className="k"><span>Example report · {EXAMPLE.type} page</span><span>{EXAMPLE.findings.length} of 15 findings</span></div>
+          <div className="k"><span>Example report · {EXAMPLE.type} page</span><span>{EXAMPLE.findings.length} of 11 findings</span></div>
           <div className="site">{EXAMPLE.url}</div>
           <div className="scoreline">
             <div className="n">{EXAMPLE.score}<small>/100</small></div>

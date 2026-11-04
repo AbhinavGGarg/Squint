@@ -182,7 +182,6 @@ function headingDrift(snap: Snapshot, idx: Map<number, El>): Finding[] {
     const counts = sizes.map((s) => hs.filter((h) => Math.abs(h.s.fontSize - s) <= 0.6).length);
     const loners = sizes.filter((_, k) => counts[k] === 1);
     const systematic = hs.length >= 4 && loners.length === 0 && sizes.length <= 3;
-    const odd = loners.length === 1 && hs.length >= 3 ? hs.find((h) => Math.abs(h.s.fontSize - loners[0]) <= 0.6)! : null;
     const sizeList = sizes.map((s, k) => `${round(s)}px ×${counts[k]}`).join(", ");
     if (systematic) {
       out.push(mk({
@@ -195,15 +194,38 @@ function headingDrift(snap: Snapshot, idx: Map<number, El>): Finding[] {
       }));
       continue;
     }
+    // The cluster is the size most headings use. Strays below it are drift (a heading that
+    // wandered off). Strays far above it (≥1.6×) are usually banner statements: a choice, which
+    // the tag is carrying h2 semantics for, but not the same mistake.
+    const modeK = counts.indexOf(Math.max(...counts));
+    const mode = sizes[modeK];
+    const strays = hs.filter((h) => Math.abs(h.s.fontSize - mode) > 0.6);
+    const below = strays.filter((h) => h.s.fontSize < mode);
+    const banners = strays.filter((h) => h.s.fontSize >= 1.6 * mode);
+    const aboveNear = strays.filter((h) => h.s.fontSize > mode && h.s.fontSize < 1.6 * mode);
+    const drift = [...below, ...aboveNear];
+    const ratio = drift.length ? Math.max(...drift.map((h) => Math.max(h.s.fontSize, mode) / Math.min(h.s.fontSize, mode))) : 1;
+    const list = (xs: El[]) => xs.slice(0, 3).map((h) => `“${name(h)}” (${round(h.s.fontSize)}px)`).join(", ") + (xs.length > 3 ? ` and ${xs.length - 3} more` : "");
+    if (!drift.length && banners.length) {
+      // Only banner statements differ: a note, with the semantic caveat, not an error.
+      out.push(mk({
+        rule: "heading-size-drift", source: "squint", category: "consistency", severity: "info", confidence: "heuristic",
+        title: `${banners.length} h${level}${banners.length > 1 ? "s" : ""} at banner size`,
+        evidence: `${counts[modeK]} h${level}s are ${round(mode)}px; ${list(banners)} ${banners.length > 1 ? "are" : "is"} ${round(Math.min(...banners.map((h) => h.s.fontSize)) / mode, 1)}×+ that. Big on purpose, by the look of it. The cost is semantic: the same tag is doing two jobs.`,
+        fix: `If they are statements rather than section titles, keep the size and consider a <p> with a class, so h${level} means one thing.`,
+        rects: banners.map((h) => h.r), citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+        data: { sizes, counts, level, mode },
+      }));
+      continue;
+    }
+    const sev = ratio >= 1.5 ? "error" : ratio >= 1.2 ? "warn" : "info";
     out.push(mk({
-      rule: "heading-size-drift", source: "squint", category: "consistency", severity: max / min >= 1.5 ? "error" : max / min >= 1.2 ? "warn" : "info", confidence: "measured",
-      title: odd ? `One h${level} is a different size from the other ${hs.length - 1}` : `h${level} headings render at ${sizes.length} different sizes`,
-      evidence: odd
-        ? `“${name(odd)}” is ${round(odd.s.fontSize)}px; the other h${level}s are ${sizes.filter((s) => s !== loners[0]).map((s) => round(s)).join("/")}px (${sizeList}). Same semantic level should get the same treatment.`
-        : `“${name(big)}” is ${round(max)}px while “${name(small)}” is ${round(min)}px (${round(max / min, 2)}×). Sizes seen: ${sizeList}${weights.length > 1 ? `; weights: ${weights.join(", ")}` : ""}. Same semantic level should get the same treatment.`,
-      fix: `Pick one size for h${level} and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.`,
-      rects: odd ? [odd.r, (odd === big ? small : big).r] : [big.r, small.r], citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
-      data: { sizes, counts, level },
+      rule: "heading-size-drift", source: "squint", category: "consistency", severity: sev, confidence: "measured",
+      title: drift.length === 1 ? `One h${level} is a different size from the other ${counts[modeK]}` : `${drift.length} h${level}s stray from the ${round(mode)}px the rest use`,
+      evidence: `${counts[modeK]} h${level}s are ${round(mode)}px. ${list(drift)} ${drift.length > 1 ? "are" : "is"} not${banners.length ? `. ${list(banners)} ${banners.length > 1 ? "are" : "is"} ${round(Math.min(...banners.map((h) => h.s.fontSize)) / mode, 1)}×+ larger, which reads as a banner statement rather than a slip` : ""}. Sizes seen: ${sizeList}${weights.length > 1 ? `; weights: ${weights.join(", ")}` : ""}. Same semantic level should get the same treatment.`,
+      fix: `Set ${list(drift)} to ${round(mode)}px like the others${banners.length ? "; leave the banner-sized ones if they are meant to be statements, or give them a <p> with a class so the heading tag means one thing" : ""}. If one of these is really a sub-heading, change its tag instead of its size.`,
+      rects: [...drift.slice(0, 3).map((h) => h.r), hs.find((h) => Math.abs(h.s.fontSize - mode) <= 0.6)!.r], citation: "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      data: { sizes, counts, level, mode },
     }));
   }
   return out;

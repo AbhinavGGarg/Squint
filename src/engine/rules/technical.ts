@@ -40,7 +40,7 @@ export function technicalRules(html: string, snap: Snapshot): Finding[] {
       rule: "link-preview", source: "squint", category: "quality", severity: !ogImage ? "warn" : "info", confidence: "measured",
       title: !ogImage ? "Links to this page unfurl as a blank card" : "Links to this page unfurl without a description",
       evidence: `${!ogImage ? "No og:image. " : ""}${!description ? "No meta description. " : ""}${!ogTitle ? "No og:title. " : ""}Every share on iMessage, Discord, Slack, X and LinkedIn renders from these tags.`,
-      fix: "Add <meta property=\"og:image\"> (1200×630), <meta property=\"og:title\"> and <meta name=\"description\"> with one specific sentence. In Next.js, export `metadata` from the page.",
+      fix: `Add ${[!ogImage && '<meta property="og:image"> (1200×630)', !ogTitle && '<meta property="og:title">', !description && '<meta name="description"> with one specific sentence'].filter(Boolean).join(", ")}. In Next.js, export \`metadata\` from the page.`,
       citation: "Open Graph protocol",
     }));
   }

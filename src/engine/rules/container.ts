@@ -86,6 +86,9 @@ function decorativePills(snap: Snapshot, kids: Map<number, El[]>, idx: Map<numbe
     const withDot = group.filter((p) => (kids.get(p.i) || []).some((c) => isDot(c)));
     if (siblingPills.length === 1) {
       const p = group[0];
+      // The first tag in a row, filled in to stand out, is one of a set even if the others are plain text.
+      const rowMates = (kids.get(pid) || []).filter((c) => c !== p && c.text && Math.abs(c.r.y - p.r.y) < 8 && Math.abs(c.r.h - p.r.h) <= 12 && c.r.w <= 320);
+      if (rowMates.length >= 1) continue;
       const anc = ancestors(p, idx, 3);
       const nearCaption = anc.some((a) => a.tag === "figcaption" || a.tag === "figure") || p.p >= 0 && (idx.get(p.p)?.text?.length ?? 0) > 0;
       out.push(mk({
