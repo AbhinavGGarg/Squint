@@ -1,0 +1,609 @@
+{
+  "id": "ade652c80d3c",
+  "createdAt": "2026-11-03T20:36:50.635Z",
+  "input": {
+    "url": "https://sentio.run",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Sentio",
+    "finalUrl": "https://sentio.run/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 14400,
+    "elementCount": 714,
+    "wordCount": 1505,
+    "fonts": [
+      "Inter",
+      "ui-monospace"
+    ]
+  },
+  "score": 75,
+  "subScores": {
+    "consistency": 65,
+    "generic": 72,
+    "clarity": 100,
+    "appeal": 100
+  },
+  "findings": [
+    {
+      "id": "squint-heading-size-drift-1",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "h2 headings render at 3 different sizes",
+      "evidence": "“Give your organization a memory it can use.” is 48px while “Trusted by organizations managing complex knowledg” is 30px (1.6×). Sizes seen: 30px ×1, 36px ×15, 48px ×1. Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h2 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 296,
+          "y": 13291.9375,
+          "w": 848,
+          "h": 120
+        },
+        {
+          "x": 104,
+          "y": 12229.9375,
+          "w": 1232,
+          "h": 36
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          30,
+          36,
+          48
+        ],
+        "counts": [
+          1,
+          15,
+          1
+        ],
+        "level": 2
+      }
+    },
+    {
+      "id": "squint-heading-size-drift-2",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "h3 headings render at 5 different sizes",
+      "evidence": "“Clearer view of organizational direction.” is 24px while “FROM” is 14px (1.71×). Sizes seen: 14px ×2, 16px ×11, 18px ×8, 20px ×17, 24px ×2; weights: 400, 500, 600, 700. Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h3 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 321,
+          "y": 8450.4375,
+          "w": 798,
+          "h": 32
+        },
+        {
+          "x": 137,
+          "y": 2626,
+          "w": 526,
+          "h": 20
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          14,
+          16,
+          18,
+          20,
+          24
+        ],
+        "counts": [
+          2,
+          11,
+          8,
+          17,
+          2
+        ],
+        "level": 3
+      }
+    },
+    {
+      "id": "squint-placeholder-content-16",
+      "rule": "placeholder-content",
+      "source": "squint",
+      "category": "copy",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "Placeholder content still on the page",
+      "evidence": "“Acme Corp”",
+      "fix": "Replace with real names, real testimonials or nothing. A fake testimonial is worse than none.",
+      "citation": "halans placeholder-template; 21st.dev tell #4 (stock imagery / non-customers)"
+    },
+    {
+      "id": "squint-cramped-padding-5",
+      "rule": "cramped-padding",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Text sits too close to its box edge",
+      "evidence": "div.p-8.rounded-xl: the text is 0/0/0/0px (top/right/bottom/left) from the box edge at 16px text; 4 sides are under 3px.",
+      "fix": "Give the box at least 8px on every side (about half the font size).",
+      "rects": [
+        {
+          "x": 104,
+          "y": 10663.6875,
+          "w": 1232,
+          "h": 164
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)"
+    },
+    {
+      "id": "squint-neon-glow-6",
+      "rule": "neon-glow",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Glowing coloured shadows (6)",
+      "evidence": "div.w-4.h-4: zero-offset 18px blur in rgb(26, 114, 200). Dark background + neon glow is tell #6 in the Reddit corpus and #2 on the Fountain Institute list.",
+      "fix": "Use neutral elevation shadows (black at low alpha, offset downward). Light should come from somewhere.",
+      "rects": [
+        {
+          "x": 711.7779541015625,
+          "y": 791.9600830078125,
+          "w": 16.444091796875,
+          "h": 16.444091796875
+        },
+        {
+          "x": 384.6200866699219,
+          "y": 970.263916015625,
+          "w": 16.65045166015625,
+          "h": 16.6505126953125
+        },
+        {
+          "x": 1037.684326171875,
+          "y": 909.4896850585938,
+          "w": 18.69384765625,
+          "h": 18.69384765625
+        },
+        {
+          "x": 587.814697265625,
+          "y": 1116.732421875,
+          "w": 19.08935546875,
+          "h": 19.08935546875
+        },
+        {
+          "x": 914.80712890625,
+          "y": 1152.163818359375,
+          "w": 19.1513671875,
+          "h": 19.1513671875
+        },
+        {
+          "x": 833.306884765625,
+          "y": 971.3941650390625,
+          "w": 18.63623046875,
+          "h": 18.63616943359375
+        }
+      ],
+      "citation": "Impeccable dark-glow; vibecoded-design-tells #6"
+    },
+    {
+      "id": "squint-link-preview-17",
+      "rule": "link-preview",
+      "source": "squint",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Links to this page unfurl as a blank card",
+      "evidence": "No og:image. Every share on iMessage, Discord, Slack, X and LinkedIn renders from these tags.",
+      "fix": "Add <meta property=\"og:image\"> (1200×630), <meta property=\"og:title\"> and <meta name=\"description\"> with one specific sentence. In Next.js, export `metadata` from the page.",
+      "citation": "Open Graph protocol"
+    },
+    {
+      "id": "impeccable-imp:nested-cards-20",
+      "rule": "imp:nested-cards",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Nested cards (×15)",
+      "evidence": "“Card inside card (div)” · “Card inside card (div)” · “Card inside card (div)”",
+      "fix": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 15
+      }
+    },
+    {
+      "id": "squint-heading-size-drift-3",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "h4 headings render at 2 different sizes",
+      "evidence": "“Project Titan: Delay Risk” is 18px while “Q3 Strategic Alignment” is 16px (1.13×). Sizes seen: 16px ×1, 18px ×1. Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h4 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 777,
+          "y": 6815.9375,
+          "w": 534,
+          "h": 28
+        },
+        {
+          "x": 839.75,
+          "y": 3594.875,
+          "w": 170.6734619140625,
+          "h": 22.800048828125
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          16,
+          18
+        ],
+        "counts": [
+          1,
+          1
+        ],
+        "level": 4
+      }
+    },
+    {
+      "id": "squint-rounded-everything-4",
+      "rule": "rounded-everything",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "22 rounded panels on one page",
+      "evidence": "Rounded corners on every container is one of the ranked vibe-coded tells (#5 in the Reddit corpus).",
+      "fix": "Round the things that are interactive or elevated; let sections and layout containers stay square.",
+      "citation": "vibecoded-design-tells (MIT), tell #5"
+    },
+    {
+      "id": "squint-overused-font-7",
+      "rule": "overused-font",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Inter for 100% of the text",
+      "evidence": "Primary family is Inter, one of the fonts generated UIs default to. Fonts seen: Inter, ui-monospace.",
+      "fix": "Not wrong on its own. If everything else is default too, this is the cheapest thing to change: pick one typeface with a point of view for headings and keep the workhorse for body.",
+      "citation": "Impeccable overused-font; HN thread on vibe-coded tells (Inter everywhere)"
+    },
+    {
+      "id": "squint-three-equal-cards-8",
+      "rule": "three-equal-cards",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "1 row of three identical cards",
+      "evidence": "Three 389px-wide cards of equal weight (“Verified Enterprise”, “Verified Enterprise”, “Verified Enterprise”). The hero + three feature cards skeleton is tell #9; equal weight tells the reader nothing is more important than anything else.",
+      "fix": "Decide which one matters and make it bigger, or turn the three into one sentence each under a single heading. Break the symmetry once.",
+      "rects": [
+        {
+          "x": 104,
+          "y": 12329.9375,
+          "w": 389.328125,
+          "h": 541
+        },
+        {
+          "x": 525.328125,
+          "y": 12329.9375,
+          "w": 389.328125,
+          "h": 541
+        },
+        {
+          "x": 946.65625,
+          "y": 12329.9375,
+          "w": 389.34375,
+          "h": 541
+        }
+      ],
+      "citation": "vibecoded-design-tells #9; 21st.dev: uniform features is a top-5 tell"
+    },
+    {
+      "id": "squint-hero-eyebrow-chip-9",
+      "rule": "hero-eyebrow-chip",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Eyebrow label above the hero headline",
+      "evidence": "“Organizational Intelligence Platform” (14px, tracked caps) sits directly above a 72px h1. The tiny label + giant headline pairing is the default generated SaaS hero.",
+      "fix": "Fold the label into the headline or the first sentence. If it's an announcement, make it a real link somewhere else.",
+      "rects": [
+        {
+          "x": 272,
+          "y": 192,
+          "w": 896,
+          "h": 20
+        },
+        {
+          "x": 272,
+          "y": 236,
+          "w": 896,
+          "h": 180
+        }
+      ],
+      "citation": "Impeccable hero-eyebrow-chip (Apache-2.0)"
+    },
+    {
+      "id": "squint-shadcn-untouched-10",
+      "rule": "shadcn-untouched",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "8 untouched shadcn/ui cards",
+      "evidence": "Class strings like “p-6 rounded-xl border bg-card” are the component library's defaults, unmodified. Fine as scaffolding; as the final look it's tell #1.",
+      "fix": "Change the tokens (radius, border colour, shadow) once in your theme so the components stop looking like the docs page.",
+      "rects": [
+        {
+          "x": 104,
+          "y": 1858.5,
+          "w": 389.328125,
+          "h": 162
+        },
+        {
+          "x": 525.328125,
+          "y": 1858.5,
+          "w": 389.328125,
+          "h": 162
+        },
+        {
+          "x": 946.65625,
+          "y": 1858.5,
+          "w": 389.34375,
+          "h": 162
+        },
+        {
+          "x": 104,
+          "y": 2052.5,
+          "w": 389.328125,
+          "h": 162
+        }
+      ],
+      "citation": "vibecoded-design-tells (MIT) tell #1"
+    },
+    {
+      "id": "squint-centered-hero-13",
+      "rule": "centered-hero",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Centered hero: big headline, centered sub, centered buttons",
+      "evidence": "h1 at 72px, centered, with 3 centered blocks under it. On 23.5% of Show HN launches. It's the layout every builder emits when nobody chooses one.",
+      "fix": "Not a problem on its own, but combined with other tells it's the skeleton. Left-align and put the product next to the headline, or lead with the product itself.",
+      "rects": [
+        {
+          "x": 272,
+          "y": 236,
+          "w": 896,
+          "h": 180
+        }
+      ],
+      "citation": "Krebs 2026 (23.5%); vibecoded-design-tells #9"
+    },
+    {
+      "id": "squint-caps-labels-14",
+      "rule": "caps-labels",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "3 tracked all-caps section labels",
+      "evidence": "Small uppercase, letter-spaced labels like “From” above sections. On 10.5% of Show HN launches, and usually redundant with the heading under them.",
+      "fix": "Delete the label or fold its word into the heading.",
+      "rects": [
+        {
+          "x": 137,
+          "y": 2626,
+          "w": 526,
+          "h": 20
+        },
+        {
+          "x": 777,
+          "y": 6787.9375,
+          "w": 534,
+          "h": 20
+        },
+        {
+          "x": 861,
+          "y": 9065.8125,
+          "w": 478,
+          "h": 16
+        }
+      ],
+      "citation": "Krebs 2026 (10.5%); Impeccable kicker-above-heading"
+    },
+    {
+      "id": "squint-aurora-blob-15",
+      "rule": "aurora-blob",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Blurred colour blobs behind the content (1)",
+      "evidence": "div.absolute.inset-0 is a blur(64px) wash. The aurora backdrop is the default \"atmosphere\" of generated heroes.",
+      "fix": "Remove it and let the content carry the first screen. If you want atmosphere, use one real image.",
+      "rects": [
+        {
+          "x": 752,
+          "y": 3563.75,
+          "w": 584,
+          "h": 295
+        }
+      ],
+      "citation": "slop-detect aurora_mesh_gradient; Fountain Institute tell #2"
+    },
+    {
+      "id": "squint-head-hygiene-18",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Head is missing: canonical",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    },
+    {
+      "id": "squint-numbered-steps-11",
+      "rule": "numbered-steps",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "“How it works” in 4 numbered steps",
+      "evidence": "4 siblings each lead with a number in a badge. The three-step setup strip was on 9% of Show HN launches; on a landing page it usually says less than one screenshot would.",
+      "fix": "Replace with the actual product: a screenshot, a 10-second clip, or the real command to run.",
+      "rects": [
+        {
+          "x": 208,
+          "y": 11856.6875,
+          "w": 232,
+          "h": 180.25
+        },
+        {
+          "x": 472,
+          "y": 11856.6875,
+          "w": 232,
+          "h": 180.25
+        },
+        {
+          "x": 736,
+          "y": 11856.6875,
+          "w": 232,
+          "h": 180.25
+        },
+        {
+          "x": 1000,
+          "y": 11856.6875,
+          "w": 232,
+          "h": 180.25
+        }
+      ],
+      "citation": "Krebs 2026 (9.4%); slop-detect numbered_steps"
+    },
+    {
+      "id": "squint-stat-banner-12",
+      "rule": "stat-banner",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Stat banner: 01 · 02 · 03 · 04",
+      "evidence": "A row of 4 big numbers with small labels. On 12% of Show HN launches. Real numbers are fine; the pattern reads as template when the numbers are round, unsourced, or \"99.9% uptime\" on a weekend project.",
+      "fix": "Keep it only if each number is real, specific and checkable (link the source). Otherwise fold the one true number into a sentence.",
+      "rects": [
+        {
+          "x": 104,
+          "y": 3103,
+          "w": 284,
+          "h": 176
+        },
+        {
+          "x": 420,
+          "y": 3103,
+          "w": 284,
+          "h": 176
+        },
+        {
+          "x": 736,
+          "y": 3103,
+          "w": 284,
+          "h": 176
+        },
+        {
+          "x": 1052,
+          "y": 3103,
+          "w": 284,
+          "h": 176
+        }
+      ],
+      "citation": "Krebs 2026 (12.2%); slop-detect stat_banner"
+    }
+  ],
+  "metrics": {
+    "colorfulness": 26.9,
+    "complexityLeaves": 196,
+    "whitespaceRatio": 0.783,
+    "textDensity": 0.225,
+    "distinctHues": 1,
+    "dominantBackground": "rgb(4, 12, 28)",
+    "maskedBoxes": 15
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 44344,
+      "note": "playwright-core + @sparticuz/chromium · 714 elements, 14400px tall · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 125,
+      "note": "18 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 21920,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 22661,
+      "note": "196 leaves after masking 15 boxes · bg rgb(4, 12, 28) · whitespace 78%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 22661,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 12000
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 21920
+  }
+}

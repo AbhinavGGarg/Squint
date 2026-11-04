@@ -1,0 +1,666 @@
+{
+  "id": "112195b6df1b",
+  "createdAt": "2026-11-03T20:19:29.546Z",
+  "input": {
+    "url": "https://resend.com",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Resend · Email for developers",
+    "finalUrl": "https://resend.com/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 12320,
+    "elementCount": 2121,
+    "wordCount": 2180,
+    "fonts": [
+      "inter",
+      "domaine",
+      "aBCFavorit",
+      "commitMono",
+      "Helvetica"
+    ]
+  },
+  "score": 74,
+  "subScores": {
+    "consistency": 76,
+    "generic": 60,
+    "clarity": 100,
+    "appeal": 100
+  },
+  "findings": [
+    {
+      "id": "squint-heading-size-drift-1",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "h2 headings render at 4 different sizes",
+      "evidence": "“Email reimagined. Available today.” is 77px while “Test mode” is 20px (3.84×). Sizes seen: 20px ×4, 24px ×1, 56px ×8, 77px ×1. Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h2 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 104,
+          "y": 11197.59375,
+          "w": 1232,
+          "h": 165.59375
+        },
+        {
+          "x": 145,
+          "y": 3626,
+          "w": 302.125,
+          "h": 26
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          20,
+          24,
+          56,
+          76.8
+        ],
+        "counts": [
+          4,
+          1,
+          8,
+          1
+        ],
+        "level": 2
+      }
+    },
+    {
+      "id": "squint-container-vs-content-4",
+      "rule": "container-vs-content",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Card is far taller than its content",
+      "evidence": "div.disable-children-scrolling.z-20 is 1022×500px but its content occupies 33% of that; 126px of empty space sits under the last line. Nothing inside it needs the height, so a fixed height or min-height is probably set.",
+      "fix": "Remove the fixed height / min-height and let the card size to its content, or fill the space with something that earns it.",
+      "rects": [
+        {
+          "x": 209,
+          "y": 2271.59375,
+          "w": 1022,
+          "h": 500
+        },
+        {
+          "x": 223,
+          "y": 2289.59375,
+          "w": 468.921875,
+          "h": 356
+        }
+      ],
+      "data": {
+        "fill": 0.3266852984344423,
+        "bottomSlack": 126
+      },
+      "citation": "Lin 2004: whitespace helps comprehension when it frames content; dead space inside a container just reads as unfinished"
+    },
+    {
+      "id": "squint-container-vs-content-5",
+      "rule": "container-vs-content",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Card is far taller than its content",
+      "evidence": "div.relative.mt-16 is 1109×600px but its content occupies 38% of that; 358px of empty space sits under the last line. Nothing inside it needs the height, so a fixed height or min-height is probably set.",
+      "fix": "Remove the fixed height / min-height and let the card size to its content, or fill the space with something that earns it.",
+      "rects": [
+        {
+          "x": 165.59375,
+          "y": 4342.375,
+          "w": 1108.796875,
+          "h": 600
+        },
+        {
+          "x": 199.59375,
+          "y": 4343.375,
+          "w": 1036.796875,
+          "h": 241
+        }
+      ],
+      "data": {
+        "fill": 0.37558434207497804,
+        "bottomSlack": 358
+      },
+      "citation": "Lin 2004: whitespace helps comprehension when it frames content; dead space inside a container just reads as unfinished"
+    },
+    {
+      "id": "squint-gradient-text-16",
+      "rule": "gradient-text",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Gradient-filled text (11)",
+      "evidence": "h1.effect-font-styling.font-domaine “Email fordevelopers” uses background-clip: text with a gradient. Decorative, hurts contrast, and reads as generated.",
+      "fix": "Use a solid colour. Emphasis comes from size and weight, not a rainbow.",
+      "rects": [
+        {
+          "x": 168,
+          "y": 327,
+          "w": 480,
+          "h": 204
+        },
+        {
+          "x": 104,
+          "y": 1887,
+          "w": 1232,
+          "h": 67.203125
+        },
+        {
+          "x": 747.4375,
+          "y": 1883,
+          "w": 164.09375,
+          "h": 75
+        },
+        {
+          "x": 104,
+          "y": 2996.59375,
+          "w": 1232,
+          "h": 134.40625
+        }
+      ],
+      "citation": "Impeccable gradient-text"
+    },
+    {
+      "id": "squint-icon-tile-stack-17",
+      "rule": "icon-tile-stack",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Rounded icon tile above 3 headings",
+      "evidence": "3 near-square 40px boxes with a background sit directly above headings. The icon-in-a-tinted-square above every feature title is the default generated feature grid.",
+      "fix": "Remove the tile backgrounds and let the icon sit inline with the heading, or drop the icons and let the headings carry the row.",
+      "rects": [
+        {
+          "x": 128,
+          "y": 9564.46875,
+          "w": 40,
+          "h": 40
+        },
+        {
+          "x": 549.328125,
+          "y": 9564.46875,
+          "w": 40,
+          "h": 40
+        },
+        {
+          "x": 970.65625,
+          "y": 9564.46875,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "citation": "Impeccable icon-tile-stack (Apache-2.0)"
+    },
+    {
+      "id": "impeccable-imp:overused-font-22",
+      "rule": "imp:overused-font",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Overused font",
+      "evidence": "“Primary font: helvetica”",
+      "fix": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    },
+    {
+      "id": "squint-decorative-badge-6",
+      "rule": "decorative-badge",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "A lone badge “delivered” that does nothing",
+      "evidence": "A 72×28px pill that is not clickable, is not one of a set of tags, and labels something the surrounding text already makes clear. Badges imply a category system; a single one is decoration.",
+      "fix": "Delete it. If the information matters, fold it into the sentence next to it. Reserve pills for things that are actually one of several (filters, statuses, tags you can click).",
+      "rects": [
+        {
+          "x": 853,
+          "y": 4130,
+          "w": 72.359375,
+          "h": 28
+        }
+      ],
+      "citation": "no-slop ‘status pill with dot’ heuristic (MIT); Fountain Institute tell #7 (status dots)"
+    },
+    {
+      "id": "squint-decorative-badge-7",
+      "rule": "decorative-badge",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "A lone badge “clicked” that does nothing",
+      "evidence": "A 61×28px pill that is not clickable, is not one of a set of tags, and labels something the surrounding text already makes clear. Badges imply a category system; a single one is decoration.",
+      "fix": "Delete it. If the information matters, fold it into the sentence next to it. Reserve pills for things that are actually one of several (filters, statuses, tags you can click).",
+      "rects": [
+        {
+          "x": 853,
+          "y": 3964,
+          "w": 60.6875,
+          "h": 28
+        }
+      ],
+      "citation": "no-slop ‘status pill with dot’ heuristic (MIT); Fountain Institute tell #7 (status dots)"
+    },
+    {
+      "id": "squint-decorative-badge-8",
+      "rule": "decorative-badge",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "A lone badge “opened” that does nothing",
+      "evidence": "A 63×28px pill that is not clickable, is not one of a set of tags, and labels something the surrounding text already makes clear. Badges imply a category system; a single one is decoration.",
+      "fix": "Delete it. If the information matters, fold it into the sentence next to it. Reserve pills for things that are actually one of several (filters, statuses, tags you can click).",
+      "rects": [
+        {
+          "x": 853,
+          "y": 3798,
+          "w": 63.359375,
+          "h": 28
+        }
+      ],
+      "citation": "no-slop ‘status pill with dot’ heuristic (MIT); Fountain Institute tell #7 (status dots)"
+    },
+    {
+      "id": "squint-decorative-badge-9",
+      "rule": "decorative-badge",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "A lone badge “complained” that does nothing",
+      "evidence": "A 87×28px pill that is not clickable, is not one of a set of tags, and labels something the surrounding text already makes clear. Badges imply a category system; a single one is decoration.",
+      "fix": "Delete it. If the information matters, fold it into the sentence next to it. Reserve pills for things that are actually one of several (filters, statuses, tags you can click).",
+      "rects": [
+        {
+          "x": 853,
+          "y": 3632,
+          "w": 86.671875,
+          "h": 28
+        }
+      ],
+      "citation": "no-slop ‘status pill with dot’ heuristic (MIT); Fountain Institute tell #7 (status dots)"
+    },
+    {
+      "id": "squint-decorative-badge-10",
+      "rule": "decorative-badge",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "A lone badge “bounced” that does nothing",
+      "evidence": "A 69×28px pill that is not clickable, is not one of a set of tags, and labels something the surrounding text already makes clear. Badges imply a category system; a single one is decoration.",
+      "fix": "Delete it. If the information matters, fold it into the sentence next to it. Reserve pills for things that are actually one of several (filters, statuses, tags you can click).",
+      "rects": [
+        {
+          "x": 853,
+          "y": 3466,
+          "w": 68.96875,
+          "h": 28
+        }
+      ],
+      "citation": "no-slop ‘status pill with dot’ heuristic (MIT); Fountain Institute tell #7 (status dots)"
+    },
+    {
+      "id": "squint-decorative-badge-11",
+      "rule": "decorative-badge",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "A lone badge “clicked” that does nothing",
+      "evidence": "A 61×28px pill that is not clickable, is not one of a set of tags, and labels something the surrounding text already makes clear. Badges imply a category system; a single one is decoration.",
+      "fix": "Delete it. If the information matters, fold it into the sentence next to it. Reserve pills for things that are actually one of several (filters, statuses, tags you can click).",
+      "rects": [
+        {
+          "x": 853,
+          "y": 3300,
+          "w": 60.6875,
+          "h": 28
+        }
+      ],
+      "citation": "no-slop ‘status pill with dot’ heuristic (MIT); Fountain Institute tell #7 (status dots)"
+    },
+    {
+      "id": "squint-cards-in-cards-14",
+      "rule": "cards-in-cards",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "5 cards nested inside other cards",
+      "evidence": "3 outer containers with bordered/shadowed children, e.g. div.disable-children-scrolling.z-20 inside div.relative.w-full. Every layer of box is a layer the reader has to look through.",
+      "fix": "Remove the inner border/background and separate items with spacing or a divider. One container per idea.",
+      "rects": [
+        {
+          "x": 208,
+          "y": 2206.59375,
+          "w": 1024,
+          "h": 598
+        },
+        {
+          "x": 209,
+          "y": 2271.59375,
+          "w": 1022,
+          "h": 500
+        },
+        {
+          "x": 208,
+          "y": 2206.59375,
+          "w": 1024,
+          "h": 598
+        },
+        {
+          "x": 209,
+          "y": 2751.59375,
+          "w": 1004,
+          "h": 52
+        },
+        {
+          "x": 165.59375,
+          "y": 4342.375,
+          "w": 1108.796875,
+          "h": 600
+        },
+        {
+          "x": 387.953125,
+          "y": 4447.375,
+          "w": 664.078125,
+          "h": 152
+        },
+        {
+          "x": 104,
+          "y": 6695.953125,
+          "w": 1232,
+          "h": 700
+        },
+        {
+          "x": 305,
+          "y": 6744.953125,
+          "w": 509.953125,
+          "h": 650
+        }
+      ],
+      "citation": "UXly nested-panel (MIT); Fountain Institute tell #5; Reinecke 2013: visual complexity is the strongest negative predictor of appeal"
+    },
+    {
+      "id": "squint-rounded-everything-3",
+      "rule": "rounded-everything",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "42 rounded panels on one page",
+      "evidence": "Rounded corners on every container is one of the ranked vibe-coded tells (#5 in the Reddit corpus).",
+      "fix": "Round the things that are interactive or elevated; let sections and layout containers stay square.",
+      "citation": "vibecoded-design-tells (MIT), tell #5"
+    },
+    {
+      "id": "squint-ai-purple-15",
+      "rule": "ai-purple",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "AI purple / purple-to-blue gradient accent",
+      "evidence": "1 element use a violet/indigo accent (hue 260–310°), 1 as a gradient, e.g. span.inline.leading-[0] “tonight”. This is the single most-cited vibe-coded tell in the Reddit corpus (#2 overall).",
+      "fix": "Pick one base hue that means something for this product and derive the palette from it. If you keep purple, make it a decision: one accent, solid, used sparingly.",
+      "rects": [
+        {
+          "x": 747.4375,
+          "y": 1883,
+          "w": 164.09375,
+          "h": 75
+        }
+      ],
+      "citation": "Impeccable ai-color-palette (Apache-2.0); vibecoded-design-tells #2–3"
+    },
+    {
+      "id": "squint-perma-dark-18",
+      "rule": "perma-dark",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Dark mode with no light alternative",
+      "evidence": "Body background rgb(0, 0, 0) and no prefers-color-scheme rule in the CSS. Permanent dark was on 20% of Show HN launches; it's the default \"techy\" look, not a decision.",
+      "fix": "Not wrong by itself. If dark is the brand, keep it and make the rest deliberate; otherwise offer light, or default to it.",
+      "citation": "Krebs 2026 (20.3%); slop-detect perma_dark_mode"
+    },
+    {
+      "id": "squint-fake-window-chrome-19",
+      "rule": "fake-window-chrome",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Fake macOS window dots",
+      "evidence": "Three red/yellow/green circles drawn in CSS to make a box look like a terminal or app window. Generated UIs use it to frame fake screenshots.",
+      "fix": "Show a real screenshot of the real thing, or a plain code block.",
+      "rects": [
+        {
+          "x": 121,
+          "y": 6715.453125,
+          "w": 10,
+          "h": 10
+        },
+        {
+          "x": 139,
+          "y": 6715.453125,
+          "w": 10,
+          "h": 10
+        },
+        {
+          "x": 157,
+          "y": 6715.453125,
+          "w": 10,
+          "h": 10
+        }
+      ],
+      "citation": "slop-detect fake_macos_terminal"
+    },
+    {
+      "id": "squint-aurora-blob-20",
+      "rule": "aurora-blob",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Blurred colour blobs behind the content (6)",
+      "evidence": "div.center.pointer-events-none is a radial-gradient wash. The aurora backdrop is the default \"atmosphere\" of generated heroes.",
+      "fix": "Remove it and let the content carry the first screen. If you want atmosphere, use one real image.",
+      "rects": [
+        {
+          "x": 520,
+          "y": 935,
+          "w": 400,
+          "h": 200
+        },
+        {
+          "x": 105,
+          "y": 3246,
+          "w": 598,
+          "h": 324
+        },
+        {
+          "x": 165.59375,
+          "y": 4342.375,
+          "w": 1108.796875,
+          "h": 600
+        }
+      ],
+      "citation": "slop-detect aurora_mesh_gradient; Fountain Institute tell #2"
+    },
+    {
+      "id": "squint-marketing-buzzwords-21",
+      "rule": "marketing-buzzwords",
+      "source": "squint",
+      "category": "copy",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "1 marketing buzzword",
+      "evidence": "“…growth acro Email reimagined.Available today.…”",
+      "fix": "Replace each with the specific thing: what it does, for whom, with a number if you have one. 'Streamline your workflow' → 'Turns a 40-minute export into a button.'",
+      "citation": "Impeccable marketing-buzzword list (Apache-2.0)",
+      "data": {
+        "hits": [
+          "growth acro Email reimagined.Available today."
+        ]
+      }
+    },
+    {
+      "id": "squint-heading-size-drift-2",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "h3 is used at 2 sizes, consistently",
+      "evidence": "Sizes: 16px ×3, 20px ×9. “Proactive blocklist tracking” is 20px, “Intuitive analytics” is 16px. Each size is used more than once, so this is a system rather than drift; but it means the same tag is doing two jobs.",
+      "fix": "If the 16px ones are sub-sections, make them h4. Screen readers and search engines only see the tag.",
+      "rects": [
+        {
+          "x": 104,
+          "y": 7811.359375,
+          "w": 357.328125,
+          "h": 20
+        },
+        {
+          "x": 184,
+          "y": 9572.46875,
+          "w": 113.84375,
+          "h": 24
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          16,
+          20
+        ],
+        "counts": [
+          3,
+          9
+        ],
+        "level": 3
+      }
+    },
+    {
+      "id": "squint-status-dots-13",
+      "rule": "status-dots",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "3 status dots on the page",
+      "evidence": "Coloured dots attached to labels where a word would say more.",
+      "fix": "Replace with text or remove.",
+      "rects": [
+        {
+          "x": 121,
+          "y": 6715.453125,
+          "w": 10,
+          "h": 10
+        },
+        {
+          "x": 139,
+          "y": 6715.453125,
+          "w": 10,
+          "h": 10
+        },
+        {
+          "x": 157,
+          "y": 6715.453125,
+          "w": 10,
+          "h": 10
+        }
+      ],
+      "citation": "Fountain Institute tell #7"
+    }
+  ],
+  "metrics": {
+    "colorfulness": 1.5,
+    "complexityLeaves": 16,
+    "whitespaceRatio": 0.659,
+    "textDensity": 0.145,
+    "distinctHues": 0,
+    "dominantBackground": "rgb(0, 0, 0)",
+    "maskedBoxes": 17
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 177620,
+      "note": "playwright-core + @sparticuz/chromium · 2121 elements, 12320px tall · 5 tracker/media requests blocked · full-page capture failed (page.screenshot: Timeout 45000ms exceeded.); report shows the first screen only · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 440,
+      "note": "20 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 25415,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 28260,
+      "note": "16 leaves after masking 17 boxes · bg rgb(0, 0, 0) · whitespace 66%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 28261,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 900
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 25415
+  }
+}

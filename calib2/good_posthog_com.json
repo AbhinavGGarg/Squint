@@ -1,0 +1,483 @@
+{
+  "id": "c796d42b2140",
+  "createdAt": "2026-11-03T20:26:38.827Z",
+  "input": {
+    "url": "https://posthog.com",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "PostHog – Your product’s context layer",
+    "finalUrl": "https://posthog.com/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 900,
+    "elementCount": 1530,
+    "wordCount": 799,
+    "fonts": [
+      "RoundHog",
+      "Source Code Pro"
+    ]
+  },
+  "score": 62,
+  "subScores": {
+    "consistency": 65,
+    "generic": 59,
+    "clarity": 100,
+    "appeal": 63
+  },
+  "findings": [
+    {
+      "id": "squint-misaligned-siblings-1",
+      "rule": "misaligned-siblings",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Stacked items are off by a few pixels (×2)",
+      "evidence": "div.inline-block and div.inline-block are stacked but their left edges differ by 2.1px.",
+      "fix": "Give both the same left margin/padding, or put them in the same column container.",
+      "rects": [
+        {
+          "x": 1041.953125,
+          "y": 1326.46875,
+          "w": 120.140625,
+          "h": 38.65625
+        },
+        {
+          "x": 1044.03125,
+          "y": 1418.78125,
+          "w": 125.109375,
+          "h": 47.65625
+        },
+        {
+          "x": 760.453125,
+          "y": 1422.78125,
+          "w": 163.21875,
+          "h": 39.65625
+        },
+        {
+          "x": 762.9375,
+          "y": 1472.4375,
+          "w": 112.46875,
+          "h": 42.65625
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "offset": 2.078125,
+        "count": 2
+      }
+    },
+    {
+      "id": "squint-heading-size-drift-4",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "One h2 is a different size from the other 6",
+      "evidence": "“Ask PostHog anything” is 24px; the other h2s are 30px (24px ×1, 30px ×6). Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h2 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 809.59375,
+          "y": 534.71875,
+          "w": 367.984375,
+          "h": 32
+        },
+        {
+          "x": 230.40625,
+          "y": 1104.828125,
+          "w": 979.1875,
+          "h": 39.984375
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          24,
+          30
+        ],
+        "counts": [
+          1,
+          6
+        ],
+        "level": 2
+      }
+    },
+    {
+      "id": "squint-radius-sprawl-5",
+      "rule": "radius-sprawl",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "5 different corner radii on panels",
+      "evidence": "Radii in use on ≥80px panels: 4px, 6px, 8px, 10px, 20px. A system usually needs two or three.",
+      "fix": "Define --radius-sm / --radius-md / --radius-lg tokens and use only those.",
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "radii": [
+          4,
+          6,
+          7.69781,
+          10.2638,
+          20
+        ]
+      }
+    },
+    {
+      "id": "squint-head-hygiene-11",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Head is missing: <title>, canonical, favicon",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    },
+    {
+      "id": "impeccable-imp:buried-raster-14",
+      "rule": "imp:buried-raster",
+      "source": "impeccable",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Raster buried under a wash or opacity (×3)",
+      "evidence": "“raster background at opacity 0” · “raster background at opacity 0” · “raster background at opacity 0”",
+      "fix": "A background image under a near-opaque gradient wash, or a raster on an element at near-zero opacity, never reaches the screen: the page shows the wash, and the produced texture or photo ships as a compliance token. Let the material show (a tint under 0.9 alpha, a blend mode, an opacity you can see) or remove the file.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 3
+      }
+    },
+    {
+      "id": "impeccable-imp:nested-cards-15",
+      "rule": "imp:nested-cards",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Nested cards (×8)",
+      "evidence": "“Card inside card (div)” · “Card inside card (div)” · “Card inside card (div)”",
+      "fix": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 8
+      }
+    },
+    {
+      "id": "impeccable-imp:gradient-text-16",
+      "rule": "imp:gradient-text",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Gradient text",
+      "evidence": "“background-clip: text + gradient”",
+      "fix": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    },
+    {
+      "id": "impeccable-imp:side-tab-17",
+      "rule": "imp:side-tab",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Side-tab accent border (×3)",
+      "evidence": "“.vac-app .vac-developer-theme .vac-event-choice[aria-pressed=true] — inset box-shadow 3px stripe (left)” · “.vac-booking-checklist li[data-state=current] — inset box-shadow 3px stripe (left)” · “.vac-filter-comparison-row[aria-pressed=true] — inset box-shadow 3px stripe (left)”",
+      "fix": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 3
+      }
+    },
+    {
+      "id": "impeccable-imp:dark-glow-18",
+      "rule": "imp:dark-glow",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Glowing shadow accents",
+      "evidence": "“Zero-offset box-shadow glow (#ffa500)”",
+      "fix": "Colored glow shadows — a zero-offset chromatic halo (box- or text-shadow) on any background, or any colored blurred shadow on a dark background — are the default \"cool\" look of AI-generated UIs. Use neutral elevation shadows and subtle, purposeful lighting instead.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    },
+    {
+      "id": "impeccable-imp:radial-halo-19",
+      "rule": "imp:radial-halo",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Radial-gradient background halo",
+      "evidence": "“radial-gradient halo (#a3cedc → transparent) on dark page”",
+      "fix": "A chromatic radial-gradient wash — saturated at the center, fading to transparent — used as a decorative background glow on a dark page. Same tell as glowing shadows, drawn with a gradient instead of a shadow. Ground the surface with a solid or subtly shifted background instead.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    },
+    {
+      "id": "squint-unsourced-social-proof-10",
+      "rule": "unsourced-social-proof",
+      "source": "squint",
+      "category": "copy",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "Social proof with no source (1)",
+      "evidence": "“Join 500,000+ teams”. Round numbers of users, 4.9/5 ratings and 99.9% uptime on a new product are the template's defaults.",
+      "fix": "Use a number you can link to, or none. One true sentence beats three impressive ones.",
+      "citation": "slop-detect structural_fake_social_proof; 21st.dev tell #4"
+    },
+    {
+      "id": "metrics-high-visual-complexity-12",
+      "rule": "high-visual-complexity",
+      "source": "metrics",
+      "category": "appeal",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "Above-the-fold is visually busy",
+      "evidence": "Quadtree decomposition of the first screen (text and photos masked out) needs 1240 leaves (calm pages run 50–250; busy ones 600+). Whitespace share 30%, text covers 36% of the viewport.",
+      "fix": "Remove one thing from the first screen. Reinecke's data says people rate low- and medium-complexity pages the same and punish high complexity; the gain is all in cutting, not adding.",
+      "citation": "Reinecke et al. CHI 2013; Tuch et al.: complexity drives the 50ms impression"
+    },
+    {
+      "id": "squint-heading-size-drift-3",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "h3 headings render at 2 different sizes",
+      "evidence": "“What can I help you with?” is 21px while “Set up for free” is 18px (1.14×). Sizes seen: 18px ×1, 21px ×1. Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h3 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 276.734375,
+          "y": 632.0381469726562,
+          "w": 486.53125,
+          "h": 25.65625
+        },
+        {
+          "x": 765.796875,
+          "y": 217.5625,
+          "w": 414,
+          "h": 28
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          18,
+          20.5275
+        ],
+        "counts": [
+          1,
+          1
+        ],
+        "level": 3
+      }
+    },
+    {
+      "id": "squint-animation-overload-8",
+      "rule": "animation-overload",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "11 elements animating at rest",
+      "evidence": "Keyframes in use: rough-notation-dash, grow, grow-sm, slideIn. Motion on everything is tell #4.",
+      "fix": "Animate the one thing you want the eye to go to. Everything else should hold still.",
+      "citation": "vibecoded-design-tells (MIT) tell #4"
+    },
+    {
+      "id": "squint-whether-youre-9",
+      "rule": "whether-youre",
+      "source": "squint",
+      "category": "copy",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "“Whether you're X or Y” (1)",
+      "evidence": "“Whether you're analyzing customer usage or directing AI”",
+      "fix": "Pick the one audience you actually built this for and address them.",
+      "citation": "slop-detect whether_youre"
+    },
+    {
+      "id": "squint-status-dots-6",
+      "rule": "status-dots",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "7 status dots on the page",
+      "evidence": "Coloured dots attached to labels where a word would say more.",
+      "fix": "Replace with text or remove.",
+      "rects": [
+        {
+          "x": 463.96875,
+          "y": 1278.8125,
+          "w": 16,
+          "h": 16
+        },
+        {
+          "x": 623.4375,
+          "y": 1330.46875,
+          "w": 16,
+          "h": 16
+        },
+        {
+          "x": 680.90625,
+          "y": 1454.28125,
+          "w": 16,
+          "h": 16
+        },
+        {
+          "x": 971.796875,
+          "y": 1380.125,
+          "w": 16,
+          "h": 16
+        },
+        {
+          "x": 906.671875,
+          "y": 1427.78125,
+          "w": 16,
+          "h": 16
+        },
+        {
+          "x": 1011.03125,
+          "y": 1425.78125,
+          "w": 16,
+          "h": 16
+        },
+        {
+          "x": 1152.140625,
+          "y": 1423.78125,
+          "w": 16,
+          "h": 16
+        }
+      ],
+      "citation": "Fountain Institute tell #7"
+    },
+    {
+      "id": "squint-tasteful-default-7",
+      "rule": "tasteful-default",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "The 2026 “tasteful default”: cream background + sage/teal accent",
+      "evidence": "Body background rgb(238, 239, 233), 23 green/teal accents. This is the look the previous wave of anti-slop advice converged on, and the fastest-rising tell in the Reddit corpus: it reads as “AI tried to be tasteful”.",
+      "fix": "Nothing here is wrong in isolation. Make one choice that isn't the default: a background that isn't cream, a typeface with a point of view, or an accent pulled from your actual subject (a photo, a logo, a place).",
+      "citation": "vibecoded-design-tells (MIT) tell #0"
+    },
+    {
+      "id": "metrics-low-whitespace-13",
+      "rule": "low-whitespace",
+      "source": "metrics",
+      "category": "appeal",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Only 30% of the first screen is breathing room",
+      "evidence": "Pixels close to the page background make up less than a third of the viewport.",
+      "fix": "Widen margins and loosen section padding; comprehension measurably improves when content is framed by empty space (Lin 2004).",
+      "citation": "Lin 2004 whitespace & comprehension"
+    },
+    {
+      "id": "impeccable-imp:repeating-stripes-gradient-20",
+      "rule": "imp:repeating-stripes-gradient",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Repeating-gradient stripes",
+      "evidence": "“repeating-gradient decorative stripes”",
+      "fix": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    }
+  ],
+  "metrics": {
+    "colorfulness": 44.2,
+    "complexityLeaves": 1240,
+    "whitespaceRatio": 0.299,
+    "textDensity": 0.356,
+    "distinctHues": 7,
+    "dominantBackground": "rgb(252, 252, 252)",
+    "maskedBoxes": 85
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 76377,
+      "note": "playwright-core + @sparticuz/chromium · 1530 elements, 900px tall · 1 tracker/media requests blocked · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 137,
+      "note": "10 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 21088,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 24983,
+      "note": "1240 leaves after masking 85 boxes · bg rgb(252, 252, 252) · whitespace 30%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 24983,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 900
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 21088
+  }
+}

@@ -34,7 +34,11 @@ export function computeScores(findings: Finding[], appealScore: number | undefin
   const weights = tenSecondScore === undefined
     ? { consistency: 0.35, generic: 0.45, clarity: 0.0, appeal: 0.2 }
     : { consistency: 0.25, generic: 0.35, clarity: 0.25, appeal: 0.15 };
-  const score = Math.round(consistency * weights.consistency + generic * weights.generic + clarity * weights.clarity + appeal * weights.appeal);
+  const weighted = consistency * weights.consistency + generic * weights.generic + clarity * weights.clarity + appeal * weights.appeal;
+  // A template is consistent by construction, so consistency cannot vouch for a page the generic
+  // rules have called unedited; and the reverse: a page with its own look but sloppy geometry is
+  // not "decided" either. The overall grade stays within one band of the weaker of the two.
+  const score = Math.round(Math.min(weighted, generic + 25, consistency + 25));
   return { score, subScores: { consistency, generic, clarity, appeal } };
 }
 

@@ -231,7 +231,7 @@ async function renderInner(input: RenderInput): Promise<RenderResult> {
   // The scroll-through wakes lazy sections; the full-page capture is the single most expensive
   // call on a long page. Both are capped harder on serverless and harder again in light mode.
   const scrollCap = light ? 6_000 : RENDERER === "serverless" ? 10_000 : 12_000;
-  const captureCap = light ? 6_000 : RENDERER === "serverless" ? 12_000 : 24_000;
+  const captureCap = light ? 6_000 : RENDERER === "serverless" ? 9_000 : 24_000;
   let onDisconnect: (() => void) | undefined;
   const disconnected = new Promise<never>((_, rej) => {
     onDisconnect = () => rej(new Error("browser disconnected during render"));

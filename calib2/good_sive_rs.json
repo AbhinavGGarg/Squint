@@ -1,0 +1,169 @@
+{
+  "id": "a7e8fbb87e82",
+  "createdAt": "2026-11-03T20:21:01.004Z",
+  "input": {
+    "url": "https://sive.rs",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Derek Sivers",
+    "finalUrl": "https://sive.rs/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 8085,
+    "elementCount": 215,
+    "wordCount": 501,
+    "fonts": [
+      "v",
+      "Georgia",
+      "sans-serif"
+    ]
+  },
+  "score": 98,
+  "subScores": {
+    "consistency": 93,
+    "generic": 100,
+    "clarity": 100,
+    "appeal": 100
+  },
+  "findings": [
+    {
+      "id": "squint-uneven-gaps-1",
+      "rule": "uneven-gaps",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Uneven spacing between 7 repeated dt items",
+      "evidence": "Gaps along the vertical axis are 65, 65, 97, 65, 65, 97px (median 65px, worst deviation 32px).",
+      "fix": "Use a single gap value on the container (flex/grid gap) instead of per-item margins.",
+      "rects": [
+        {
+          "x": 396.9375,
+          "y": 4935.4375,
+          "w": 646.125,
+          "h": 26.390625
+        },
+        {
+          "x": 396.9375,
+          "y": 5026.828125,
+          "w": 646.125,
+          "h": 26.390625
+        },
+        {
+          "x": 396.9375,
+          "y": 5118.21875,
+          "w": 646.125,
+          "h": 26.390625
+        },
+        {
+          "x": 396.9375,
+          "y": 5241.609375,
+          "w": 646.125,
+          "h": 26.390625
+        },
+        {
+          "x": 396.9375,
+          "y": 5333,
+          "w": 646.125,
+          "h": 26.390625
+        },
+        {
+          "x": 396.9375,
+          "y": 5424.390625,
+          "w": 646.125,
+          "h": 26.390625
+        },
+        {
+          "x": 396.9375,
+          "y": 5547.78125,
+          "w": 646.125,
+          "h": 26.390625
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "gaps": [
+          65,
+          65,
+          97,
+          65,
+          65,
+          97
+        ],
+        "median": 65
+      }
+    }
+  ],
+  "metrics": {
+    "colorfulness": 20.9,
+    "complexityLeaves": 16,
+    "whitespaceRatio": 0.957,
+    "textDensity": 0.239,
+    "distinctHues": 1,
+    "dominantBackground": "rgb(255, 241, 229)",
+    "maskedBoxes": 33
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 8321,
+      "note": "playwright-core + @sparticuz/chromium · 215 elements, 8085px tall · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 27,
+      "note": "1 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 3011,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 3954,
+      "note": "16 leaves after masking 33 boxes · bg rgb(255, 241, 229) · whitespace 96%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 3954,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 8085
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 3011
+  }
+}

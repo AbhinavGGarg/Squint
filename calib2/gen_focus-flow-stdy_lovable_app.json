@@ -1,0 +1,377 @@
+{
+  "id": "496f56a53434",
+  "createdAt": "2026-11-03T20:32:07.567Z",
+  "input": {
+    "url": "https://focus-flow-stdy.lovable.app",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "FocusFlow — Study smarter, focus deeper.",
+    "finalUrl": "https://focus-flow-stdy.lovable.app/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 2797,
+    "elementCount": 206,
+    "wordCount": 248,
+    "fonts": [
+      "Poppins",
+      "Inter",
+      "system-ui"
+    ]
+  },
+  "score": 87,
+  "subScores": {
+    "consistency": 93,
+    "generic": 80,
+    "clarity": 100,
+    "appeal": 94
+  },
+  "findings": [
+    {
+      "id": "squint-misaligned-siblings-1",
+      "rule": "misaligned-siblings",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Row items are off by a few pixels",
+      "evidence": "span#lovable-badge-text “Edit with” and span#lovable-badge-logo sit in the same row but their top edges differ by 2px (870 vs 868). 1px is sub-pixel noise; 2–3px is a mistake, not a decision.",
+      "fix": "Align them on the same axis: use align-items on the parent, or give both the same margin-top. If the offset is intentional, make it ≥ 8px so it reads as deliberate.",
+      "rects": [
+        {
+          "x": 1288.59375,
+          "y": 870,
+          "w": 48.40625,
+          "h": 12
+        },
+        {
+          "x": 1343,
+          "y": 868,
+          "w": 52,
+          "h": 12
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "offset": 2
+      }
+    },
+    {
+      "id": "squint-pulsing-dot-2",
+      "rule": "pulsing-dot",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "11 pulsing status dots",
+      "evidence": "Small round elements animating with “float-slow”. The blinking green dot that says “live” / “available” is on every AI-generated landing page.",
+      "fix": "If something is actually live, show the live thing (a number, a timestamp). Otherwise remove the dot.",
+      "rects": [
+        {
+          "x": 65.3125,
+          "y": 665.65625,
+          "w": 4,
+          "h": 4
+        },
+        {
+          "x": 1219.484375,
+          "y": 135.6875,
+          "w": 5.21875,
+          "h": 5.21875
+        },
+        {
+          "x": 1065.5,
+          "y": 543.625,
+          "w": 4.609375,
+          "h": 4.609375
+        },
+        {
+          "x": 315.234375,
+          "y": 600.8125,
+          "w": 5.421875,
+          "h": 5.421875
+        },
+        {
+          "x": 59.84375,
+          "y": 159.90625,
+          "w": 5.96875,
+          "h": 5.96875
+        },
+        {
+          "x": 1013,
+          "y": 487.71875,
+          "w": 5.703125,
+          "h": 5.703125
+        },
+        {
+          "x": 1426.828125,
+          "y": 165.75,
+          "w": 5.265625,
+          "h": 5.265625
+        },
+        {
+          "x": 1196.515625,
+          "y": 660.171875,
+          "w": 4.4375,
+          "h": 4.4375
+        },
+        {
+          "x": 1204.828125,
+          "y": 322.1875,
+          "w": 5.9375,
+          "h": 5.9375
+        },
+        {
+          "x": 1091.15625,
+          "y": 556.75,
+          "w": 5.6875,
+          "h": 5.6875
+        },
+        {
+          "x": 69.421875,
+          "y": 6.53125,
+          "w": 4.828125,
+          "h": 4.828125
+        }
+      ],
+      "citation": "Impeccable pulsing-dot (Apache-2.0); Fountain Institute tell #7"
+    },
+    {
+      "id": "squint-gradient-text-3",
+      "rule": "gradient-text",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Gradient-filled text (1)",
+      "evidence": "span.text-gradient “focus deeper.” uses background-clip: text with a gradient. Decorative, hurts contrast, and reads as generated.",
+      "fix": "Use a solid colour. Emphasis comes from size and weight, not a rainbow.",
+      "rects": [
+        {
+          "x": 481.0625,
+          "y": 260.59375,
+          "w": 477.875,
+          "h": 101
+        }
+      ],
+      "citation": "Impeccable gradient-text"
+    },
+    {
+      "id": "squint-generic-headline-10",
+      "rule": "generic-headline",
+      "source": "squint",
+      "category": "copy",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "Headline could be on any site in the category",
+      "evidence": "h1: “Study smarter, focus deeper.”. No product name, no number, no specific noun. 21st.dev's five-minute test: cover the logo; if the copy still works for a competitor, it isn't yours.",
+      "fix": "Write one specific claim: what it is, for whom, and the one thing it does that others don't. Specific beats clever.",
+      "rects": [
+        {
+          "x": 168,
+          "y": 198,
+          "w": 1104,
+          "h": 151.1875
+        }
+      ],
+      "citation": "21st.dev: generic copy is the strongest tell"
+    },
+    {
+      "id": "squint-overused-font-4",
+      "rule": "overused-font",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Inter for 86% of the text",
+      "evidence": "Primary family is Inter, one of the fonts generated UIs default to. Fonts seen: Poppins, Inter, system-ui.",
+      "fix": "Not wrong on its own. If everything else is default too, this is the cheapest thing to change: pick one typeface with a point of view for headings and keep the workhorse for body.",
+      "citation": "Impeccable overused-font; HN thread on vibe-coded tells (Inter everywhere)"
+    },
+    {
+      "id": "squint-three-equal-cards-5",
+      "rule": "three-equal-cards",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "1 row of three identical cards",
+      "evidence": "Three 355px-wide cards of equal weight (“\"FocusFlow turned my stu”, “\"The rainy café scene + ”, “\"Finally, a single tool ”). The hero + three feature cards skeleton is tell #9; equal weight tells the reader nothing is more important than anything else.",
+      "fix": "Decide which one matters and make it bigger, or turn the three into one sentence each under a single heading. Break the symmetry once.",
+      "rects": [
+        {
+          "x": 168,
+          "y": 2090.1875,
+          "w": 354.65625,
+          "h": 127.5
+        },
+        {
+          "x": 542.65625,
+          "y": 2090.1875,
+          "w": 354.671875,
+          "h": 127.5
+        },
+        {
+          "x": 917.328125,
+          "y": 2090.1875,
+          "w": 354.65625,
+          "h": 127.5
+        }
+      ],
+      "citation": "vibecoded-design-tells #9; 21st.dev: uniform features is a top-5 tell"
+    },
+    {
+      "id": "squint-animation-overload-6",
+      "rule": "animation-overload",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "71 elements animating at rest",
+      "evidence": "Keyframes in use: twinkle, float-slow, pulse. Motion on everything is tell #4.",
+      "fix": "Animate the one thing you want the eye to go to. Everything else should hold still.",
+      "citation": "vibecoded-design-tells (MIT) tell #4"
+    },
+    {
+      "id": "squint-centered-hero-7",
+      "rule": "centered-hero",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Centered hero: big headline, centered sub, centered buttons",
+      "evidence": "h1 at 72px, centered, with 4 centered blocks under it. On 23.5% of Show HN launches. It's the layout every builder emits when nobody chooses one.",
+      "fix": "Not a problem on its own, but combined with other tells it's the skeleton. Left-align and put the product next to the headline, or lead with the product itself.",
+      "rects": [
+        {
+          "x": 168,
+          "y": 198,
+          "w": 1104,
+          "h": 151.1875
+        }
+      ],
+      "citation": "Krebs 2026 (23.5%); vibecoded-design-tells #9"
+    },
+    {
+      "id": "squint-aurora-blob-8",
+      "rule": "aurora-blob",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Blurred colour blobs behind the content (2)",
+      "evidence": "div.absolute.inset-0 is a blur(40px) wash. The aurora backdrop is the default \"atmosphere\" of generated heroes.",
+      "fix": "Remove it and let the content carry the first screen. If you want atmosphere, use one real image.",
+      "rects": [
+        {
+          "x": 843,
+          "y": 678.1875,
+          "w": 220,
+          "h": 220
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 900
+        }
+      ],
+      "citation": "slop-detect aurora_mesh_gradient; Fountain Institute tell #2"
+    },
+    {
+      "id": "squint-em-dash-density-9",
+      "rule": "em-dash-density",
+      "source": "squint",
+      "category": "copy",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "4 em dashes in 1.6k characters",
+      "evidence": "2.5 per 1,000 characters. Humans use them; generated copy uses them in nearly every paragraph, and readers have learned to notice.",
+      "fix": "Keep the ones that do work; turn the rest into commas, periods, or parentheses.",
+      "citation": "Impeccable em-dash-overuse; Slopdar em-dash signal; HN thread"
+    },
+    {
+      "id": "squint-head-hygiene-11",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Head is missing: canonical, favicon",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    }
+  ],
+  "metrics": {
+    "colorfulness": 30.4,
+    "complexityLeaves": 400,
+    "whitespaceRatio": 0.576,
+    "textDensity": 0.301,
+    "distinctHues": 3,
+    "dominantBackground": "rgb(28, 20, 52)",
+    "maskedBoxes": 19
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 26411,
+      "note": "playwright-core + @sparticuz/chromium · 206 elements, 2797px tall · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 19,
+      "note": "11 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 11905,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 12359,
+      "note": "400 leaves after masking 19 boxes · bg rgb(28, 20, 52) · whitespace 58%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 12359,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 2797
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 11905
+  }
+}

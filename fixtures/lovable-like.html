@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QuoteFlow</title>
+<meta name="description" content="Lovable Generated Project">
+<meta property="og:title" content="QuoteFlow">
+<meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png">
+<link rel="icon" href="/favicon.ico">
+<style>
+  /* What a Lovable/shadcn page looks like when nobody edited it: clean, consistent, and identical
+     to ten thousand others. Every geometry rule should stay quiet; the kit rules should not. */
+  :root { --border: #e4e4e7; --muted: #71717a; --fg: #09090b; --accent: #7c3aed; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, system-ui, sans-serif; color: var(--fg); background: #fff; line-height: 1.5; }
+  .container { max-width: 1152px; margin: 0 auto; padding: 0 24px; }
+  header { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  header nav a { color: var(--muted); text-decoration: none; margin-left: 24px; font-size: 14px; padding: 8px 4px; display: inline-block; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; border-radius: 6px; background: var(--accent); color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; }
+  .hero { text-align: center; padding: 96px 0 64px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 9999px; padding: 4px 12px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .dot { width: 8px; height: 8px; border-radius: 9999px; background: #22c55e; }
+  h1 { font-size: 60px; line-height: 1.05; margin: 0 auto 20px; max-width: 18ch; letter-spacing: -0.02em; }
+  .lede { color: var(--muted); font-size: 18px; max-width: 42em; margin: 0 auto 32px; }
+  .ctas { display: flex; gap: 12px; justify-content: center; }
+  .btn.outline { background: #fff; color: var(--fg); border: 1px solid var(--border); }
+  section { padding: 64px 0; }
+  .label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 0 8px; }
+  h2 { font-size: 36px; text-align: center; margin: 0 0 48px; letter-spacing: -0.02em; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { border-radius: 0.5rem; border: 1px solid var(--border); background: #fff; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .tile { width: 48px; height: 48px; border-radius: 10px; background: #ede9fe; margin-bottom: 16px; }
+  .card h3 { font-size: 20px; margin: 0 0 8px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: center; }
+  .stats b { display: block; font-size: 40px; letter-spacing: -0.02em; }
+  .stats span { color: var(--muted); font-size: 14px; }
+  .cta { text-align: center; }
+  footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--muted); font-size: 14px; text-align: center; }
+  #lovable-badge { position: fixed; right: 16px; bottom: 16px; background: #000; color: #fff; border-radius: 9999px; padding: 8px 14px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  #lovable-badge-logo { width: 16px; height: 16px; background: #fff; border-radius: 3px; display: inline-block; }
+  @media (max-width: 720px) { .grid, .stats { grid-template-columns: 1fr; } h1 { font-size: 40px; } header nav a { margin-left: 12px; } }
+</style>
+</head>
+<body>
+<header class="container">
+  <strong>QuoteFlow</strong>
+  <nav><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#" class="btn">Get Started</a></nav>
+</header>
+<main class="container">
+  <section class="hero">
+    <div class="eyebrow"><span class="dot"></span>Now in public beta</div>
+    <h1>Streamline your quotes, effortlessly</h1>
+    <p class="lede">QuoteFlow is the all-in-one platform for modern service businesses — create, send and track quotes in seconds, not hours. Seamlessly integrate with the tools you already use.</p>
+    <div class="ctas"><a href="#" class="btn">Start for free</a><a href="#" class="btn outline">Watch demo</a></div>
+  </section>
+  <section id="features">
+    <p class="label">Features</p>
+    <h2>Everything you need to grow</h2>
+    <div class="grid">
+      <div class="card rounded-lg border bg-card p-6 shadow-sm"><div class="tile"></div><h3>Instant quotes</h3><p>Generate professional quotes in seconds — no more spreadsheets, no more guesswork.</p></div>
+      <div class="card rounded-lg border bg-card p-6 shadow-sm"><div class="tile"></div><h3>Smart tracking</h3><p>Know the moment a client opens, views or accepts — stay one step ahead, always.</p></div>
+      <div class="card rounded-lg border bg-card p-6 shadow-sm"><div class="tile"></div><h3>Seamless payments</h3><p>Get paid faster with integrated payments — because your time matters.</p></div>
+    </div>
+  </section>
+  <section>
+    <p class="label">Trusted by teams</p>
+    <div class="stats">
+      <div><b>10K+</b><span>Quotes sent</span></div>
+      <div><b>99.9%</b><span>Uptime</span></div>
+      <div><b>4.9/5</b><span>Customer rating</span></div>
+    </div>
+  </section>
+  <section class="cta">
+    <p class="label">Get started</p>
+    <h2>Ready to transform your business?</h2>
+    <a href="#" class="btn">Start your free trial today</a>
+  </section>
+</main>
+<footer class="container">© 2026 QuoteFlow — Built with ❤️ for service businesses.</footer>
+<div id="lovable-badge"><span id="lovable-badge-text">Edit with</span><span id="lovable-badge-logo"></span></div>
+</body>
+</html>

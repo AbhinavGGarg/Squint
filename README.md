@@ -95,6 +95,15 @@ Without those three variables the sign-in link is hidden and nothing else change
 
 **Custom domain:** Vercel → Settings → Domains → add it. Vercel shows the records to create at your registrar (an `A` record to `76.76.21.21` for the apex and a `CNAME` to `cname.vercel-dns.com` for `www`, or just the CNAME for a subdomain). Then set `NEXT_PUBLIC_SITE_URL=https://<your-domain>` so Open Graph cards and badges use it, and update the Google redirect URI above.
 
+## Did anyone edit it
+
+Two rules added after the first blind calibration (13 Lovable-built sites scored like Stripe; the engine was rewarding a template for being consistent):
+
+- `builder-signature` (measured, error): the builder's own badge or defaults are still on the page — “Edit with Lovable”, Lovable's default og:image, “Lovable Generated Project”, “Create Next App”, Vite's favicon. The one tell that is a fact rather than a style.
+- `template-stack` (heuristic): four or more of the template tells on one page, counted. No single tell separates generated from made; the count does. Six or more is an error.
+
+The overall score is also capped at one grade band above the weaker of the consistency and generic sub-scores: a template is consistent by construction, so consistency can't vouch for a page the generic rules call unedited.
+
 ## Hardening and sharing
 
 - **Rate limit:** 5 scans/minute and 60/day per IP (`SQUINT_RATE_PER_MIN`, `SQUINT_RATE_PER_DAY`). Counted only for scans that actually run; engine-side failures are refunded. Set `SQUINT_ADMIN_TOKEN` and pass it as `x-squint-token` (CLI: `--token` or `SQUINT_TOKEN`) to skip the limit for your own calibration runs.

@@ -129,8 +129,10 @@ export function ancestors(e: El, idx: Map<number, El>, max = 20): El[] {
  * almost no words, positioned absolutely, often clipped).
  */
 const ARTWORK_NAME = /(^|[-_ ])(graphic|graphics|illustration|illus|animation|animated|anim|lottie|canvas|mock|mockup|artwork|visual|visuals|decor|decoration|decorative|device|frame|window|browser|skeleton|scene|particles|orbit|orb|blob|glow|shape|shapes|diagram|chart|sparkline|marquee|ticker)([-_ ]|$)/i;
+/** Badges the builders inject: not the author's work, so no geometry rule should grade them. */
+const INJECTED = /lovable-badge|w-webflow-badge|framer-badge|__next-build-watcher|vercel-live/i;
 export function isArtworkNamed(e: El) {
-  return ARTWORK_NAME.test(e.cls) || ARTWORK_NAME.test(e.id) || e.role === "img" || e.role === "presentation" || e.role === "none";
+  return ARTWORK_NAME.test(e.cls) || ARTWORK_NAME.test(e.id) || INJECTED.test(e.id) || INJECTED.test(e.cls) || e.role === "img" || e.role === "presentation" || e.role === "none";
 }
 /** True when the element or an ancestor (up to `depth`) is artwork by name, or the element is wordless box-art. */
 export function inArtwork(e: El, idx: Map<number, El>, depth = 8) {

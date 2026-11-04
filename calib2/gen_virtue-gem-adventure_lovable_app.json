@@ -1,0 +1,256 @@
+{
+  "id": "633fd2506ed5",
+  "createdAt": "2026-11-03T20:31:22.791Z",
+  "input": {
+    "url": "https://virtue-gem-adventure.lovable.app",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Virtue Sort — A sparkly sorting game for kids",
+    "finalUrl": "https://virtue-gem-adventure.lovable.app/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 900,
+    "elementCount": 121,
+    "wordCount": 61,
+    "fonts": [
+      "Fredoka",
+      "Nunito",
+      "system-ui"
+    ]
+  },
+  "score": 88,
+  "subScores": {
+    "consistency": 93,
+    "generic": 93,
+    "clarity": 100,
+    "appeal": 70
+  },
+  "findings": [
+    {
+      "id": "squint-misaligned-siblings-1",
+      "rule": "misaligned-siblings",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Row items are off by a few pixels",
+      "evidence": "span#lovable-badge-text “Edit with” and span#lovable-badge-logo sit in the same row but their top edges differ by 2px (870 vs 868). 1px is sub-pixel noise; 2–3px is a mistake, not a decision.",
+      "fix": "Align them on the same axis: use align-items on the parent, or give both the same margin-top. If the offset is intentional, make it ≥ 8px so it reads as deliberate.",
+      "rects": [
+        {
+          "x": 1288.59375,
+          "y": 870,
+          "w": 48.40625,
+          "h": 12
+        },
+        {
+          "x": 1343,
+          "y": 868,
+          "w": 52,
+          "h": 12
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "offset": 2
+      }
+    },
+    {
+      "id": "squint-emoji-as-icons-2",
+      "rule": "emoji-as-icons",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Emoji used as icons (7)",
+      "evidence": "“🌞”, “🗺️”, “🎲”. 🚀✨⚡ in front of headings is tell #7 in the Reddit corpus and #3 on the Fountain Institute list.",
+      "fix": "Drop them, or use one consistent icon set at one size. Headings don't need a mascot.",
+      "rects": [
+        {
+          "x": 352,
+          "y": 278.75,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "x": 742,
+          "y": 278.75,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "x": 352,
+          "y": 436.25,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "x": 742,
+          "y": 436.25,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "x": 352,
+          "y": 593.75,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "x": 742,
+          "y": 593.75,
+          "w": 56,
+          "h": 56
+        }
+      ],
+      "citation": "vibecoded-design-tells #7; Slopdar emoji signal"
+    },
+    {
+      "id": "metrics-high-visual-complexity-6",
+      "rule": "high-visual-complexity",
+      "source": "metrics",
+      "category": "appeal",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "Above-the-fold is visually busy",
+      "evidence": "Quadtree decomposition of the first screen (text and photos masked out) needs 1048 leaves (calm pages run 50–250; busy ones 600+). Whitespace share 44%, text covers 10% of the viewport.",
+      "fix": "Remove one thing from the first screen. Reinecke's data says people rate low- and medium-complexity pages the same and punish high complexity; the gain is all in cutting, not adding.",
+      "citation": "Reinecke et al. CHI 2013; Tuch et al.: complexity drives the 50ms impression"
+    },
+    {
+      "id": "squint-centered-hero-3",
+      "rule": "centered-hero",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Centered hero: big headline, centered sub, centered buttons",
+      "evidence": "h1 at 60px, centered, with 6 centered blocks under it. On 23.5% of Show HN launches. It's the layout every builder emits when nobody chooses one.",
+      "fix": "Not a problem on its own, but combined with other tells it's the skeleton. Left-align and put the product next to the headline, or lead with the product itself.",
+      "rects": [
+        {
+          "x": 336,
+          "y": 24,
+          "w": 768,
+          "h": 60
+        }
+      ],
+      "citation": "Krebs 2026 (23.5%); vibecoded-design-tells #9"
+    },
+    {
+      "id": "squint-aurora-blob-4",
+      "rule": "aurora-blob",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Blurred colour blobs behind the content (1)",
+      "evidence": "body is a radial-gradient wash. The aurora backdrop is the default \"atmosphere\" of generated heroes.",
+      "fix": "Remove it and let the content carry the first screen. If you want atmosphere, use one real image.",
+      "rects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 900
+        }
+      ],
+      "citation": "slop-detect aurora_mesh_gradient; Fountain Institute tell #2"
+    },
+    {
+      "id": "squint-head-hygiene-5",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Head is missing: canonical, favicon",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    },
+    {
+      "id": "squint-mobile-tiny-text-7",
+      "rule": "mobile-tiny-text",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "20 words under 12px on a phone",
+      "evidence": "5 text blocks render below 12px at 390px, e.g. div.truncate.text-[11px] “A sparkle for today” at 11px.",
+      "fix": "Body text 16px on mobile; nothing readable under 12px. If the desktop size is in px, use clamp() or a mobile breakpoint."
+    }
+  ],
+  "metrics": {
+    "colorfulness": 28.2,
+    "complexityLeaves": 1048,
+    "whitespaceRatio": 0.443,
+    "textDensity": 0.104,
+    "distinctHues": 3,
+    "dominantBackground": "rgb(255, 249, 242)",
+    "maskedBoxes": 30
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 16367,
+      "note": "playwright-core + @sparticuz/chromium · 121 elements, 900px tall · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 19,
+      "note": "5 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 5771,
+      "note": "1 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 6127,
+      "note": "1048 leaves after masking 30 boxes · bg rgb(255, 249, 242) · whitespace 44%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 6127,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 900
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": "20",
+    "smallTargets": 0,
+    "durationMs": 5771
+  }
+}

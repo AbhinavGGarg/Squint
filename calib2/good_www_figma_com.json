@@ -1,0 +1,224 @@
+{
+  "id": "923fae9b6345",
+  "createdAt": "2026-11-03T20:23:00.991Z",
+  "input": {
+    "url": "https://www.figma.com",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Figma: The collaborative canvas for design, code, and AI",
+    "finalUrl": "https://www.figma.com/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 8739,
+    "elementCount": 843,
+    "wordCount": 483,
+    "fonts": [
+      "figmaSans",
+      "figmaMono"
+    ]
+  },
+  "score": 95,
+  "subScores": {
+    "consistency": 93,
+    "generic": 100,
+    "clarity": 100,
+    "appeal": 85
+  },
+  "findings": [
+    {
+      "id": "impeccable-imp:buried-raster-4",
+      "rule": "imp:buried-raster",
+      "source": "impeccable",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Raster buried under a wash or opacity (×4)",
+      "evidence": "“<img> at opacity 0 \"Wireframe of a website\"” · “<img> at opacity 0 \"Butterfly illustration\"” · “<img> at opacity 0 \"Personal portfolio website pulled up on an ipad\"”",
+      "fix": "A background image under a near-opaque gradient wash, or a raster on an element at near-zero opacity, never reaches the screen: the page shows the wash, and the produced texture or photo ships as a compliance token. Let the material show (a tint under 0.9 alpha, a blend mode, an opacity you can see) or remove the file.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 4
+      }
+    },
+    {
+      "id": "squint-caps-labels-2",
+      "rule": "caps-labels",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "5 tracked all-caps section labels",
+      "evidence": "Small uppercase, letter-spaced labels like “New” above sections. On 10.5% of Show HN launches, and usually redundant with the heading under them.",
+      "fix": "Delete the label or fold its word into the heading.",
+      "rects": [
+        {
+          "x": 618.40625,
+          "y": 7752.59375,
+          "w": 23.40625,
+          "h": 13
+        },
+        {
+          "x": 621.71875,
+          "y": 7827.28125,
+          "w": 23.40625,
+          "h": 13
+        },
+        {
+          "x": 615.265625,
+          "y": 7864.78125,
+          "w": 31.203125,
+          "h": 13
+        },
+        {
+          "x": 607.9375,
+          "y": 8013.84375,
+          "w": 31.203125,
+          "h": 13
+        },
+        {
+          "x": 606.984375,
+          "y": 8051.34375,
+          "w": 31.203125,
+          "h": 13
+        }
+      ],
+      "citation": "Krebs 2026 (10.5%); Impeccable kicker-above-heading"
+    },
+    {
+      "id": "squint-heading-size-drift-1",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "h2 is used at 2 sizes, consistently",
+      "evidence": "Sizes: 30px ×4, 44px ×13. “The products you love are designed in Figma” is 44px, “Move fast in the right direction on an AI-native c” is 30px. Each size is used more than once, so this is a system rather than drift; but it means the same tag is doing two jobs.",
+      "fix": "If the 30px ones are sub-sections, make them h3. Screen readers and search engines only see the tag.",
+      "rects": [
+        {
+          "x": 40,
+          "y": 5636.515625,
+          "w": 1360,
+          "h": 48.390625
+        },
+        {
+          "x": 40,
+          "y": 1018,
+          "w": 901.328125,
+          "h": 36
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          30,
+          44
+        ],
+        "counts": [
+          4,
+          13
+        ],
+        "level": 2
+      }
+    },
+    {
+      "id": "metrics-high-visual-complexity-3",
+      "rule": "high-visual-complexity",
+      "source": "metrics",
+      "category": "appeal",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Above-the-fold is visually busy",
+      "evidence": "Quadtree decomposition of the first screen (text and photos masked out) needs 757 leaves (calm pages run 50–250; busy ones 600+). Whitespace share 81%, text covers 15% of the viewport.",
+      "fix": "Remove one thing from the first screen. Reinecke's data says people rate low- and medium-complexity pages the same and punish high complexity; the gain is all in cutting, not adding.",
+      "citation": "Reinecke et al. CHI 2013; Tuch et al.: complexity drives the 50ms impression"
+    },
+    {
+      "id": "impeccable-imp:repeating-stripes-gradient-5",
+      "rule": "imp:repeating-stripes-gradient",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Repeating-gradient stripes",
+      "evidence": "“repeating-gradient decorative stripes”",
+      "fix": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    }
+  ],
+  "metrics": {
+    "colorfulness": 15.7,
+    "complexityLeaves": 757,
+    "whitespaceRatio": 0.814,
+    "textDensity": 0.15,
+    "distinctHues": 2,
+    "dominantBackground": "rgb(255, 255, 255)",
+    "maskedBoxes": 19
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 29784,
+      "note": "playwright-core + @sparticuz/chromium · 843 elements, 8739px tall · 23 tracker/media requests blocked · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 186,
+      "note": "2 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 19202,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 20084,
+      "note": "757 leaves after masking 19 boxes · bg rgb(255, 255, 255) · whitespace 81%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 20084,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 8739
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 19202
+  }
+}

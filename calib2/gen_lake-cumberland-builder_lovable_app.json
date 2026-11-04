@@ -1,0 +1,204 @@
+{
+  "id": "891e30d91571",
+  "createdAt": "2026-11-03T20:32:59.510Z",
+  "input": {
+    "url": "https://lake-cumberland-builder.lovable.app",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Cumberland Roofing & Siding Quotes — Lake Cumberland KY Contractors",
+    "finalUrl": "https://lake-cumberland-builder.lovable.app/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 1336,
+    "elementCount": 177,
+    "wordCount": 215,
+    "fonts": [
+      "ui-sans-serif",
+      "system-ui"
+    ]
+  },
+  "score": 95,
+  "subScores": {
+    "consistency": 86,
+    "generic": 100,
+    "clarity": 100,
+    "appeal": 100
+  },
+  "findings": [
+    {
+      "id": "squint-misaligned-siblings-1",
+      "rule": "misaligned-siblings",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Row items are off by a few pixels",
+      "evidence": "span#lovable-badge-text “Edit with” and span#lovable-badge-logo sit in the same row but their top edges differ by 2px (870 vs 868). 1px is sub-pixel noise; 2–3px is a mistake, not a decision.",
+      "fix": "Align them on the same axis: use align-items on the parent, or give both the same margin-top. If the offset is intentional, make it ≥ 8px so it reads as deliberate.",
+      "rects": [
+        {
+          "x": 1288.59375,
+          "y": 870,
+          "w": 48.40625,
+          "h": 12
+        },
+        {
+          "x": 1343,
+          "y": 868,
+          "w": 52,
+          "h": 12
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "offset": 2
+      }
+    },
+    {
+      "id": "squint-head-hygiene-4",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Head is missing: title is 71 chars (cuts off ~60), canonical",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    },
+    {
+      "id": "squint-caps-labels-2",
+      "rule": "caps-labels",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "12 tracked all-caps section labels",
+      "evidence": "Small uppercase, letter-spaced labels like “Client Name” above sections. On 10.5% of Show HN launches, and usually redundant with the heading under them.",
+      "fix": "Delete the label or fold its word into the heading.",
+      "rects": [
+        {
+          "x": 181,
+          "y": 307.125,
+          "w": 508,
+          "h": 18
+        },
+        {
+          "x": 181,
+          "y": 389.5,
+          "w": 248,
+          "h": 18
+        },
+        {
+          "x": 441,
+          "y": 389.5,
+          "w": 248,
+          "h": 18
+        },
+        {
+          "x": 181,
+          "y": 471.875,
+          "w": 508,
+          "h": 18
+        },
+        {
+          "x": 181,
+          "y": 554.25,
+          "w": 508,
+          "h": 18
+        },
+        {
+          "x": 181,
+          "y": 636.625,
+          "w": 508,
+          "h": 18
+        }
+      ],
+      "citation": "Krebs 2026 (10.5%); Impeccable kicker-above-heading"
+    },
+    {
+      "id": "squint-em-dash-density-3",
+      "rule": "em-dash-density",
+      "source": "squint",
+      "category": "copy",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "10 em dashes in 1.2k characters",
+      "evidence": "8 per 1,000 characters. Humans use them; generated copy uses them in nearly every paragraph, and readers have learned to notice.",
+      "fix": "Keep the ones that do work; turn the rest into commas, periods, or parentheses.",
+      "citation": "Impeccable em-dash-overuse; Slopdar em-dash signal; HN thread"
+    }
+  ],
+  "metrics": {
+    "colorfulness": 12.2,
+    "complexityLeaves": 244,
+    "whitespaceRatio": 0.886,
+    "textDensity": 0.237,
+    "distinctHues": 1,
+    "dominantBackground": "rgb(252, 252, 252)",
+    "maskedBoxes": 48
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 5041,
+      "note": "playwright-core + @sparticuz/chromium · 177 elements, 1336px tall · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 18,
+      "note": "4 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 3262,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 3759,
+      "note": "244 leaves after masking 48 boxes · bg rgb(252, 252, 252) · whitespace 89%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 3759,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 1336
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 3262
+  }
+}

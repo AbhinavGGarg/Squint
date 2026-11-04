@@ -1,0 +1,339 @@
+{
+  "id": "eda42282c598",
+  "createdAt": "2026-11-03T20:28:30.162Z",
+  "input": {
+    "url": "https://www.theguardian.com",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "Latest news, sport and opinion from the Guardian",
+    "finalUrl": "https://www.theguardian.com/us",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 22370,
+    "elementCount": 3216,
+    "wordCount": 3316,
+    "fonts": [
+      "GuardianTextSans",
+      "GH Guardian Headline",
+      "Times New Roman"
+    ]
+  },
+  "score": 82,
+  "subScores": {
+    "consistency": 79,
+    "generic": 93,
+    "clarity": 100,
+    "appeal": 60
+  },
+  "findings": [
+    {
+      "id": "squint-heading-size-drift-1",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "h3 headings render at 5 different sizes",
+      "evidence": "“US midterm elections 2026 live Americans go to the” is 28px while “Full reportAmericans head to polls in midterm elec” is 14px (2×). Sizes seen: 14px ×12, 17px ×27, 20px ×62, 24px ×9, 28px ×6; weights: 400, 500. Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h3 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 330,
+          "y": 671,
+          "w": 300,
+          "h": 114.75
+        },
+        {
+          "x": 330,
+          "y": 1219,
+          "w": 220,
+          "h": 54.5625
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          14,
+          17,
+          20,
+          24,
+          28
+        ],
+        "counts": [
+          12,
+          27,
+          62,
+          9,
+          6
+        ],
+        "level": 3
+      }
+    },
+    {
+      "id": "squint-link-preview-5",
+      "rule": "link-preview",
+      "source": "squint",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Links to this page unfurl as a blank card",
+      "evidence": "No og:image. No og:title. Every share on iMessage, Discord, Slack, X and LinkedIn renders from these tags.",
+      "fix": "Add <meta property=\"og:image\"> (1200×630), <meta property=\"og:title\"> and <meta name=\"description\"> with one specific sentence. In Next.js, export `metadata` from the page.",
+      "citation": "Open Graph protocol"
+    },
+    {
+      "id": "impeccable-imp:side-tab-9",
+      "rule": "imp:side-tab",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Side-tab accent border (×2)",
+      "evidence": "“.dcr-1nw03rh::after — absolute 5px pseudo-element stripe (bottom: 0)” · “.dcr-1lb40gj::after — absolute 5px pseudo-element stripe (bottom: 0)”",
+      "fix": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 2
+      }
+    },
+    {
+      "id": "metrics-high-visual-complexity-7",
+      "rule": "high-visual-complexity",
+      "source": "metrics",
+      "category": "appeal",
+      "severity": "warn",
+      "confidence": "heuristic",
+      "title": "Above-the-fold is visually busy",
+      "evidence": "Quadtree decomposition of the first screen (text and photos masked out) needs 1300 leaves (calm pages run 50–250; busy ones 600+). Whitespace share 41%, text covers 17% of the viewport.",
+      "fix": "Remove one thing from the first screen. Reinecke's data says people rate low- and medium-complexity pages the same and punish high complexity; the gain is all in cutting, not adding.",
+      "citation": "Reinecke et al. CHI 2013; Tuch et al.: complexity drives the 50ms impression"
+    },
+    {
+      "id": "squint-marketing-buzzwords-4",
+      "rule": "marketing-buzzwords",
+      "source": "squint",
+      "category": "copy",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "2 marketing buzzwords",
+      "evidence": "“…sly watchable and effortlessly charming as a bli…” · “…e still see it as the future of cinema 6h ago Wha…”",
+      "fix": "Replace each with the specific thing: what it does, for whom, with a number if you have one. 'Streamline your workflow' → 'Turns a 40-minute export into a button.'",
+      "citation": "Impeccable marketing-buzzword list (Apache-2.0)",
+      "data": {
+        "hits": [
+          "sly watchable and effortlessly charming as a bli",
+          "e still see it as the future of cinema 6h ago Wha"
+        ]
+      }
+    },
+    {
+      "id": "squint-h1-count-6",
+      "rule": "h1-count",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "No h1 on the page",
+      "evidence": "Screen readers and search engines use the h1 as the page's name.",
+      "fix": "Exactly one h1, saying what the page is."
+    },
+    {
+      "id": "squint-heading-size-drift-2",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "h2 is used at 2 sizes, consistently",
+      "evidence": "Sizes: 20px ×16, 28px ×9. “US midterm elections 2026” is 28px, “In focus” is 20px. Each size is used more than once, so this is a system rather than drift; but it means the same tag is doing two jobs.",
+      "fix": "If the 20px ones are sub-sections, make them h3. Screen readers and search engines only see the tag.",
+      "rects": [
+        {
+          "x": 90,
+          "y": 663,
+          "w": 220,
+          "h": 74.375
+        },
+        {
+          "x": 90,
+          "y": 3447.53125,
+          "w": 220,
+          "h": 36
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          20,
+          28
+        ],
+        "counts": [
+          16,
+          9
+        ],
+        "level": 2
+      }
+    },
+    {
+      "id": "squint-status-dots-3",
+      "rule": "status-dots",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "10 status dots on the page",
+      "evidence": "Coloured dots attached to labels where a word would say more.",
+      "fix": "Replace with text or remove.",
+      "rects": [
+        {
+          "x": 935.9749755859375,
+          "y": 1188.9749755859375,
+          "w": 8.050048828125,
+          "h": 8.050048828125
+        },
+        {
+          "x": 947.5,
+          "y": 1189.5,
+          "w": 7,
+          "h": 7
+        },
+        {
+          "x": 958.5,
+          "y": 1189.5,
+          "w": 7,
+          "h": 7
+        },
+        {
+          "x": 969.5,
+          "y": 1189.5,
+          "w": 7,
+          "h": 7
+        },
+        {
+          "x": 981.0250244140625,
+          "y": 1190.0250244140625,
+          "w": 5.949951171875,
+          "h": 5.949951171875
+        },
+        {
+          "x": 991.5,
+          "y": 1189.5,
+          "w": 7,
+          "h": 7
+        },
+        {
+          "x": 1002.5,
+          "y": 1189.5,
+          "w": 7,
+          "h": 7
+        },
+        {
+          "x": 1013.5,
+          "y": 1189.5,
+          "w": 7,
+          "h": 7
+        }
+      ],
+      "citation": "Fountain Institute tell #7"
+    },
+    {
+      "id": "metrics-high-colorfulness-8",
+      "rule": "high-colorfulness",
+      "source": "metrics",
+      "category": "appeal",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Colourful first screen (M = 157, 5 hue bands)",
+      "evidence": "Colorfulness is the weaker of the two first-impression predictors, but many competing hues read as noise rather than brand.",
+      "fix": "One accent hue, one neutral ramp. Let photos or product shots carry the colour.",
+      "citation": "Hasler & Süsstrunk 2003; Reinecke 2013"
+    },
+    {
+      "id": "impeccable-imp:repeating-stripes-gradient-10",
+      "rule": "imp:repeating-stripes-gradient",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Repeating-gradient stripes",
+      "evidence": "“repeating-gradient decorative stripes”",
+      "fix": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    }
+  ],
+  "metrics": {
+    "colorfulness": 156.8,
+    "complexityLeaves": 1300,
+    "whitespaceRatio": 0.407,
+    "textDensity": 0.17,
+    "distinctHues": 5,
+    "dominantBackground": "rgb(252, 228, 4)",
+    "maskedBoxes": 69
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 20712,
+      "note": "playwright-core + @sparticuz/chromium · 3216 elements, 22370px tall · 4 tracker/media requests blocked · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 344,
+      "note": "6 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 13073,
+      "note": "0 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 16455,
+      "note": "1300 leaves after masking 69 boxes · bg rgb(252, 228, 4) · whitespace 41%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 16455,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 12000
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": 0,
+    "smallTargets": 0,
+    "durationMs": 13073
+  }
+}

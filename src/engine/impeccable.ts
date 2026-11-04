@@ -56,7 +56,7 @@ export async function runImpeccable(opts: { url?: string; html: string }): Promi
   let raw: ImpFinding[] | null = null;
   let note = "";
   if (opts.url && /^https?:/.test(opts.url) && !process.env.SQUINT_IMPECCABLE_HTML_ONLY) {
-    const r = await run(["detect", "--json", opts.url], 60_000);
+    const r = await run(["detect", "--json", opts.url], 45_000);
     raw = parse(r.stdout);
     if (!raw || (raw.length === 0 && /Error:/.test(r.stdout + r.stderr))) {
       raw = null;
@@ -67,7 +67,7 @@ export async function runImpeccable(opts: { url?: string; html: string }): Promi
     const dir = await mkdtemp(path.join(tmpdir(), "squint-imp-"));
     try {
       await writeFile(path.join(dir, "index.html"), opts.html, "utf8");
-      const r = await run(["detect", "--json", dir], 60_000);
+      const r = await run(["detect", "--json", dir], 45_000);
       raw = parse(r.stdout);
       note += raw ? "pattern rules on captured HTML" : `failed: ${(r.stderr || r.stdout).slice(0, 200)}`;
     } finally {

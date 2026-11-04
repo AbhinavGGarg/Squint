@@ -36,6 +36,14 @@ const CASES: Case[] = [
     mustNotHave: ["container-vs-content", "stretched-row-cards", "misaligned-siblings", "uneven-gaps", "cramped-padding", "cards-in-cards", "placeholder-content", "tasteful-default", "heading-size-drift", "decorative-badge", "mobile-tap-targets"],
     scoreAbove: 85,
   },
+  {
+    // An unedited Lovable/shadcn page: clean geometry, the whole kit, the builder's badge and defaults.
+    // The blind test showed these scored like Stripe; they must not.
+    file: "fixtures/lovable-like.html", type: "landing",
+    mustHave: ["builder-signature", "template-stack", "shadcn-untouched", "hero-eyebrow-chip", "centered-hero"],
+    mustNotHave: ["misaligned-siblings", "container-vs-content", "cramped-padding"],
+    scoreBelow: 70,
+  },
 ];
 
 async function main() {

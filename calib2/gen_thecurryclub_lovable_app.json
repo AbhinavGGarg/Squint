@@ -1,0 +1,326 @@
+{
+  "id": "dbba9d53d933",
+  "createdAt": "2026-11-03T20:34:45.285Z",
+  "input": {
+    "url": "https://thecurryclub.lovable.app",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "CurryClub — A global social network for curry lovers",
+    "finalUrl": "https://thecurryclub.lovable.app/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 3471,
+    "elementCount": 190,
+    "wordCount": 278,
+    "fonts": [
+      "Space Grotesk",
+      "Bricolage Grotesque",
+      "system-ui"
+    ]
+  },
+  "score": 86,
+  "subScores": {
+    "consistency": 72,
+    "generic": 93,
+    "clarity": 100,
+    "appeal": 95
+  },
+  "findings": [
+    {
+      "id": "squint-heading-size-drift-2",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "One h3 is a different size from the other 5",
+      "evidence": "“ACTIVE NOW” is 12px; the other h3s are 24px (12px ×1, 24px ×5). Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h3 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 96,
+          "y": 1475,
+          "w": 87.40625,
+          "h": 16
+        },
+        {
+          "x": 113,
+          "y": 1226,
+          "w": 344.65625,
+          "h": 32
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          12,
+          24
+        ],
+        "counts": [
+          1,
+          5
+        ],
+        "level": 3
+      }
+    },
+    {
+      "id": "squint-misaligned-siblings-1",
+      "rule": "misaligned-siblings",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Row items are off by a few pixels",
+      "evidence": "span#lovable-badge-text “Edit with” and span#lovable-badge-logo sit in the same row but their top edges differ by 2px (870 vs 868). 1px is sub-pixel noise; 2–3px is a mistake, not a decision.",
+      "fix": "Align them on the same axis: use align-items on the parent, or give both the same margin-top. If the offset is intentional, make it ≥ 8px so it reads as deliberate.",
+      "rects": [
+        {
+          "x": 1288.59375,
+          "y": 870,
+          "w": 48.40625,
+          "h": 12
+        },
+        {
+          "x": 1343,
+          "y": 868,
+          "w": 52,
+          "h": 12
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "offset": 2
+      }
+    },
+    {
+      "id": "squint-cramped-padding-3",
+      "rule": "cramped-padding",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Text sits too close to its box edge (×2)",
+      "evidence": "div.relative.flex: the text is 1/1/1/1px (top/right/bottom/left) from the box edge at 16px text; 4 sides are under 3px.",
+      "fix": "Give the box at least 8px on every side (about half the font size).",
+      "rects": [
+        {
+          "x": 356,
+          "y": 815,
+          "w": 728,
+          "h": 90
+        },
+        {
+          "x": 235,
+          "y": 2773.875,
+          "w": 970,
+          "h": 250
+        }
+      ],
+      "citation": "Thresholds from UXly (MIT)",
+      "data": {
+        "count": 2
+      }
+    },
+    {
+      "id": "impeccable-imp:pulsing-dot-7",
+      "rule": "imp:pulsing-dot",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Pulsing status dot",
+      "evidence": "“animate-pulse on tiny rounded-full element”",
+      "fix": "Small pulsing status dots simulate liveness decoratively. Reserve pulse animation for indicators tied to genuinely live, changing data; a static indicator with clear labeling is honest and calmer.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    },
+    {
+      "id": "squint-hero-eyebrow-chip-4",
+      "rule": "hero-eyebrow-chip",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Eyebrow label above the hero headline",
+      "evidence": "“Live · 2,402 feasts this week” (10px, tracked caps) sits directly above a 96px h1. The tiny label + giant headline pairing is the default generated SaaS hero.",
+      "fix": "Fold the label into the headline or the first sentence. If it's an announcement, make it a real link somewhere else.",
+      "rects": [
+        {
+          "x": 64,
+          "y": 387.21875,
+          "w": 197.3125,
+          "h": 23
+        },
+        {
+          "x": 64,
+          "y": 426.21875,
+          "w": 672,
+          "h": 172.78125
+        }
+      ],
+      "citation": "Impeccable hero-eyebrow-chip (Apache-2.0)"
+    },
+    {
+      "id": "squint-caps-labels-5",
+      "rule": "caps-labels",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "12 tracked all-caps section labels",
+      "evidence": "Small uppercase, letter-spaced labels like “Live · 2,402 feasts this week” above sections. On 10.5% of Show HN launches, and usually redundant with the heading under them.",
+      "fix": "Delete the label or fold its word into the heading.",
+      "rects": [
+        {
+          "x": 64,
+          "y": 387.21875,
+          "w": 197.3125,
+          "h": 23
+        },
+        {
+          "x": 974.546875,
+          "y": 820,
+          "w": 100.453125,
+          "h": 13.5
+        },
+        {
+          "x": 96,
+          "y": 1475,
+          "w": 87.40625,
+          "h": 16
+        },
+        {
+          "x": 1156.765625,
+          "y": 1475.5,
+          "w": 27.6875,
+          "h": 15
+        },
+        {
+          "x": 1296.453125,
+          "y": 1475.5,
+          "w": 63.546875,
+          "h": 15
+        },
+        {
+          "x": 264.59375,
+          "y": 1535.25,
+          "w": 22.40625,
+          "h": 13.5
+        }
+      ],
+      "citation": "Krebs 2026 (10.5%); Impeccable kicker-above-heading"
+    },
+    {
+      "id": "squint-head-hygiene-6",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Head is missing: canonical",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    },
+    {
+      "id": "squint-mobile-tiny-text-9",
+      "rule": "mobile-tiny-text",
+      "source": "squint",
+      "category": "quality",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "29 words under 12px on a phone",
+      "evidence": "4 text blocks render below 12px at 390px, e.g. span.mb-4.inline-block “Live · 2,402 feasts this week” at 10px.",
+      "fix": "Body text 16px on mobile; nothing readable under 12px. If the desktop size is in px, use clamp() or a mobile breakpoint."
+    },
+    {
+      "id": "impeccable-imp:repeating-stripes-gradient-8",
+      "rule": "imp:repeating-stripes-gradient",
+      "source": "impeccable",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "Repeating-gradient stripes",
+      "evidence": "“repeating-gradient decorative stripes”",
+      "fix": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    }
+  ],
+  "metrics": {
+    "colorfulness": 49.9,
+    "complexityLeaves": 103,
+    "whitespaceRatio": 0.417,
+    "textDensity": 0.215,
+    "distinctHues": 4,
+    "dominantBackground": "rgb(12, 4, 4)",
+    "maskedBoxes": 18
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 10854,
+      "note": "playwright-core + @sparticuz/chromium · 190 elements, 3471px tall · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 20,
+      "note": "6 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 5053,
+      "note": "1 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 5579,
+      "note": "103 leaves after masking 18 boxes · bg rgb(12, 4, 4) · whitespace 42%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 5579,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 3471
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": "29",
+    "smallTargets": 0,
+    "durationMs": 5053
+  }
+}

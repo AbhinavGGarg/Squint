@@ -1,0 +1,425 @@
+{
+  "id": "626e6b13bfc9",
+  "createdAt": "2026-11-03T20:21:30.947Z",
+  "input": {
+    "url": "https://github.com",
+    "html": false,
+    "pageType": "landing"
+  },
+  "page": {
+    "title": "GitHub · Change is constant. GitHub keeps you ahead. · GitHub · GitHub",
+    "finalUrl": "https://github.com/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "fullHeight": 7634,
+    "elementCount": 1128,
+    "wordCount": 767,
+    "fonts": [
+      "Mona Sans VF",
+      "Mona Sans",
+      "Mona Sans Mono"
+    ]
+  },
+  "score": 77,
+  "subScores": {
+    "consistency": 51,
+    "generic": 86,
+    "clarity": 100,
+    "appeal": 100
+  },
+  "findings": [
+    {
+      "id": "squint-heading-size-drift-1",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "One h2 is a different size from the other 9",
+      "evidence": "“COMPANIES USING GITHUB” is 14px; the other h2s are 24/34/40px (14px ×1, 24px ×5, 34px ×2, 40px ×2). Same semantic level should get the same treatment.",
+      "fix": "Pick one size for h2 and set it once in CSS. If one of these is really a sub-heading, change its tag instead of its size.",
+      "rects": [
+        {
+          "x": 177,
+          "y": 5167.671875,
+          "w": 1,
+          "h": 1
+        },
+        {
+          "x": 16,
+          "y": 1729.703125,
+          "w": 1408,
+          "h": 48
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          14,
+          24,
+          34,
+          40
+        ],
+        "counts": [
+          1,
+          5,
+          2,
+          2
+        ],
+        "level": 2
+      }
+    },
+    {
+      "id": "squint-container-vs-content-4",
+      "rule": "container-vs-content",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "error",
+      "confidence": "measured",
+      "title": "Card is far taller than its content",
+      "evidence": "div.Testimonials__stat__Mnxlqt is 455×330px but its content occupies 13% of that; 81px of empty space sits under the last line. Nothing inside it needs the height, so a fixed height or min-height is probably set.",
+      "fix": "Remove the fixed height / min-height and let the card size to its content, or fill the space with something that earns it.",
+      "rects": [
+        {
+          "x": 856.375,
+          "y": 4804.671875,
+          "w": 454.625,
+          "h": 330
+        },
+        {
+          "x": 904.375,
+          "y": 4931.578125,
+          "w": 265.890625,
+          "h": 74.1875
+        }
+      ],
+      "data": {
+        "fill": 0.13148206225368894,
+        "bottomSlack": 80.90625
+      },
+      "citation": "Lin 2004: whitespace helps comprehension when it frames content; dead space inside a container just reads as unfinished"
+    },
+    {
+      "id": "squint-stretched-row-cards-3",
+      "rule": "stretched-row-cards",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "4 cards in a row stretched to the tallest one",
+      "evidence": "All 4 are 579px tall, but content ends at 571, 411, 331, 451px from the top. Empty space below content: 8, 168, 249, 128px. One card's wrapped text is dictating the height of its siblings.",
+      "fix": "Either shorten the long one so they match naturally, align content to the top and accept a little empty space, or use align-items: start so cards hug their content. Avoid a row where two tiles are 60% air.",
+      "rects": [
+        {
+          "x": 112,
+          "y": 6917.296875,
+          "w": 286,
+          "h": 579.21875
+        },
+        {
+          "x": 422,
+          "y": 6917.296875,
+          "w": 286,
+          "h": 579.21875
+        },
+        {
+          "x": 732,
+          "y": 6917.296875,
+          "w": 286,
+          "h": 579.21875
+        },
+        {
+          "x": 1042,
+          "y": 6917.296875,
+          "w": 286,
+          "h": 579.21875
+        }
+      ],
+      "citation": "Gestalt: items given equal size are read as equal weight — empty tiles read as padding",
+      "data": {
+        "height": 579.21875,
+        "contentHeights": [
+          571.125,
+          410.75,
+          330.5625,
+          450.84375
+        ]
+      }
+    },
+    {
+      "id": "squint-ai-purple-6",
+      "rule": "ai-purple",
+      "source": "squint",
+      "category": "generic",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "AI purple accent",
+      "evidence": "5 elements use a violet/indigo accent (hue 260–310°), e.g. a.RepositoryPanel__9cDraF. This is the single most-cited vibe-coded tell in the Reddit corpus (#2 overall).",
+      "fix": "Pick one base hue that means something for this product and derive the palette from it. If you keep purple, make it a decision: one accent, solid, used sparingly.",
+      "rects": [
+        {
+          "x": 129,
+          "y": 5844.859375,
+          "w": 196,
+          "h": 88.515625
+        },
+        {
+          "x": 720,
+          "y": 5844.859375,
+          "w": 196,
+          "h": 88.515625
+        },
+        {
+          "x": 523,
+          "y": 6023.890625,
+          "w": 196,
+          "h": 88.515625
+        },
+        {
+          "x": 1114,
+          "y": 6023.890625,
+          "w": 197,
+          "h": 88.515625
+        },
+        {
+          "x": 129,
+          "y": 6113.40625,
+          "w": 196,
+          "h": 89.515625
+        }
+      ],
+      "citation": "Impeccable ai-color-palette (Apache-2.0); vibecoded-design-tells #2–3"
+    },
+    {
+      "id": "squint-head-hygiene-9",
+      "rule": "head-hygiene",
+      "source": "squint",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Head is missing: title is 70 chars (cuts off ~60)",
+      "evidence": "No JSON-LD structured data either, so AI search engines have nothing to cite. One h1, good.",
+      "fix": "Ten minutes of <head> work: title under 60 chars, canonical URL, lang attribute, favicon, and an Organization or WebSite JSON-LD block.",
+      "citation": "slop-detect AEO axis; lightsite checks"
+    },
+    {
+      "id": "squint-mobile-tiny-text-11",
+      "rule": "mobile-tiny-text",
+      "source": "squint",
+      "category": "quality",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "149 words under 12px on a phone",
+      "evidence": "16 text blocks render below 12px at 390px, e.g. p.RepositoryDescription__JVXrci “Hyprland is an independent, highly custo…” at 11px.",
+      "fix": "Body text 16px on mobile; nothing readable under 12px. If the desktop size is in px, use clamp() or a mobile breakpoint."
+    },
+    {
+      "id": "impeccable-imp:marketing-buzzword-10",
+      "rule": "imp:marketing-buzzword",
+      "source": "impeccable",
+      "category": "copy",
+      "severity": "warn",
+      "confidence": "measured",
+      "title": "Marketing buzzword",
+      "evidence": "“3 buzzword phrases: \"ed Security Enterprise-grade code securi\"”",
+      "fix": "Generic SaaS phrases (streamline / empower / supercharge / world-class / enterprise-grade / next-generation / cutting-edge / etc) are instant AI tells. Pick a specific verb and noun that says what the product literally does.",
+      "citation": "Impeccable detector (Apache-2.0, pbakaus/impeccable)",
+      "data": {
+        "count": 1
+      }
+    },
+    {
+      "id": "squint-glassmorphism-7",
+      "rule": "glassmorphism",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Frosted-glass panels (2)",
+      "evidence": "2 elements combine backdrop-filter blur with a translucent background, e.g. a.Primer_Brand__Button-module__Button___scH9Z.Primer_Brand__Button-module__Button--secondary___gHnw_. On 17% of Show HN launches.",
+      "fix": "Use a solid surface. Translucency only earns its place when something meaningful is behind it.",
+      "rects": [
+        {
+          "x": 817.5625,
+          "y": 345.1875,
+          "w": 271.703125,
+          "h": 53
+        },
+        {
+          "x": 177,
+          "y": 4370.671875,
+          "w": 230.828125,
+          "h": 43
+        }
+      ],
+      "citation": "Krebs 2026 (17.1%); slop-detect glassmorphism"
+    },
+    {
+      "id": "squint-centered-hero-8",
+      "rule": "centered-hero",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "measured",
+      "title": "Centered hero: big headline, centered sub, centered buttons",
+      "evidence": "h1 at 56px, centered, with 2 centered blocks under it. On 23.5% of Show HN launches. It's the layout every builder emits when nobody chooses one.",
+      "fix": "Not a problem on its own, but combined with other tells it's the skeleton. Left-align and put the product next to the headline, or lead with the product itself.",
+      "rects": [
+        {
+          "x": 457.03125,
+          "y": 190,
+          "w": 525.9375,
+          "h": 123.1875
+        }
+      ],
+      "citation": "Krebs 2026 (23.5%); vibecoded-design-tells #9"
+    },
+    {
+      "id": "squint-heading-size-drift-2",
+      "rule": "heading-size-drift",
+      "source": "squint",
+      "category": "consistency",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "h3 is used at 3 sizes, consistently",
+      "evidence": "Sizes: 20px ×5, 22px ×3, 28px ×2. “GitHub” is 28px, “Actions” is 20px. Each size is used more than once, so this is a system rather than drift; but it means the same tag is doing two jobs.",
+      "fix": "If the 20px ones are sub-sections, make them h4. Screen readers and search engines only see the tag.",
+      "rects": [
+        {
+          "x": 362.234375,
+          "y": 2373.953125,
+          "w": 124.53125,
+          "h": 37.796875
+        },
+        {
+          "x": 188.09375,
+          "y": 3212.953125,
+          "w": 70.828125,
+          "h": 26
+        }
+      ],
+      "citation": "UICrit: elements at the same level of hierarchy should get similar graphic treatment (Duan et al., UIST '24)",
+      "data": {
+        "sizes": [
+          20,
+          22,
+          28
+        ],
+        "counts": [
+          5,
+          3,
+          2
+        ],
+        "level": 3
+      }
+    },
+    {
+      "id": "squint-status-dots-5",
+      "rule": "status-dots",
+      "source": "squint",
+      "category": "generic",
+      "severity": "info",
+      "confidence": "heuristic",
+      "title": "4 status dots on the page",
+      "evidence": "Coloured dots attached to labels where a word would say more.",
+      "fix": "Replace with text or remove.",
+      "rects": [
+        {
+          "x": 244,
+          "y": 5030.671875,
+          "w": 6,
+          "h": 6
+        },
+        {
+          "x": 256,
+          "y": 5030.671875,
+          "w": 6,
+          "h": 6
+        },
+        {
+          "x": 268,
+          "y": 5030.671875,
+          "w": 6,
+          "h": 6
+        },
+        {
+          "x": 280,
+          "y": 5030.671875,
+          "w": 6,
+          "h": 6
+        }
+      ],
+      "citation": "Fountain Institute tell #7"
+    }
+  ],
+  "metrics": {
+    "colorfulness": 16.7,
+    "complexityLeaves": 88,
+    "whitespaceRatio": 0.788,
+    "textDensity": 0.075,
+    "distinctHues": 1,
+    "dominantBackground": "rgb(255, 255, 255)",
+    "maskedBoxes": 20
+  },
+  "judgeSkipped": "Pro tier not enabled on this deployment.",
+  "engines": [
+    {
+      "name": "render",
+      "ok": true,
+      "durationMs": 14302,
+      "note": "playwright-core + @sparticuz/chromium · 1128 elements, 7634px tall · 5 tracker/media requests blocked · store: vercel-blob"
+    },
+    {
+      "name": "squint-rules",
+      "ok": true,
+      "durationMs": 82,
+      "note": "9 findings"
+    },
+    {
+      "name": "mobile-390",
+      "ok": true,
+      "durationMs": 8368,
+      "note": "1 findings"
+    },
+    {
+      "name": "appeal-metrics",
+      "ok": true,
+      "durationMs": 9423,
+      "note": "88 leaves after masking 20 boxes · bg rgb(255, 255, 255) · whitespace 79%"
+    },
+    {
+      "name": "impeccable",
+      "ok": true,
+      "durationMs": 9423,
+      "note": "no local Chrome; pattern rules on captured HTML"
+    },
+    {
+      "name": "judge",
+      "ok": false,
+      "durationMs": 0,
+      "note": "Pro tier not enabled on this deployment."
+    }
+  ],
+  "screenshot": {
+    "viewport": "viewport.png",
+    "full": "full.png",
+    "fullSize": {
+      "w": 1440,
+      "h": 7634
+    },
+    "mobile": "mobile.png",
+    "mobileSize": {
+      "w": 390,
+      "h": 844
+    }
+  },
+  "mobile": {
+    "scrollWidth": 390,
+    "overflow": false,
+    "tinyText": "149",
+    "smallTargets": 0,
+    "durationMs": 8368
+  }
+}

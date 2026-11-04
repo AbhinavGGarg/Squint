@@ -22,6 +22,7 @@ const CATALOGUE: { fam: string; n: string; rules: string }[] = [
   { fam: "Copy", n: "8 rules · measured", rules: "Marketing buzzwords (the unlock / supercharge / seamless family) · the not-just-X-but-Y construction · em-dash density · placeholder names and filler text · a headline that could be on any site · formulaic openers and closers · the whether-you're-a-this-or-a-that opener · social proof with no source (round user counts, star ratings nobody can check)." },
   { fam: "On a phone", n: "3 rules · 390px render", rules: "Page scrolls sideways · text under 12px · tap targets under 32px." },
   { fam: "How the link unfurls", n: "3 rules · HTML", rules: "og:image, og:title and meta description · canonical, viewport, lang, favicon, JSON-LD · exactly one h1." },
+  { fam: "Did anyone edit it", n: "2 rules · measured", rules: "The builder's own badge or defaults still on the page (“Edit with Lovable”, the Lovable share image, “Create Next App”, Vite's favicon) · the whole kit at once: four or more template tells on one page, counted, because no single one separates generated from made and the count does." },
   { fam: "First impression", n: "3 metrics · screenshot", rules: "Visual complexity by quadtree with text masked, colourfulness (Hasler & Süsstrunk), whitespace share. After Reinecke et al. 2013, who found complexity and colourfulness explain about half the variance in 500 ms appeal ratings." },
 ];
 
@@ -76,7 +77,7 @@ export default function Home() {
 
       <section className="section">
         <h2>The catalogue</h2>
-        <p className="sub">Fifty-five rules and three metrics. Thresholds borrowed from Impeccable and UXly, tell rankings from a corpus of 3,000 Reddit comments and a study of 500 Show HN launches, and every rule names its source in the report.</p>
+        <p className="sub">Fifty-seven rules and three metrics. Thresholds borrowed from Impeccable and UXly, tell rankings from a corpus of 3,000 Reddit comments and a study of 500 Show HN launches, and every rule names its source in the report.</p>
         <div className="catalogue">
           {CATALOGUE.map((c) => (
             <div key={c.fam} style={{ display: "contents" }}>

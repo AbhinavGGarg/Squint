@@ -7,6 +7,7 @@ import { fingerprintRules2 } from "./rules/fingerprints2";
 import { copyRules } from "./rules/copy";
 import { mobileRules } from "./rules/mobile";
 import { technicalRules } from "./rules/technical";
+import { templateStack } from "./rules/stack";
 import { applyPreset } from "./presets";
 import { resetIds } from "./rules/util";
 import { appealMetrics } from "./metrics/appeal";
@@ -78,14 +79,18 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
     lightMode
       ? Promise.resolve({ ok: false as const, e: "skipped: light-mode screenshot has no images, so complexity and colourfulness would be wrong" })
       : appealMetrics(r.viewportPng, r.snapshot).then((a) => ({ ok: true as const, a })).catch((e) => ({ ok: false as const, e })),
-    input.skipImpeccable ? Promise.resolve(null) : runImpeccable({ url: input.url, html: r.html }).catch((e) => ({ findings: [], note: String(e), ok: false })),
+    input.skipImpeccable || Date.now() - t0 > 120_000 ? Promise.resolve(null) : runImpeccable({ url: input.url, html: r.html }).catch((e) => ({ findings: [], note: String(e), ok: false })),
   ]);
   // The mobile pass runs AFTER the other engines, on its own: opening a second browser context while
   // other work is in flight crashes the serverless Chromium build. It also gets a hard deadline so a
   // dead browser can never hang the request.
   const t2m = Date.now();
+  // Time budget: a page that took over 100s to get this far will not finish a second render and
+  // the function has a hard ceiling. Better a desktop-only report than none.
+  const slow = Date.now() - t0 > 100_000;
   const mob = input.skipMobile ? null
     : lightMode ? { ok: false as const, e: "skipped: the page needed light mode on desktop, a second render would not survive" }
+    : slow ? { ok: false as const, e: `skipped: the desktop pass already took ${Math.round((Date.now() - t0) / 1000)}s` }
     : await Promise.race([
         render({ url: input.url, html: input.html, viewport: { width: 390, height: 844 }, timeoutMs: 20_000, reuseBrowser: true }).then((m) => ({ ok: true as const, m })),
         new Promise<{ ok: false; e: string }>((res) => setTimeout(() => res({ ok: false, e: "mobile render timed out (35s)" }), 35_000)),
@@ -134,7 +139,10 @@ export async function analyze(input: AnalyzeInput): Promise<Report> {
     }
   } else judgeSkipped = "Judge skipped by request.";
 
-  findings = applyPreset(findings, pageType).sort((a, b) => SEV[a.severity] - SEV[b.severity] || CONF[a.confidence] - CONF[b.confidence]);
+  // Presets first (they drop tells that don't apply to this page's job), then count what's left.
+  findings = applyPreset(findings, pageType);
+  findings.push(...templateStack(findings));
+  findings = findings.sort((a, b) => SEV[a.severity] - SEV[b.severity] || CONF[a.confidence] - CONF[b.confidence]);
   const { score, subScores } = computeScores(findings, appeal.ok ? appeal.a.score : undefined, judgeResult?.tenSecondTest.score);
 
   const report: Report = {
