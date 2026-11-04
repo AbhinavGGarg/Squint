@@ -219,10 +219,9 @@ function Feedback({ reportId, findingId }: { reportId: string; findingId: string
   if (!hydrated) return <div className="fb" />;
   return (
     <div className="fb">
-      {sent ? <span>Thanks — marked {sent}.</span> : (<>
-        <span>Is this right?</span>
-        <button type="button" onClick={() => send("right")}>Yes</button>
-        <button type="button" onClick={() => send("wrong")}>No</button>
+      {sent ? <span>{sent === "right" ? "Confirmed." : "Disputed. Noted for the next version."}</span> : (<>
+        <button type="button" onClick={() => send("right")}>Confirm</button>
+        <button type="button" onClick={() => send("wrong")}>Dispute</button>
       </>)}
     </div>
   );

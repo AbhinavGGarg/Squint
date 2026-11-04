@@ -66,7 +66,7 @@ export default function Home() {
           </div>
           <div>
             <h3>Heuristic</h3>
-            <p>A rule with a threshold that is usually right and occasionally misfires: three equal cards, a lone badge, cream plus serif plus sage. Every one of these has a Yes/No control, and your answer feeds the next version.</p>
+            <p>A rule with a threshold that is usually right and occasionally misfires: three equal cards, a lone badge, cream plus serif plus sage. Every one of these can be confirmed or disputed on the report, and the verdicts feed the next version.</p>
           </div>
           <div>
             <h3>Judgment</h3>
@@ -98,7 +98,7 @@ export default function Home() {
         <h2>Why this isn&apos;t a prompt</h2>
         <p><b>The judge is never the author.</b> Most of these pages were built by a model. Models rate their own output higher than people do, because it reads as familiar to them. Squint&apos;s rules involve no model at all, and when the judge runs it is a different model that is handed the measurements and told not to re-derive them.</p>
         <p><b>Generic, not “AI”.</b> Squint does not claim to know who wrote your page. It measures whether the page looks like anybody made a decision: whether the type scale was chosen, whether the badge means something, whether the copy would still work on a competitor&apos;s site with the logo covered.</p>
-        <p><b>The score is a starting point, not a verdict.</b> It is calibrated on a handful of sites so far. Every scan and every Yes/No click makes it better, which is the whole reason it is free.</p>
+        <p><b>The score is a starting point, not a verdict.</b> It is calibrated on a few dozen real sites so far. Every scan and every disputed finding makes it better, which is the whole reason it is free.</p>
       </section>
 
     </main>
