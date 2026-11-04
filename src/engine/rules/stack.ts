@@ -46,10 +46,13 @@ const TELLS: Record<string, string> = {
   "builder-signature": "the builder's own badge or defaults",
 };
 
+/** Marketing and copy devices that made pages use too: they count half. The visual kit counts full. */
+const HALF = new Set(["status-dots", "numbered-steps", "fake-window-chrome", "marketing-buzzwords", "em-dash-density", "unsourced-social-proof", "formulaic-copy", "contrastive-reframe", "whether-youre", "logo-bar", "cards-in-cards", "accent-stripe", "animation-overload", "rounded-everything", "stat-banner", "inert-tags"]);
+
 export function templateStack(findings: Finding[]): Finding[] {
   const present = [...new Set(findings.map((f) => f.rule).filter((r) => TELLS[r]))];
   // The builder's signature is not a style choice; it counts for two.
-  const n = present.length + (present.includes("builder-signature") ? 1 : 0);
+  const n = present.reduce((sum, r) => sum + (r === "builder-signature" ? 2 : HALF.has(r) ? 0.5 : 1), 0);
   if (n < 4) return [];
   const names = present.map((r) => TELLS[r]);
   return [mk({
@@ -58,6 +61,6 @@ export function templateStack(findings: Finding[]): Finding[] {
     evidence: `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}. Any one of these is a choice somebody could defend. Together they are the page every builder produces before anyone edits it: the reader has seen this exact page a hundred times this month and will assume nobody is home.`,
     fix: "Pick the three that matter least and remove them today: usually the eyebrow chip, the caps labels and the icon tiles. Then change one thing a template would never do (a real photograph, a typeface with a point of view, a headline with a number in it).",
     citation: "vibecoded-design-tells (MIT) and the 500 Show HN launches: no single tell separates generated from made; the count does",
-    data: { tells: present, count: n },
+    data: { tells: present, weight: n },
   })];
 }

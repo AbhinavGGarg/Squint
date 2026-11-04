@@ -45,3 +45,5 @@ next-env.d.ts
 .env.local
 src/engine/snapshot.generated.ts
 calib/
+calib2/
+calib2.tar

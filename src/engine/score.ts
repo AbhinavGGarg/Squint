@@ -37,8 +37,12 @@ export function computeScores(findings: Finding[], appealScore: number | undefin
   const weighted = consistency * weights.consistency + generic * weights.generic + clarity * weights.clarity + appeal * weights.appeal;
   // A template is consistent by construction, so consistency cannot vouch for a page the generic
   // rules have called unedited; and the reverse: a page with its own look but sloppy geometry is
-  // not "decided" either. The overall grade stays within one band of the weaker of the two.
-  const score = Math.round(Math.min(weighted, generic + 25, consistency + 25));
+  // not "decided" either. The grade stays within 15 of the generic score and 25 of consistency
+  // (a real site can carry a couple of geometry slips; it cannot carry the builder's badge).
+  let score = Math.round(Math.min(weighted, generic + 15, consistency + 25));
+  // A page still carrying the builder's badge or defaults was not finished, whatever else it gets right.
+  // It can be a good B; it cannot be an A.
+  if (findings.some((f) => f.rule === "builder-signature")) score = Math.min(score, 79);
   return { score, subScores: { consistency, generic, clarity, appeal } };
 }
 
