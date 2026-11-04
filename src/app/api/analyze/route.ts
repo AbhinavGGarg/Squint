@@ -1,5 +1,5 @@
 import { analyze } from "@/engine/analyze";
-import { cacheKeyForUrl, checkRateLimit, clientIp, kvDel, kvGet, kvSet, kvSetNX, refundRateLimit, rememberReport } from "@/engine/kv";
+import { cacheKeyForUrl, checkRateLimit, clientIp, kvDel, kvGet, kvIncr, kvSet, kvSetNX, refundRateLimit, rememberReport } from "@/engine/kv";
 import { currentUserId } from "@/auth";
 import { loadReport } from "@/engine/store";
 import type { PageType } from "@/engine/types";
@@ -67,6 +67,9 @@ export async function POST(req: Request) {
   try {
     const report = await analyze({ url: url || undefined, html: html || undefined, pageType, goal });
     if (key) await kvSet(key, report.id, CACHE_TTL);
+    // Counters for /api/stats: how many scans actually ran, in total and today.
+    const day = new Date().toISOString().slice(0, 10);
+    await Promise.all([kvIncr("stats:scans", 10 * 365 * 86_400), kvIncr(`stats:scans:${day}`, 40 * 86_400), kvIncr(`stats:type:${pageType}`, 10 * 365 * 86_400)]);
     if (userId) await rememberReport(userId, report.id);
     return Response.json({ id: report.id, score: report.score });
   } catch (e) {

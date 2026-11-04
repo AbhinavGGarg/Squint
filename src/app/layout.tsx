@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
 import { HeaderAuth } from "@/components/HeaderAuth";
 import "./globals.css";
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <span><Link href="/notices">Notices</Link></span>
           </footer>
         </div>
+        <Analytics />
       </body>
     </html>
   );
